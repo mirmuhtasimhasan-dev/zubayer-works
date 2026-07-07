@@ -1,11 +1,11 @@
 "use client";
 import { useEffect, useRef } from "react";
 
-/* ====== CIRCLE SIZE: change ONLY this one number to resize ====== */
-const LENS = 96;   // magnifier diameter in px (smaller number = smaller circle)
+
+const LENS = 68;   // magnifier diameter in px (smaller number = smaller circle)
 /* =============================================================== */
-const ZOOM = 1.9;                       // how much to zoom the image
-const BOX = ".work-media, .g-item";     // only these images get the magnifier
+const ZOOM = 1.9;                     
+const BOX = ".work-media, .g-item";   
 
 export default function CustomCursor() {
   const ref = useRef<HTMLDivElement>(null);
