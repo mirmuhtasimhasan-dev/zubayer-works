@@ -1,13 +1,15 @@
 "use client";
 import { useEffect, useState } from "react";
 
+// About is its own page (/about); the rest are sections on the home page. Using
+// "/#section" (not "#section") so they also work from other pages like /about.
 const LINKS: [string, string][] = [
-  ["Work", "#work"],
-  ["Gallery", "#gallery"],
-  ["About", "#about"],
-  ["Ventures", "#ventures"],
-  ["Writing", "#writing"],
-  ["Contact", "#contact"],
+  ["Work", "/#work"],
+  ["Gallery", "/#gallery"],
+  ["About", "/about"],
+  ["Ventures", "/#ventures"],
+  ["Writing", "/#writing"],
+  ["Contact", "/#contact"],
 ];
 
 export default function Nav() {
@@ -28,7 +30,7 @@ export default function Nav() {
   return (
     <>
       <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
-        <a href="#top" className="nav-logo">Z. Ahmed</a>
+        <a href="/" className="nav-logo">Z. Ahmed</a>
 
         <div className="nav-links">
           {LINKS.map(([label, href]) => (
@@ -43,7 +45,7 @@ export default function Nav() {
 
       <div className={`mobile-menu ${open ? "open" : ""}`}>
         <div className="mobile-menu-top">
-          <a href="#top" className="nav-logo" onClick={close}>Z. Ahmed</a>
+          <a href="/" className="nav-logo" onClick={close}>Z. Ahmed</a>
           <button className="mobile-close" onClick={close} aria-label="Close menu">✕</button>
         </div>
         <div className="mobile-menu-links">

@@ -2,12 +2,11 @@ import Nav from "@/components/Nav";
 import Opening from "@/components/Opening";
 import Work from "@/components/Work";
 import Archive from "@/components/Archive";
-import About from "@/components/About";
 import Ventures from "@/components/Ventures";
 import Writing from "@/components/Writing";
 import Services from "@/components/Services";
 import Contact from "@/components/Contact";
-import { getWork, getGallery, getVentures, getWriting } from "@/sanity/lib/queries";
+import { getFeaturedWork, getWorkCategories, getGallery, getArchiveSettings, getVentures, getWriting } from "@/sanity/lib/queries";
 
 export const revalidate = 30;
 
@@ -18,24 +17,7 @@ const HERO = {
   subText: "I make films, build brands, and start companies. Trained in architecture, shaped by media, sharpened in Japan.",
 };
 
-const ABOUT = {
-  aboutTitle: "A Crooked Line, Drawn Deliberately",
-  aboutIntro: "I never picked one thing. I picked one question and followed it across disciplines.",
-  aboutBody: [
-    "I started in architecture, learning how structure carries meaning before a single word is spoken.",
-    "Then media pulled me in, and I found the same rules applied to story: tension, rhythm, restraint.",
-    "Japan taught me how little you actually need, and how much silence can hold.",
-    "Everything since has been the same instinct working itself out in a different medium.",
-  ],
-  // To use Zubayer's real photo: put it in the "public" folder and change this to "/portrait.jpg"
-  portrait: "https://picsum.photos/seed/zubportrait/800/1000",
-  disciplineTable: [
-    { institution: "Architecture School", credits: "120 credits", location: "Dhaka" },
-    { institution: "Film & Media", credits: "48 credits", location: "Tokyo" },
-    { institution: "Residency", credits: "1 year", location: "Kyoto" },
-    { institution: "Independent practice", credits: "Ongoing", location: "Dhaka, present" },
-  ],
-};
+// The About section now lives on its own /about page, managed in Sanity.
 
 const FOOTER = {
   email: "hello@zubayer.works",
@@ -44,16 +26,15 @@ const FOOTER = {
 };
 
 export default async function Home() {
-  const [work, gallery, ventures, writing] = await Promise.all([
-    getWork(), getGallery(), getVentures(), getWriting(),
+  const [featuredWork, workCategories, gallery, archiveSettings, ventures, writing] = await Promise.all([
+    getFeaturedWork(), getWorkCategories(), getGallery(), getArchiveSettings(), getVentures(), getWriting(),
   ]);
   return (
     <main>
       <Nav />
       <Opening location={HERO.location} headline={HERO.headline} subText={HERO.subText} />
-      <Work items={work} />
-      <Archive images={gallery} />
-      <About settings={ABOUT} />
+      <Work featured={featuredWork} categories={workCategories} />
+      <Archive images={gallery} behanceUrl={archiveSettings?.behanceUrl} />
       <Ventures ventures={ventures} />
       <Writing posts={writing} />
       <Services />

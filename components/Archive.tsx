@@ -1,59 +1,98 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Reveal from "./Reveal";
+import { sanityImage } from "@/sanity/lib/image";
 
-function GItem({ img, onClick, delay }: { img: any; onClick: () => void; delay: number; }) {
-  const ref = useRef<HTMLButtonElement>(null);
-  const [vis, setVis] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const o = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVis(true); o.disconnect(); } }, { threshold: 0.1 });
-    o.observe(el);
-    return () => o.disconnect();
-  }, []);
-  return (
-    <button ref={ref} className={`g-item ${vis ? "in" : ""}`} style={{ transitionDelay: `${delay}s` }} onClick={onClick}>
-      <img src={img.src} alt={img.caption || ""} loading="lazy" />
-      {img.caption && <span className="g-cap">{img.caption}</span>}
-    </button>
-  );
-}
+const CARD_IMG = { widths: [220, 320, 440, 560], sizes: "(max-width: 600px) 52vw, 200px" };
 
-export default function Archive({ images }: { images: any[] }) {
-  const [open, setOpen] = useState(false);
-  const [index, setIndex] = useState(0);
+export default function Archive({ images, behanceUrl }: { images: any[]; behanceUrl?: string }) {
+  const rowRef = useRef<HTMLDivElement>(null);
+  const drag = useRef({ down: false, moved: false, startX: 0, scroll: 0 });
+  const [dragging, setDragging] = useState(false);
+
   if (!images?.length) return null;
-  const cols: any[][] = [[], [], []];
-  images.forEach((im, i) => cols[i % 3].push({ ...im, _i: i }));
-  const show = (i: number) => { setIndex(i); setOpen(true); };
-  const close = () => setOpen(false);
-  const prev = () => setIndex(v => (v - 1 + images.length) % images.length);
-  const next = () => setIndex(v => (v + 1) % images.length);
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") close(); if (e.key === "ArrowLeft") prev(); if (e.key === "ArrowRight") next(); };
-    window.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
-  }, [open, images.length]);
+
+  const nudge = (dir: number) => {
+    const el = rowRef.current;
+    if (el) el.scrollBy({ left: dir * el.clientWidth * 0.9, behavior: "smooth" });
+  };
+
+  // Mouse click-and-drag to scroll (touch uses native swipe).
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (e.pointerType !== "mouse") return;
+    const el = rowRef.current;
+    if (!el) return;
+    drag.current = { down: true, moved: false, startX: e.clientX, scroll: el.scrollLeft };
+    el.setPointerCapture?.(e.pointerId);
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!drag.current.down) return;
+    const el = rowRef.current;
+    if (!el) return;
+    const dx = e.clientX - drag.current.startX;
+    if (!drag.current.moved && Math.abs(dx) > 5) {
+      drag.current.moved = true;
+      setDragging(true);
+    }
+    el.scrollLeft = drag.current.scroll - dx;
+  };
+  const onPointerUp = (e: React.PointerEvent) => {
+    if (!drag.current.down) return;
+    drag.current.down = false;
+    setDragging(false);
+    rowRef.current?.releasePointerCapture?.(e.pointerId);
+  };
+
   return (
     <section className="archive" id="gallery">
-      <div className="archive-head"><Reveal><p className="eyebrow">The Archive</p></Reveal></div>
-      <div className="strip">
-        {cols.map((col, c) => (
-          <div className="col" key={c}>
-            {col.map((im) => (<GItem key={im._i} img={im} onClick={() => show(im._i)} delay={c * 0.1} />))}
-          </div>
-        ))}
-      </div>
-      {open && (
-        <div className="lightbox" onClick={close}>
-          <button className="lb-arrow left" onClick={(e) => { e.stopPropagation(); prev(); }}>‹</button>
-          <img src={images[index].src} alt={images[index].caption || ""} onClick={(e) => e.stopPropagation()} />
-          <button className="lb-arrow right" onClick={(e) => { e.stopPropagation(); next(); }}>›</button>
+      <div className="archive-head">
+        <Reveal><p className="eyebrow">The Archive</p></Reveal>
+        <div className="arch-nav">
+          <button className="arch-arrow" aria-label="Scroll left" onClick={() => nudge(-1)}>&#8249;</button>
+          <button className="arch-arrow" aria-label="Scroll right" onClick={() => nudge(1)}>&#8250;</button>
         </div>
-      )}
+      </div>
+
+      <div className="arch-rowwrap">
+        <div
+          ref={rowRef}
+          className={`arch-row ${dragging ? "dragging" : ""}`}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+          onPointerLeave={onPointerUp}
+        >
+          {images.map((im) => (
+            <div className="arch-card" key={im.id}>
+              <div className="arch-card-media">
+                {im.image && <img {...sanityImage(im.image, CARD_IMG)} alt={im.title || ""} loading="lazy" draggable={false} />}
+              </div>
+              {(im.title || im.place) && (
+                <div className="arch-card-meta">
+                  {im.title && <span className="arch-card-title">{im.title}</span>}
+                  {im.place && <span className="arch-card-place">{im.place}</span>}
+                </div>
+              )}
+            </div>
+          ))}
+
+          {behanceUrl && (
+            <div className="arch-card arch-end">
+              <a
+                href={behanceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                // A drag that moved should not trigger the link.
+                onClick={(e) => { if (drag.current.moved) e.preventDefault(); }}
+              >
+                <span className="arch-end-arrow" aria-hidden>&#8599;</span>
+                <span className="arch-end-text">See the full archive on Behance</span>
+              </a>
+            </div>
+          )}
+        </div>
+      </div>
     </section>
   );
 }
