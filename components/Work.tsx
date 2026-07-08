@@ -1,27 +1,297 @@
-import Link from "next/link";
+"use client";
+import { useEffect, useRef, useState } from "react";
 import Reveal from "./Reveal";
+import { sanityImage } from "@/sanity/lib/image";
+import MotionHover from "./MotionHover";
 
-export default function Work({ items }: { items: any[] }) {
-  if (!items?.length) return null;
+type Group = "Videography" | "Still Photos";
+const GROUPS: Group[] = ["Videography", "Still Photos"];
+
+// Normalize a YouTube/Vimeo URL to an embeddable one.
+function embedUrl(url?: string) {
+  if (!url) return "";
+  const yt = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/);
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
+  const vm = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (vm) return `https://player.vimeo.com/video/${vm[1]}`;
+  return url;
+}
+
+// Explicit kind, else infer from a video URL, else from the group.
+function workKind(w: any, group?: string): "video" | "photo" {
+  if (w?.kind === "video" || w?.kind === "photo") return w.kind;
+  if (w?.videoEmbed) return "video";
+  return group === "Videography" ? "video" : "photo";
+}
+
+const TILE_WIDTHS = [400, 600, 800, 1000, 1200];
+const TILE_SIZES = "(max-width: 600px) 70vw, (max-width: 1000px) 44vw, 300px";
+const GRID_SIZES = "(max-width: 600px) 45vw, (max-width: 1000px) 45vw, 30vw";
+const LIGHTBOX_IMG = { widths: [1024, 1600, 2000, 2600], sizes: "92vw" };
+
+function VideoIcon() {
   return (
-    <section className="section" id="work">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="7" width="14" height="10" rx="1.5" />
+      <path d="M16 10l5-3v10l-5-3z" />
+    </svg>
+  );
+}
+function PhotoIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="16" rx="1.5" />
+      <circle cx="9" cy="10" r="1.6" />
+      <path d="M4 18l5-5 4 4 3-3 4 4" />
+    </svg>
+  );
+}
+
+// Renders a work's thumbnail: a manual Sanity cover/image (optimized) if set,
+// otherwise the auto video thumbnail derived from its link, otherwise a clean
+// placeholder — so a video tile never breaks even without an uploaded cover.
+function TileMedia({ w, widths, sizes, alt, group }: { w: any; widths: number[]; sizes: string; alt: string; group?: string }) {
+  const [autoSrc, setAutoSrc] = useState<string | null>(w?.autoThumb ?? null);
+  const [broken, setBroken] = useState(false);
+
+  const sanitySrc = w?.cover || w?.image;
+  if (sanitySrc) {
+    return <img {...sanityImage(sanitySrc, { widths, sizes })} alt={alt} loading="lazy" />;
+  }
+  if (autoSrc && !broken) {
+    return (
+      <img
+        src={autoSrc}
+        alt={alt}
+        loading="lazy"
+        onError={() => {
+          // maxres missing → hqdefault; anything else broken → placeholder.
+          if (autoSrc.includes("maxresdefault")) setAutoSrc(autoSrc.replace("maxresdefault", "hqdefault"));
+          else setBroken(true);
+        }}
+      />
+    );
+  }
+  const isVideo = group === "Videography" || Boolean(w?.videoEmbed);
+  return <span className="eye-tile-placeholder">{isVideo ? <VideoIcon /> : <PhotoIcon />}</span>;
+}
+
+export default function Work({ featured, categories }: { featured: any; categories: any[] }) {
+  const byGroup = (g: Group) => (categories || []).filter((c) => c?.group === g);
+  const firstNonEmpty = GROUPS.find((g) => byGroup(g).length > 0) ?? "Videography";
+
+  const [group, setGroup] = useState<Group>(firstNonEmpty);
+  const [activeCat, setActiveCat] = useState<string | null>(null);
+  const [lightbox, setLightbox] = useState<{ img?: any; video?: string; videoFile?: string } | null>(null);
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const catDrag = useRef({ down: false, moved: false, startX: 0, scroll: 0 });
+  const [catDragging, setCatDragging] = useState(false);
+
+  useEffect(() => {
+    if (!lightbox) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setLightbox(null); };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, [lightbox]);
+
+  if (!featured && (!categories || categories.length === 0)) return null;
+
+  const cats = byGroup(group);
+  const active = activeCat ? cats.find((c) => c.id === activeCat) : null;
+
+  const switchGroup = (g: Group) => { setGroup(g); setActiveCat(null); };
+  const openWork = (w: any, g?: string) => {
+    if (w?.videoFile) setLightbox({ videoFile: w.videoFile }); // direct file = high quality
+    else if (workKind(w, g) === "video" && w?.videoEmbed) setLightbox({ video: embedUrl(w.videoEmbed) });
+    else if (w?.image || w?.cover) setLightbox({ img: w.image || w.cover });
+  };
+  const nudge = (dir: number) => {
+    const el = sliderRef.current;
+    if (el) el.scrollBy({ left: dir * el.clientWidth * 0.9, behavior: "smooth" });
+  };
+  // Mouse click-and-drag to slide (touch uses native scroll).
+  const catDown = (e: React.PointerEvent) => {
+    if (e.pointerType !== "mouse") return;
+    const el = sliderRef.current;
+    if (!el) return;
+    catDrag.current = { down: true, moved: false, startX: e.clientX, scroll: el.scrollLeft };
+    el.setPointerCapture?.(e.pointerId);
+  };
+  const catMove = (e: React.PointerEvent) => {
+    if (!catDrag.current.down) return;
+    const el = sliderRef.current;
+    if (!el) return;
+    const dx = e.clientX - catDrag.current.startX;
+    if (!catDrag.current.moved && Math.abs(dx) > 5) { catDrag.current.moved = true; setCatDragging(true); }
+    el.scrollLeft = catDrag.current.scroll - dx;
+  };
+  const catUp = (e: React.PointerEvent) => {
+    if (!catDrag.current.down) return;
+    catDrag.current.down = false;
+    setCatDragging(false);
+    sliderRef.current?.releasePointerCapture?.(e.pointerId);
+  };
+
+  const featKind = featured ? workKind(featured, featured.categoryGroup) : null;
+  // Thumbnail source for the featured MotionHover. Sanity images are CORS-ok and
+  // used directly; the auto YouTube thumbnail is routed through /api/img so it
+  // can be used as a WebGL texture (external images aren't CORS-textureable).
+  const featuredSrc = featured
+    ? featured.cover
+      ? sanityImage(featured.cover, { widths: [1600], sizes: "80vw" }).src
+      : featured.image
+      ? sanityImage(featured.image, { widths: [1600], sizes: "80vw" }).src
+      : featured.autoThumb
+      ? `/api/img?url=${encodeURIComponent(featured.autoThumb)}`
+      : ""
+    : "";
+
+  return (
+    <section className="section eye" id="work">
       <Reveal><p className="eyebrow">The Eye</p></Reveal>
-      <div className="work-grid">
-        {items.map((it) => (
-          <Reveal key={it.id} className={`work-item ${it.format === "wide" ? "wide" : ""} ${it.type === "video" ? "is-video" : ""}`}>
-            <Link href={`/work/${it.slug}`} className="work-link">
-              <div className="work-media">
-                <img src={it.cover} alt={it.title} loading="lazy" />
-                {it.type === "video" && <span className="work-play" />}
-              </div>
-              <div className="work-meta">
-                <span className="work-title">{it.title}</span>
-                <span className="work-label">{it.category}</span>
-              </div>
-            </Link>
-          </Reveal>
+
+      {/* FEATURED */}
+      {featured && (featured.cover || featured.image || featured.autoThumb) && (
+        <Reveal>
+          <div
+            className="eye-featured"
+            role="button"
+            tabIndex={0}
+            onClick={() => openWork(featured, featured.categoryGroup)}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") openWork(featured, featured.categoryGroup); }}
+          >
+            {/* The thumbnail ripples on hover and spills beyond the frame
+                (transparent bg, no box). Clicking opens the video. */}
+            <div className="eye-featured-media" style={{ overflow: "visible", background: "transparent" }}>
+              {featuredSrc && (
+                <MotionHover type="image" src={featuredSrc} style={{ position: "absolute", inset: 0 }} />
+              )}
+              {featKind === "video" && <span className="eye-play" aria-hidden />}
+            </div>
+            <div className="eye-featured-meta">
+              <span className="eye-featured-title">{featured.title}</span>
+              {featured.categoryName && <span className="eye-featured-cat">{featured.categoryName}</span>}
+            </div>
+          </div>
+        </Reveal>
+      )}
+
+      {/* GROUP TOGGLE */}
+      <div className="eye-toggle" role="tablist" aria-label="Work groups">
+        {GROUPS.map((g) => (
+          <button
+            key={g}
+            role="tab"
+            aria-selected={group === g}
+            className={`eye-pill ${group === g ? "active" : ""}`}
+            onClick={() => switchGroup(g)}
+          >
+            {g}
+          </button>
         ))}
       </div>
+
+      {/* SLIDER  or  DRILL-DOWN (same area) */}
+      <div className="eye-area">
+        {!active ? (
+          cats.length === 0 ? (
+            <p className="eye-empty">No categories here yet.</p>
+          ) : (
+            <div className="eye-slider-wrap">
+              {/* Arrows only when there are more categories than fit (> 3). */}
+              {cats.length > 3 && (
+                <button className="eye-arrow left" aria-label="Scroll left" onClick={() => nudge(-1)}>&#8249;</button>
+              )}
+              <div
+                className={`eye-slider ${catDragging ? "dragging" : ""}`}
+                ref={sliderRef}
+                onPointerDown={catDown}
+                onPointerMove={catMove}
+                onPointerUp={catUp}
+                onPointerCancel={catUp}
+                onPointerLeave={catUp}
+              >
+                {cats.map((c) => {
+                  const count = c.works?.length ?? 0;
+                  return (
+                    <button
+                      key={c.id}
+                      className="eye-tile"
+                      // A drag that moved should not open the category.
+                      onClick={() => { if (!catDrag.current.moved) setActiveCat(c.id); }}
+                    >
+                      <div className="eye-tile-media">
+                        {c.cover ? (
+                          <img {...sanityImage(c.cover, { widths: TILE_WIDTHS, sizes: TILE_SIZES })} alt={c.name} loading="lazy" draggable={false} />
+                        ) : (
+                          <span className="eye-tile-placeholder">{group === "Videography" ? <VideoIcon /> : <PhotoIcon />}</span>
+                        )}
+                      </div>
+                      <span className="eye-tile-name">{c.name}</span>
+                      <span className="eye-tile-count">{count} {count === 1 ? "work" : "works"}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              {cats.length > 3 && (
+                <button className="eye-arrow right" aria-label="Scroll right" onClick={() => nudge(1)}>&#8250;</button>
+              )}
+            </div>
+          )
+        ) : (
+          <div className="eye-drill">
+            <button className="eye-back" onClick={() => setActiveCat(null)}>&#8249; Back to categories</button>
+            <h3 className="eye-drill-title">{active.name}</h3>
+            {(active.works?.length ?? 0) === 0 ? (
+              <p className="eye-empty">No works in this category yet.</p>
+            ) : (
+              <div className="eye-grid">
+                {active.works.map((w: any) => {
+                  const isVideo = workKind(w, active.group) === "video";
+                  return (
+                    <button key={w.id} className="eye-work" onClick={() => openWork(w, active.group)}>
+                      <div className="eye-work-media">
+                        <TileMedia w={w} widths={TILE_WIDTHS} sizes={GRID_SIZES} alt={w.title} group={active.group} />
+                        {isVideo && <span className="eye-work-play" aria-hidden />}
+                      </div>
+                      <span className="eye-work-title">{w.title}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* LIGHTBOX / VIDEO */}
+      {lightbox && (
+        <div className="lightbox" onClick={() => setLightbox(null)}>
+          <button className="lb-close" aria-label="Close" onClick={() => setLightbox(null)}>&#10005;</button>
+          {lightbox.videoFile ? (
+            <video
+              className="eye-videobox"
+              src={lightbox.videoFile}
+              controls
+              autoPlay
+              playsInline
+              onClick={(e) => e.stopPropagation()}
+            />
+          ) : lightbox.video ? (
+            <div className="eye-videobox" onClick={(e) => e.stopPropagation()}>
+              <iframe
+                src={`${lightbox.video}${lightbox.video.includes("?") ? "&" : "?"}autoplay=1`}
+                allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                allowFullScreen
+                title="Video"
+              />
+            </div>
+          ) : (
+            <img {...sanityImage(lightbox.img, LIGHTBOX_IMG)} alt="" onClick={(e) => e.stopPropagation()} />
+          )}
+        </div>
+      )}
     </section>
   );
 }
