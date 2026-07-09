@@ -90,7 +90,7 @@ button{font-family:inherit;cursor:pointer;}
 .eye-slider::-webkit-scrollbar{display:none;}
 .eye-slider.dragging{cursor:grabbing;scroll-snap-type:none;}
 .eye-tile{position:relative;flex:0 0 calc((100% - 44px) / 3);scroll-snap-align:start;background:none;border:0;padding:0;text-align:left;cursor:pointer;}
-.eye-tile-media{position:relative;aspect-ratio:4/5;overflow:hidden;background:var(--divider);transform-origin:center bottom;transition:transform .45s cubic-bezier(.2,.7,.2,1),box-shadow .45s ease;will-change:transform;}
+.eye-tile-media{position:relative;aspect-ratio:4/5;overflow:hidden;background:linear-gradient(155deg,#ece7dd 0%,#e0d9cc 100%);transform-origin:center bottom;transition:transform .45s cubic-bezier(.2,.7,.2,1),box-shadow .45s ease;will-change:transform;}
 .eye-tile-media img{width:100%;height:100%;object-fit:cover;filter:saturate(.7);transition:filter .6s ease;user-select:none;-webkit-user-drag:none;}
 /* Subtle hover lift — fine pointers only, not while dragging. The zoom is small
    enough (and z-raised) that a hovered tile never messily overlaps its neighbours. */
@@ -106,13 +106,14 @@ button{font-family:inherit;cursor:pointer;}
 .eye-tile-name{display:block;font-family:var(--font-display),serif;font-size:19px;margin-top:14px;}
 .eye-tile-count{display:block;font-size:12px;letter-spacing:.05em;color:var(--ash);margin-top:4px;}
 @media (max-width:1000px){.eye-tile{flex-basis:calc((100% - 22px) / 2);}}
-/* Phones: smaller, compact category row — ~2 tiles at a time with a peek of the
-   next, tighter spacing, no hover-zoom top padding (touch has no hover). */
+/* Phones: same slider as desktop, just scaled down & refined — smaller tiles
+   (~2.3 at a time with a peek), tighter spacing, daintier type + placeholder. */
 @media (max-width:600px){
-  .eye-slider{gap:12px;padding:6px 0 4px;}
-  .eye-tile{flex-basis:44%;}
-  .eye-tile-name{font-size:15px;margin-top:9px;}
-  .eye-tile-count{font-size:11px;margin-top:2px;}
+  .eye-slider{gap:10px;padding:4px 0 2px;}
+  .eye-tile{flex-basis:40%;}
+  .eye-tile-name{font-size:13.5px;margin-top:8px;line-height:1.25;}
+  .eye-tile-count{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ash);margin-top:3px;}
+  .eye-tile-placeholder svg{width:28px;height:28px;}
 }
 
 /* premium side arrows — floating, blurred, soft shadow */
