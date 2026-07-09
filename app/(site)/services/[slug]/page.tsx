@@ -56,8 +56,9 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
             )}
 
             <div className="service-cta">
-              {/* The WHOLE CTA box — background + content — ripples as one on hover. */}
-              <LiquidHover contentClassName="service-cta-box">
+              {/* The WHOLE box ripples like liquid on hover; the email stays a live,
+                  clickable link inside it. */}
+              <LiquidHover contentClassName="service-cta-box" strength={0.03} ambient={0.4}>
                 <p className="service-cta-text">{service.cta}</p>
                 <a className="service-cta-email" href={`mailto:${SERVICES_EMAIL}`}>{SERVICES_EMAIL}</a>
               </LiquidHover>

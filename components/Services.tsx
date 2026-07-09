@@ -17,7 +17,6 @@ export default function Services() {
                 <span className="service-icon">{s.icon}</span>
                 <h3>{s.title}</h3>
                 <p>{s.blurb}</p>
-                <span className="service-more">Learn more →</span>
               </LiquidHover>
             </Link>
           </Reveal>

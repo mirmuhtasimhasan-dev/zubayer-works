@@ -99,10 +99,14 @@ const LiquidText = forwardRef<LiquidTextHandle, LiquidTextProps>(function Liquid
     onRevealComplete?.();
   }, [onRevealComplete]);
 
-  // Decide once, on the client, whether WebGL should run at all.
+  // Decide once, on the client, whether WebGL should run at all. Skip it on
+  // touch / coarse pointers: mobile reflow makes the canvas word-layout drift
+  // from the wrapped DOM (a stray fragment can show), and a tap would trigger it
+  // — so phones just get the crisp, reliable DOM text.
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    setEnabled(!reduce && supportsWebGL());
+    const coarse = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+    setEnabled(!reduce && !coarse && supportsWebGL());
   }, []);
 
   // Mount the canvas only while the heading is near the viewport.
@@ -119,9 +123,15 @@ const LiquidText = forwardRef<LiquidTextHandle, LiquidTextProps>(function Liquid
     return () => io.disconnect();
   }, [enabled]);
 
-  // When the canvas unmounts (scrolled away), un-hide the DOM text again.
+  // When the canvas unmounts (scrolled away), un-hide the DOM text again — and
+  // reset `hovering`/its timer, so re-entering the viewport (e.g. clicking
+  // "back to top") can never leave a stale hover that blanks the heading.
   useEffect(() => {
-    if (!active) setGlHidden(false);
+    if (!active) {
+      setGlHidden(false);
+      setHovering(false);
+      window.clearTimeout(leaveTimer.current);
+    }
   }, [active]);
 
   // Reveal + play the word-by-word entrance after the configured delay.
