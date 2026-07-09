@@ -44,10 +44,29 @@ export async function getWorkCategories() {
   return cats;
 }
 
+// Archive albums (cover row on the home page). Any album with a name + cover
+// shows (opens by slug, or by _id if the slug wasn't generated yet); truly empty
+// drafts are skipped.
 export async function getGallery() {
-  return client.fetch(`*[_type == "galleryImage"] | order(order asc){
-    "id": _id, "title": coalesce(title, caption), place, image
+  return client.fetch(`*[_type == "galleryImage" && defined(title) && defined(image)] | order(order asc){
+    "id": _id, title, place, image, "slug": slug.current, "count": count(photos)
   }`);
+}
+
+// One album with all its photos, by slug (falls back to _id for legacy items).
+export async function getAlbum(slug: string) {
+  return client.fetch(
+    `*[_type == "galleryImage" && (slug.current == $slug || _id == $slug)][0]{
+      "id": _id, title, place, "slug": slug.current,
+      "photos": photos[]{ ..., "ar": asset->metadata.dimensions.aspectRatio }
+    }`,
+    { slug }
+  );
+}
+
+// Slugs for static generation of the album pages.
+export async function getAlbumSlugs() {
+  return client.fetch(`*[_type == "galleryImage" && defined(slug.current)].slug.current`);
 }
 
 export async function getArchiveSettings() {
@@ -56,8 +75,22 @@ export async function getArchiveSettings() {
 
 export async function getVentures() {
   return client.fetch(`*[_type == "venture"] | order(order asc){
-    "id": _id, name, tagline, description, inquiryEmail
+    "id": _id, name, tagline, description, "slug": slug.current, logo
   }`);
+}
+
+// One venture with its full page content, by slug (falls back to _id).
+export async function getVenture(slug: string) {
+  return client.fetch(
+    `*[_type == "venture" && (slug.current == $slug || _id == $slug)][0]{
+      "id": _id, name, tagline, description, "slug": slug.current, logo, body, inquiryEmail
+    }`,
+    { slug }
+  );
+}
+
+export async function getVentureSlugs() {
+  return client.fetch(`*[_type == "venture" && defined(slug.current)].slug.current`);
 }
 
 export async function getWriting() {

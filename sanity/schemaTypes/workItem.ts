@@ -13,18 +13,13 @@ export default defineType({
       to: [{ type: "category" }],
       validation: (r) => r.required(),
     }),
+    // Video-only now (Still Photos removed) — hidden; works default to video.
     defineField({
       name: "kind",
       title: "Kind",
       type: "string",
-      description: "Leave blank to match the category's group (Videography → video, Still Photos → photo).",
-      options: {
-        list: [
-          { title: "Video", value: "video" },
-          { title: "Photo", value: "photo" },
-        ],
-        layout: "radio",
-      },
+      initialValue: "video",
+      hidden: true,
     }),
     defineField({
       name: "featured",
@@ -41,12 +36,13 @@ export default defineType({
       description:
         "Optional. For video works, leave this empty and the thumbnail is pulled from the video link automatically. Set it only to override.",
     }),
+    // Photo works were removed (video only) — hidden, kept for existing data.
     defineField({
       name: "image",
       title: "Photo (full image)",
       type: "image",
       options: { hotspot: true },
-      description: "For photo works — opens in the lightbox. Falls back to the cover.",
+      hidden: true,
     }),
     defineField({
       name: "videoEmbed",

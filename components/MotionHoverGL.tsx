@@ -203,6 +203,7 @@ export default function MotionHoverGL(props: GLProps) {
   return (
     <Canvas
       dpr={[1, 2]}
+      flat
       frameloop={props.type === "video" ? "always" : "demand"}
       gl={{ alpha: true, antialias: true }}
       style={{ width: "100%", height: "100%" }}

@@ -64,6 +64,10 @@ export interface MotionHoverProps {
    *  edge gap left by the ripple with the crisp media (no empty box behind).
    *  Best for image mode; avoid for video (would show a static duplicate). */
   holdBase?: boolean;
+  /** Mount the WebGL canvas only WHILE hovering (not just in view). Use when many
+   *  instances share a page (e.g. a gallery) so they don't exhaust the browser's
+   *  ~16 WebGL contexts — only the hovered one is live. */
+  activateOnHover?: boolean;
 }
 
 function supportsWebGL(): boolean {
@@ -93,6 +97,7 @@ export default function MotionHover({
   base = 0.3,
   pull = 0.35,
   holdBase = false,
+  activateOnHover = false,
 }: MotionHoverProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const mediaRef = useRef<HTMLVideoElement & HTMLImageElement>(null);
@@ -101,8 +106,31 @@ export default function MotionHover({
   const [enabled, setEnabled] = useState<boolean | null>(null); // WebGL distortion allowed?
   const [inView, setInView] = useState(false);
   const [glReady, setGlReady] = useState(false); // GL painted → hide the plain media
+  const [hovering, setHovering] = useState(false); // for activateOnHover gating
+  const leaveTimer = useRef<number | undefined>(undefined);
 
-  const active = !!enabled && inView;
+  // With activateOnHover, the canvas only mounts while the pointer is over it.
+  const active = !!enabled && inView && (!activateOnHover || hovering);
+
+  // Detect hover before the canvas mounts (so activateOnHover can gate it). Only
+  // needed for that mode; otherwise the active-gated effect below handles hover.
+  useEffect(() => {
+    if (!activateOnHover || !enabled || !inView) return;
+    const el = wrapRef.current;
+    if (!el) return;
+    const onEnter = () => { window.clearTimeout(leaveTimer.current); setHovering(true); };
+    const onLeave = () => {
+      window.clearTimeout(leaveTimer.current);
+      leaveTimer.current = window.setTimeout(() => setHovering(false), 300); // let the ripple settle
+    };
+    el.addEventListener("pointerenter", onEnter);
+    el.addEventListener("pointerleave", onLeave);
+    return () => {
+      window.clearTimeout(leaveTimer.current);
+      el.removeEventListener("pointerenter", onEnter);
+      el.removeEventListener("pointerleave", onLeave);
+    };
+  }, [activateOnHover, enabled, inView]);
 
   // Decide once: no distortion on reduced-motion, touch/coarse pointer, or no WebGL.
   useEffect(() => {
