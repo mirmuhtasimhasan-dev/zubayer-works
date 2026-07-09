@@ -60,6 +60,10 @@ export interface MotionHoverProps {
   base?: number;
   /** How strongly the flow leans toward the cursor (0 = none). */
   pull?: number;
+  /** Keep the plain media visible UNDER the GL instead of fading it out. Fills any
+   *  edge gap left by the ripple with the crisp media (no empty box behind).
+   *  Best for image mode; avoid for video (would show a static duplicate). */
+  holdBase?: boolean;
 }
 
 function supportsWebGL(): boolean {
@@ -79,15 +83,16 @@ export default function MotionHover({
   style,
   playMode = "always",
   ambient = 0,
-  amplitude = 0.06,
+  amplitude = 0.02,
   noiseScale = 3.0,
   flowSpeed = 0.3,
   mouseRadius = 0.4,
-  spill = 0.12,
+  spill = 0.10,
   motionGain = 80,
   motionDecay = 0.22,
   base = 0.3,
   pull = 0.35,
+  holdBase = false,
 }: MotionHoverProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const mediaRef = useRef<HTMLVideoElement & HTMLImageElement>(null);
@@ -170,7 +175,9 @@ export default function MotionHover({
     height: "100%",
     objectFit: "cover",
     display: "block",
-    opacity: glReady ? 0 : 1,
+    // holdBase keeps the crisp media under the GL so a warped edge never reveals
+    // the empty box behind; otherwise fade it out once the GL is painting.
+    opacity: holdBase ? 1 : glReady ? 0 : 1,
     transition: "opacity .2s ease",
   };
 
