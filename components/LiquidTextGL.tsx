@@ -27,7 +27,7 @@ import * as THREE from "three";
 export const TUNING = {
   /* ── Liquid warp (mouse-motion driven) ── */
   /** Overall warp distance, as a fraction of the text width. THE liquid knob. */
-  AMPLITUDE: 0.05,
+  AMPLITUDE: 0.02,
   /** Spatial frequency of the flow field (low = swells, high = ripples). */
   NOISE_SCALE: 2.4,
   /** Speed the flow field animates while warping. */
@@ -75,6 +75,9 @@ interface GLProps {
   onActive?: () => void;
   /** Fired once every word has finished blooming in. */
   onRevealDone?: () => void;
+  /** Skip the word-by-word entrance — paint the full text at once (reliable),
+   *  and just ripple on hover. */
+  instant?: boolean;
 }
 
 interface Word {
@@ -172,7 +175,7 @@ function cssAlign(value: string): "left" | "center" | "right" {
   return "left";
 }
 
-function Scene({ getEl, controls, onActive, onRevealDone }: GLProps) {
+function Scene({ getEl, controls, onActive, onRevealDone, instant }: GLProps) {
   const dpr = useThree((s) => s.viewport.dpr);
 
   const offscreen = useRef<HTMLCanvasElement | null>(null);
@@ -182,7 +185,7 @@ function Scene({ getEl, controls, onActive, onRevealDone }: GLProps) {
 
   const words = useRef<Word[]>([]);
   const meta = useRef({ cssW: 1, cssH: 1, ratio: 1, font: "", color: "#000", letterSpacing: "normal" });
-  const phase = useRef<RevealPhase>("blank");
+  const phase = useRef<RevealPhase>(instant ? "done" : "blank");
   const revealStart = useRef(0);
   const stepMsRef = useRef(TUNING.WORD_STEP);
   const fadeMsRef = useRef(TUNING.WORD_FADE);

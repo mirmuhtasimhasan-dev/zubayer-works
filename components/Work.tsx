@@ -47,35 +47,6 @@ function PhotoIcon() {
   );
 }
 
-// Renders a work's thumbnail: a manual Sanity cover/image (optimized) if set,
-// otherwise the auto video thumbnail derived from its link, otherwise a clean
-// placeholder — so a video tile never breaks even without an uploaded cover.
-function TileMedia({ w, widths, sizes, alt, group }: { w: any; widths: number[]; sizes: string; alt: string; group?: string }) {
-  const [autoSrc, setAutoSrc] = useState<string | null>(w?.autoThumb ?? null);
-  const [broken, setBroken] = useState(false);
-
-  const sanitySrc = w?.cover || w?.image;
-  if (sanitySrc) {
-    return <img {...sanityImage(sanitySrc, { widths, sizes })} alt={alt} loading="lazy" />;
-  }
-  if (autoSrc && !broken) {
-    return (
-      <img
-        src={autoSrc}
-        alt={alt}
-        loading="lazy"
-        onError={() => {
-          // maxres missing → hqdefault; anything else broken → placeholder.
-          if (autoSrc.includes("maxresdefault")) setAutoSrc(autoSrc.replace("maxresdefault", "hqdefault"));
-          else setBroken(true);
-        }}
-      />
-    );
-  }
-  const isVideo = group === "Videography" || Boolean(w?.videoEmbed);
-  return <span className="eye-tile-placeholder">{isVideo ? <VideoIcon /> : <PhotoIcon />}</span>;
-}
-
 export default function Work({ featured, categories }: { featured: any; categories: any[] }) {
   const byGroup = (g: Group) => (categories || []).filter((c) => c?.group === g);
   const firstNonEmpty = GROUPS.find((g) => byGroup(g).length > 0) ?? "Videography";
@@ -110,27 +81,77 @@ export default function Work({ featured, categories }: { featured: any; categori
     const el = sliderRef.current;
     if (el) el.scrollBy({ left: dir * el.clientWidth * 0.9, behavior: "smooth" });
   };
+
+  // One work tile — shared by the drill grid and the drill slider so both look
+  // identical. A drag that moved the slider must not open the work.
+  const renderWork = (w: any, g?: string) => {
+    const isVideo = workKind(w, g) === "video";
+    // Thumbnail source (Sanity direct, else YouTube thumb via same-origin proxy).
+    const wsrc = w.cover
+      ? sanityImage(w.cover, { widths: TILE_WIDTHS, sizes: GRID_SIZES }).src
+      : w.image
+      ? sanityImage(w.image, { widths: TILE_WIDTHS, sizes: GRID_SIZES }).src
+      : w.autoThumb
+      ? `/api/img?url=${encodeURIComponent(w.autoThumb)}`
+      : "";
+    return (
+      <button
+        key={w.id}
+        className="eye-work"
+        onClick={() => { if (!catDrag.current.moved) openWork(w, g); }}
+      >
+        <div className="eye-work-media">
+          {wsrc ? (
+            // Featured-style liquid hover, kept subtle.
+            <MotionHover
+              type="image"
+              src={wsrc}
+              holdBase
+              amplitude={0.05}
+              spill={0.08}
+              noiseScale={3}
+              mouseRadius={0.4}
+              motionGain={95}
+              motionDecay={0.18}
+              base={0.3}
+              pull={0.3}
+              style={{ position: "absolute", inset: 0 }}
+            />
+          ) : (
+            <span className="eye-tile-placeholder">{isVideo ? <VideoIcon /> : <PhotoIcon />}</span>
+          )}
+          {isVideo && <span className="eye-work-play" aria-hidden />}
+        </div>
+        <span className="eye-work-title">{w.title}</span>
+      </button>
+    );
+  };
   // Mouse click-and-drag to slide (touch uses native scroll).
   const catDown = (e: React.PointerEvent) => {
     if (e.pointerType !== "mouse") return;
     const el = sliderRef.current;
     if (!el) return;
+    // Do NOT capture here — capturing on down swallows the tile's click.
     catDrag.current = { down: true, moved: false, startX: e.clientX, scroll: el.scrollLeft };
-    el.setPointerCapture?.(e.pointerId);
   };
   const catMove = (e: React.PointerEvent) => {
     if (!catDrag.current.down) return;
     const el = sliderRef.current;
     if (!el) return;
     const dx = e.clientX - catDrag.current.startX;
-    if (!catDrag.current.moved && Math.abs(dx) > 5) { catDrag.current.moved = true; setCatDragging(true); }
+    if (!catDrag.current.moved && Math.abs(dx) > 5) {
+      catDrag.current.moved = true;
+      setCatDragging(true);
+      el.setPointerCapture?.(e.pointerId); // capture only once a real drag begins
+    }
     el.scrollLeft = catDrag.current.scroll - dx;
   };
   const catUp = (e: React.PointerEvent) => {
     if (!catDrag.current.down) return;
     catDrag.current.down = false;
     setCatDragging(false);
-    sliderRef.current?.releasePointerCapture?.(e.pointerId);
+    const el = sliderRef.current;
+    if (el?.hasPointerCapture?.(e.pointerId)) el.releasePointerCapture(e.pointerId);
   };
 
   const featKind = featured ? workKind(featured, featured.categoryGroup) : null;
@@ -245,20 +266,26 @@ export default function Work({ featured, categories }: { featured: any; categori
             <h3 className="eye-drill-title">{active.name}</h3>
             {(active.works?.length ?? 0) === 0 ? (
               <p className="eye-empty">No works in this category yet.</p>
+            ) : active.works.length > 3 ? (
+              // More than 3 → slide like the category slider (arrows + drag).
+              <div className="eye-slider-wrap">
+                <button className="eye-arrow left" aria-label="Scroll left" onClick={() => nudge(-1)}>&#8249;</button>
+                <div
+                  className={`eye-slider ${catDragging ? "dragging" : ""}`}
+                  ref={sliderRef}
+                  onPointerDown={catDown}
+                  onPointerMove={catMove}
+                  onPointerUp={catUp}
+                  onPointerCancel={catUp}
+                  onPointerLeave={catUp}
+                >
+                  {active.works.map((w: any) => renderWork(w, active.group))}
+                </div>
+                <button className="eye-arrow right" aria-label="Scroll right" onClick={() => nudge(1)}>&#8250;</button>
+              </div>
             ) : (
               <div className="eye-grid">
-                {active.works.map((w: any) => {
-                  const isVideo = workKind(w, active.group) === "video";
-                  return (
-                    <button key={w.id} className="eye-work" onClick={() => openWork(w, active.group)}>
-                      <div className="eye-work-media">
-                        <TileMedia w={w} widths={TILE_WIDTHS} sizes={GRID_SIZES} alt={w.title} group={active.group} />
-                        {isVideo && <span className="eye-work-play" aria-hidden />}
-                      </div>
-                      <span className="eye-work-title">{w.title}</span>
-                    </button>
-                  );
-                })}
+                {active.works.map((w: any) => renderWork(w, active.group))}
               </div>
             )}
           </div>

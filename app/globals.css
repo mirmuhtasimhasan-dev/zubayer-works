@@ -85,13 +85,21 @@ button{font-family:inherit;cursor:pointer;}
 /* Category slider */
 .eye-slider-wrap{position:relative;}
 /* 3 tiles fill the row; more categories overflow → drag / arrows to slide. */
-.eye-slider{display:flex;gap:22px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:4px;cursor:grab;}
+/* top padding so the hover pop-up (grows upward) isn't clipped by the scroller */
+.eye-slider{display:flex;gap:22px;overflow-x:auto;overflow-y:visible;scroll-snap-type:x proximity;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:52px 0 6px;cursor:grab;}
 .eye-slider::-webkit-scrollbar{display:none;}
 .eye-slider.dragging{cursor:grabbing;scroll-snap-type:none;}
-.eye-tile{flex:0 0 calc((100% - 44px) / 3);scroll-snap-align:start;background:none;border:0;padding:0;text-align:left;cursor:pointer;}
-.eye-tile-media{position:relative;aspect-ratio:4/5;overflow:hidden;background:var(--divider);}
-.eye-tile-media img{width:100%;height:100%;object-fit:cover;filter:saturate(.7);transition:transform .8s ease,filter .8s ease;user-select:none;-webkit-user-drag:none;}
-.eye-slider:not(.dragging) .eye-tile:hover .eye-tile-media img{transform:scale(1.05);filter:saturate(1);}
+.eye-tile{position:relative;flex:0 0 calc((100% - 44px) / 3);scroll-snap-align:start;background:none;border:0;padding:0;text-align:left;cursor:pointer;}
+.eye-tile-media{position:relative;aspect-ratio:4/5;overflow:hidden;background:var(--divider);transform-origin:center bottom;transition:transform .45s cubic-bezier(.2,.7,.2,1),box-shadow .45s ease;will-change:transform;}
+.eye-tile-media img{width:100%;height:100%;object-fit:cover;filter:saturate(.7);transition:filter .6s ease;user-select:none;-webkit-user-drag:none;}
+/* hover pop-up — like the Archive; fine pointers only, not while dragging */
+@media (hover:hover) and (pointer:fine){
+  .eye-slider:not(.dragging) .eye-tile:hover{z-index:5;}
+  .eye-slider:not(.dragging) .eye-tile:hover .eye-tile-media{transform:scale(1.09);box-shadow:0 30px 60px rgba(26,24,20,.24);}
+  .eye-slider:not(.dragging) .eye-tile:hover .eye-tile-media img{filter:saturate(1);}
+  .eye-slider:not(.dragging) .eye-tile:first-child:hover .eye-tile-media{transform-origin:left bottom;}
+  .eye-slider:not(.dragging) .eye-tile:last-child:hover .eye-tile-media{transform-origin:right bottom;}
+}
 .eye-tile-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--faint);}
 .eye-tile-placeholder svg{width:40px;height:40px;}
 .eye-tile-name{display:block;font-family:var(--font-display),serif;font-size:19px;margin-top:14px;}
@@ -113,6 +121,10 @@ button{font-family:inherit;cursor:pointer;}
 .eye-drill-title{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(24px,3vw,34px);margin:10px 0 28px;}
 .eye-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
 .eye-work{background:none;border:0;padding:0;text-align:left;cursor:pointer;}
+/* Drill slider (works > 3): tiles slide 3-up like the category slider. */
+.eye-slider .eye-work{flex:0 0 calc((100% - 44px) / 3);scroll-snap-align:start;}
+@media (max-width:1000px){.eye-slider .eye-work{flex-basis:calc((100% - 22px) / 2);}}
+@media (max-width:600px){.eye-slider .eye-work{flex-basis:76%;}}
 .eye-work-media{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--divider);}
 .eye-work-media img{width:100%;height:100%;object-fit:cover;filter:saturate(.7);transition:transform .8s ease,filter .8s ease;}
 .eye-work:hover .eye-work-media img{transform:scale(1.05);filter:saturate(1);}
@@ -149,8 +161,11 @@ button{font-family:inherit;cursor:pointer;}
 /* hover pop-up — fine pointers only, and not while dragging */
 @media (hover:hover) and (pointer:fine){
   .arch-row:not(.dragging) .arch-card:hover{z-index:5;}
-  .arch-row:not(.dragging) .arch-card:hover .arch-card-media{transform:scale(1.3);box-shadow:0 30px 60px rgba(26,24,20,.28);}
+  .arch-row:not(.dragging) .arch-card:hover .arch-card-media{transform:scale(1.28);box-shadow:0 30px 60px rgba(26,24,20,.28);}
   .arch-row:not(.dragging) .arch-card:hover .arch-card-media img{filter:saturate(1);}
+  /* edge cards grow inward so they never clip off the left/right of the row */
+  .arch-row:not(.dragging) .arch-card:first-child:hover .arch-card-media{transform-origin:left bottom;}
+  .arch-row:not(.dragging) .arch-card:last-child:hover .arch-card-media{transform-origin:right bottom;}
 }
 /* touch: gentle tap-scale instead of the pop-up */
 @media (hover:none){
@@ -168,6 +183,15 @@ button{font-family:inherit;cursor:pointer;}
 .arch-end a:hover{transform:translateY(-5px);}
 .arch-end-arrow{align-self:flex-end;font-size:28px;line-height:1;}
 .arch-end-text{font-family:var(--font-display),serif;font-size:24px;line-height:1.22;}
+
+/* below-the-row Behance link — centred, with the liquid hover text */
+.arch-foot{text-align:center;margin-top:40px;padding:0 var(--side);}
+.arch-behance{display:inline-flex;align-items:baseline;gap:8px;font-size:15px;letter-spacing:.02em;color:var(--ink);transition:color .35s ease,gap .35s ease;}
+.arch-behance:hover{color:var(--ash);gap:13px;}
+.arch-behance-text{position:relative;background-image:linear-gradient(var(--ink),var(--ink));background-repeat:no-repeat;background-position:0 100%;background-size:0 1px;transition:background-size .4s cubic-bezier(.2,.7,.2,1);}
+.arch-behance:hover .arch-behance-text{background-size:100% 1px;}
+.arch-behance-arrow{font-size:15px;transition:transform .35s ease;}
+.arch-behance:hover .arch-behance-arrow{transform:translate(2px,-2px);}
 .lightbox{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.96);display:flex;align-items:center;justify-content:center;}
 .lightbox img{max-width:88vw;max-height:88vh;object-fit:contain;}
 .lb-arrow{position:absolute;top:50%;transform:translateY(-50%);background:none;border:0;color:#fff;font-size:46px;opacity:.7;padding:20px;}
@@ -207,12 +231,16 @@ button{font-family:inherit;cursor:pointer;}
 .service-icon{display:block;width:30px;height:30px;color:var(--ink);margin-bottom:22px;}
 .service-icon svg{width:100%;height:100%;display:block;}
 .service-card-cell{display:flex;}
-.service-card{display:flex;flex-direction:column;width:100%;color:inherit;padding:40px 32px;background:var(--divider);transition:background .4s,transform .4s;}
-.service-card:hover{background:#ded1bd;transform:translateY(-4px);}
-.service-card h3{font-family:var(--font-display),serif;font-weight:400;font-size:24px;margin-bottom:12px;}
-.service-card p{color:var(--ash);font-size:14px;}
+/* Link + LiquidHover: thin stretch wrappers so the grid keeps equal heights. */
+.service-card{display:flex;width:100%;color:inherit;}
+.service-card-liquid{flex:1;display:flex;flex-direction:column;}
+/* The actual BOX (snapshotted + distorted) — bg, padding, edges ripple as one. */
+.service-box{position:relative;overflow:hidden;flex:1;display:flex;flex-direction:column;padding:40px 32px;background:var(--divider);box-shadow:0 0 0 rgba(26,24,20,0);transition:background .5s ease,transform .5s ease,box-shadow .5s ease;}
+.service-box:hover{background:#e4ddce;transform:translateY(-2px);box-shadow:0 12px 30px -18px rgba(26,24,20,.28);}
+.service-box h3{font-family:var(--font-display),serif;font-weight:400;font-size:24px;margin-bottom:12px;}
+.service-box p{color:var(--ash);font-size:14px;}
 .service-more{margin-top:auto;padding-top:24px;font-size:13px;letter-spacing:.04em;color:var(--ink);opacity:0;transform:translateY(4px);transition:opacity .35s ease,transform .35s ease;}
-.service-card:hover .service-more{opacity:1;transform:none;}
+.service-box:hover .service-more{opacity:1;transform:none;}
 @media (hover:none){.service-more{opacity:1;transform:none;}}
 
 /* SERVICE DETAIL PAGE */
@@ -233,7 +261,9 @@ button{font-family:inherit;cursor:pointer;}
 .service-title{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(40px,5.6vw,74px);line-height:1.03;letter-spacing:-.01em;margin-bottom:36px;}
 .service-lead{font-family:var(--font-display),serif;font-size:clamp(21px,2.4vw,27px);line-height:1.45;color:var(--ink);margin-bottom:30px;max-width:26ch;}
 .service-body p{font-size:17px;line-height:1.75;color:var(--ash);margin-bottom:22px;max-width:58ch;}
-.service-cta{margin-top:64px;padding:clamp(32px,4vw,52px);background:var(--divider);}
+.service-cta{margin-top:64px;}
+/* The CTA box itself (snapshotted + distorted) — the whole box ripples as one. */
+.service-cta-box{position:relative;overflow:hidden;padding:clamp(32px,4vw,52px);background:var(--divider);}
 .service-cta-text{font-family:var(--font-display),serif;font-size:clamp(24px,3vw,36px);line-height:1.22;color:var(--ink);max-width:20ch;margin-bottom:28px;}
 .service-cta-email{display:inline-block;font-size:18px;border-bottom:1px solid var(--ink);padding-bottom:3px;transition:color .3s,border-color .3s;}
 .service-cta-email:hover{color:var(--ash);border-color:var(--ash);}

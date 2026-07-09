@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Nav from "@/components/Nav";
+import LiquidHover from "@/components/LiquidHover";
 import { SERVICES, SERVICES_EMAIL } from "@/components/servicesData";
 
 export function generateStaticParams() {
@@ -55,8 +56,11 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
             )}
 
             <div className="service-cta">
-              <p className="service-cta-text">{service.cta}</p>
-              <a className="service-cta-email" href={`mailto:${SERVICES_EMAIL}`}>{SERVICES_EMAIL}</a>
+              {/* The WHOLE CTA box — background + content — ripples as one on hover. */}
+              <LiquidHover contentClassName="service-cta-box">
+                <p className="service-cta-text">{service.cta}</p>
+                <a className="service-cta-email" href={`mailto:${SERVICES_EMAIL}`}>{SERVICES_EMAIL}</a>
+              </LiquidHover>
             </div>
           </div>
         </div>

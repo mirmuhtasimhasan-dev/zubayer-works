@@ -12,6 +12,9 @@ export default function Archive({ images, behanceUrl }: { images: any[]; behance
 
   if (!images?.length) return null;
 
+  // Set/change in Studio (Archive Settings → Behance URL); falls back to this.
+  const bh = behanceUrl || "https://www.behance.net/zubayerahmed23";
+
   const nudge = (dir: number) => {
     const el = rowRef.current;
     if (el) el.scrollBy({ left: dir * el.clientWidth * 0.9, behavior: "smooth" });
@@ -77,21 +80,26 @@ export default function Archive({ images, behanceUrl }: { images: any[]; behance
             </div>
           ))}
 
-          {behanceUrl && (
-            <div className="arch-card arch-end">
-              <a
-                href={behanceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                // A drag that moved should not trigger the link.
-                onClick={(e) => { if (drag.current.moved) e.preventDefault(); }}
-              >
-                <span className="arch-end-arrow" aria-hidden>&#8599;</span>
-                <span className="arch-end-text">See the full archive on Behance</span>
-              </a>
-            </div>
-          )}
+          <div className="arch-card arch-end">
+            <a
+              href={bh}
+              target="_blank"
+              rel="noopener noreferrer"
+              // A drag that moved should not trigger the link.
+              onClick={(e) => { if (drag.current.moved) e.preventDefault(); }}
+            >
+              <span className="arch-end-arrow" aria-hidden>&#8599;</span>
+              <span className="arch-end-text">See the full archive on Behance</span>
+            </a>
+          </div>
         </div>
+      </div>
+
+      <div className="arch-foot">
+        <a className="arch-behance" href={bh} target="_blank" rel="noopener noreferrer">
+          <span className="arch-behance-text">See the full archive on Behance</span>
+          <span className="arch-behance-arrow" aria-hidden>&#8599;</span>
+        </a>
       </div>
     </section>
   );
