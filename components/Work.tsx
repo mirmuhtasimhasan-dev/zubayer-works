@@ -58,6 +58,10 @@ export default function Work({ featured, categories }: { featured: any; categori
   const catDrag = useRef({ down: false, moved: false, startX: 0, scroll: 0 });
   const [catDragging, setCatDragging] = useState(false);
 
+  // Phones use the SAME drill-down flow as desktop, only sized down — on mobile
+  // the works show as a 2-column grid (never the horizontal slider).
+  const [isMobile, setIsMobile] = useState(false);
+
   useEffect(() => {
     if (!lightbox) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setLightbox(null); };
@@ -65,6 +69,15 @@ export default function Work({ featured, categories }: { featured: any; categori
     document.body.style.overflow = "hidden";
     return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
   }, [lightbox]);
+
+  // Track phone width so the works render as a 2-column grid (not the slider).
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 600px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener?.("change", update);
+    return () => mq.removeEventListener?.("change", update);
+  }, []);
 
   if (!featured && (!categories || categories.length === 0)) return null;
 
@@ -213,61 +226,20 @@ export default function Work({ featured, categories }: { featured: any; categori
         ))}
       </div>
 
-      {/* SLIDER  or  DRILL-DOWN (same area) */}
+      {/* CATEGORY SLIDER, replaced in place by the drill-down when a category is
+          open — same flow on desktop and phones, only sized down. On phones the
+          works render as a 2-column grid instead of the horizontal slider. */}
       <div className="eye-area">
-        {!active ? (
-          cats.length === 0 ? (
-            <p className="eye-empty">No categories here yet.</p>
-          ) : (
-            <div className="eye-slider-wrap">
-              {/* Arrows only when there are more categories than fit (> 3). */}
-              {cats.length > 3 && (
-                <button className="eye-arrow left" aria-label="Scroll left" onClick={() => nudge(-1)}>&#8249;</button>
-              )}
-              <div
-                className={`eye-slider ${catDragging ? "dragging" : ""}`}
-                ref={sliderRef}
-                onPointerDown={catDown}
-                onPointerMove={catMove}
-                onPointerUp={catUp}
-                onPointerCancel={catUp}
-                onPointerLeave={catUp}
-              >
-                {cats.map((c) => {
-                  const count = c.works?.length ?? 0;
-                  return (
-                    <button
-                      key={c.id}
-                      className="eye-tile"
-                      // A drag that moved should not open the category.
-                      onClick={() => { if (!catDrag.current.moved) setActiveCat(c.id); }}
-                    >
-                      <div className="eye-tile-media">
-                        {c.cover ? (
-                          <img {...sanityImage(c.cover, { widths: TILE_WIDTHS, sizes: TILE_SIZES })} alt={c.name} loading="lazy" draggable={false} />
-                        ) : (
-                          <span className="eye-tile-placeholder">{group === "Videography" ? <VideoIcon /> : <PhotoIcon />}</span>
-                        )}
-                      </div>
-                      <span className="eye-tile-name">{c.name}</span>
-                      <span className="eye-tile-count">{count} {count === 1 ? "work" : "works"}</span>
-                    </button>
-                  );
-                })}
-              </div>
-              {cats.length > 3 && (
-                <button className="eye-arrow right" aria-label="Scroll right" onClick={() => nudge(1)}>&#8250;</button>
-              )}
-            </div>
-          )
-        ) : (
+        {cats.length === 0 ? (
+          <p className="eye-empty">No categories here yet.</p>
+        ) : active ? (
           <div className="eye-drill">
             <button className="eye-back" onClick={() => setActiveCat(null)}>&#8249; Back to categories</button>
             <h3 className="eye-drill-title">{active.name}</h3>
             {(active.works?.length ?? 0) === 0 ? (
               <p className="eye-empty">No works in this category yet.</p>
-            ) : active.works.length > 3 ? (
-              // More than 3 → slide like the category slider (arrows + drag).
+            ) : !isMobile && active.works.length > 3 ? (
+              // Desktop, >3 → slide like the category slider (arrows + drag).
               <div className="eye-slider-wrap">
                 <button className="eye-arrow left" aria-label="Scroll left" onClick={() => nudge(-1)}>&#8249;</button>
                 <div
@@ -284,9 +256,51 @@ export default function Work({ featured, categories }: { featured: any; categori
                 <button className="eye-arrow right" aria-label="Scroll right" onClick={() => nudge(1)}>&#8250;</button>
               </div>
             ) : (
+              // Phones (and desktop ≤3): a clean grid — 2 columns on phones.
               <div className="eye-grid">
                 {active.works.map((w: any) => renderWork(w, active.group))}
               </div>
+            )}
+          </div>
+        ) : (
+          <div className="eye-slider-wrap">
+            {/* Arrows only when there are more categories than fit (> 3). */}
+            {cats.length > 3 && (
+              <button className="eye-arrow left" aria-label="Scroll left" onClick={() => nudge(-1)}>&#8249;</button>
+            )}
+            <div
+              className={`eye-slider ${catDragging ? "dragging" : ""}`}
+              ref={sliderRef}
+              onPointerDown={catDown}
+              onPointerMove={catMove}
+              onPointerUp={catUp}
+              onPointerCancel={catUp}
+              onPointerLeave={catUp}
+            >
+              {cats.map((c) => {
+                const count = c.works?.length ?? 0;
+                return (
+                  <button
+                    key={c.id}
+                    className="eye-tile"
+                    // A drag that moved should not open the category.
+                    onClick={() => { if (!catDrag.current.moved) setActiveCat(c.id); }}
+                  >
+                    <div className="eye-tile-media">
+                      {c.cover ? (
+                        <img {...sanityImage(c.cover, { widths: TILE_WIDTHS, sizes: TILE_SIZES })} alt={c.name} loading="lazy" draggable={false} />
+                      ) : (
+                        <span className="eye-tile-placeholder">{group === "Videography" ? <VideoIcon /> : <PhotoIcon />}</span>
+                      )}
+                    </div>
+                    <span className="eye-tile-name">{c.name}</span>
+                    <span className="eye-tile-count">{count} {count === 1 ? "work" : "works"}</span>
+                  </button>
+                );
+              })}
+            </div>
+            {cats.length > 3 && (
+              <button className="eye-arrow right" aria-label="Scroll right" onClick={() => nudge(1)}>&#8250;</button>
             )}
           </div>
         )}

@@ -46,6 +46,10 @@ interface LiquidHoverProps {
   contentClassName?: string;
   /** Override amplitude for this instance (falls back to STRENGTH). */
   strength?: number;
+  /** Baseline ripple (0..1) kept while hovering, even without moving — so it
+   *  wobbles continuously on hover (like the hero) instead of only on movement.
+   *  0 (default) = purely motion-driven (settles to calm when the pointer holds still). */
+  ambient?: number;
 }
 
 function supportsWebGL(): boolean {
@@ -115,7 +119,7 @@ void main(){
 }
 `;
 
-export default function LiquidHover({ children, className, style, contentClassName, strength: strengthProp }: LiquidHoverProps) {
+export default function LiquidHover({ children, className, style, contentClassName, strength: strengthProp, ambient = 0 }: LiquidHoverProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -242,6 +246,9 @@ export default function LiquidHover({ children, className, style, contentClassNa
     // settles it back to calm. Movement (onMove) is what builds it back up.
     strength.current *= Math.exp(-dt / MOTION_DECAY);
     if (strength.current < 0.001) strength.current = 0;
+    // While hovering, keep a baseline ripple so it wobbles continuously (ambient=0
+    // stays purely motion-driven and settles to calm).
+    if (hovering.current && ambient > 0 && strength.current < ambient) strength.current = ambient;
     mouse.current.x += (mouseT.current.x - mouse.current.x) * 0.2;
     mouse.current.y += (mouseT.current.y - mouse.current.y) * 0.2;
 
@@ -260,7 +267,7 @@ export default function LiquidHover({ children, className, style, contentClassNa
       return;
     }
     raf.current = requestAnimationFrame(frame);
-  }, [stopLoop]);
+  }, [stopLoop, ambient]);
 
   const startLoop = useCallback(() => {
     if (raf.current === undefined) raf.current = requestAnimationFrame(frame);

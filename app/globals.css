@@ -86,16 +86,17 @@ button{font-family:inherit;cursor:pointer;}
 .eye-slider-wrap{position:relative;}
 /* 3 tiles fill the row; more categories overflow → drag / arrows to slide. */
 /* top padding so the hover pop-up (grows upward) isn't clipped by the scroller */
-.eye-slider{display:flex;gap:22px;overflow-x:auto;overflow-y:visible;scroll-snap-type:x proximity;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:52px 0 6px;cursor:grab;}
+.eye-slider{display:flex;gap:22px;overflow-x:auto;overflow-y:visible;scroll-snap-type:x proximity;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:24px 0 8px;cursor:grab;}
 .eye-slider::-webkit-scrollbar{display:none;}
 .eye-slider.dragging{cursor:grabbing;scroll-snap-type:none;}
 .eye-tile{position:relative;flex:0 0 calc((100% - 44px) / 3);scroll-snap-align:start;background:none;border:0;padding:0;text-align:left;cursor:pointer;}
 .eye-tile-media{position:relative;aspect-ratio:4/5;overflow:hidden;background:var(--divider);transform-origin:center bottom;transition:transform .45s cubic-bezier(.2,.7,.2,1),box-shadow .45s ease;will-change:transform;}
 .eye-tile-media img{width:100%;height:100%;object-fit:cover;filter:saturate(.7);transition:filter .6s ease;user-select:none;-webkit-user-drag:none;}
-/* hover pop-up — like the Archive; fine pointers only, not while dragging */
+/* Subtle hover lift — fine pointers only, not while dragging. The zoom is small
+   enough (and z-raised) that a hovered tile never messily overlaps its neighbours. */
 @media (hover:hover) and (pointer:fine){
   .eye-slider:not(.dragging) .eye-tile:hover{z-index:5;}
-  .eye-slider:not(.dragging) .eye-tile:hover .eye-tile-media{transform:scale(1.09);box-shadow:0 30px 60px rgba(26,24,20,.24);}
+  .eye-slider:not(.dragging) .eye-tile:hover .eye-tile-media{transform:scale(1.035);box-shadow:0 16px 38px rgba(26,24,20,.14);}
   .eye-slider:not(.dragging) .eye-tile:hover .eye-tile-media img{filter:saturate(1);}
   .eye-slider:not(.dragging) .eye-tile:first-child:hover .eye-tile-media{transform-origin:left bottom;}
   .eye-slider:not(.dragging) .eye-tile:last-child:hover .eye-tile-media{transform-origin:right bottom;}
@@ -105,7 +106,14 @@ button{font-family:inherit;cursor:pointer;}
 .eye-tile-name{display:block;font-family:var(--font-display),serif;font-size:19px;margin-top:14px;}
 .eye-tile-count{display:block;font-size:12px;letter-spacing:.05em;color:var(--ash);margin-top:4px;}
 @media (max-width:1000px){.eye-tile{flex-basis:calc((100% - 22px) / 2);}}
-@media (max-width:600px){.eye-tile{flex-basis:76%;}}
+/* Phones: smaller, compact category row — ~2 tiles at a time with a peek of the
+   next, tighter spacing, no hover-zoom top padding (touch has no hover). */
+@media (max-width:600px){
+  .eye-slider{gap:12px;padding:6px 0 4px;}
+  .eye-tile{flex-basis:44%;}
+  .eye-tile-name{font-size:15px;margin-top:9px;}
+  .eye-tile-count{font-size:11px;margin-top:2px;}
+}
 
 /* premium side arrows — floating, blurred, soft shadow */
 .eye-arrow{position:absolute;top:42%;transform:translateY(-50%);z-index:6;width:52px;height:52px;border-radius:50%;border:.5px solid var(--divider);background:rgba(247,244,238,.7);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:var(--ink);font-size:23px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(26,24,20,.12);transition:transform .3s cubic-bezier(.2,.7,.2,1),border-color .3s,background .3s,box-shadow .3s;}
@@ -141,6 +149,16 @@ button{font-family:inherit;cursor:pointer;}
 @media (max-width:1000px){.eye-grid{grid-template-columns:repeat(2,1fr);}}
 @media (max-width:560px){.eye-grid{gap:14px;}}
 @media (hover:none){.eye-arrow{display:none;}}
+
+/* Phones: same drill-down flow as desktop, only sized down. */
+@media (max-width:600px){
+  .eye-toggle{gap:8px;margin-bottom:24px;}
+  .eye-pill{font-size:15px;padding:8px 18px;}
+  .eye-drill-title{font-size:24px;margin:8px 0 18px;}
+  .eye-back{font-size:12px;}
+  .eye-grid{grid-template-columns:repeat(2,1fr);gap:12px;} /* works: 2 columns */
+  .eye-work-title{font-size:15px;margin-top:9px;}
+}
 
 /* THE ARCHIVE — a single draggable diary row */
 .archive{padding:110px 0 90px;}
@@ -239,9 +257,6 @@ button{font-family:inherit;cursor:pointer;}
 .service-box:hover{background:#e4ddce;transform:translateY(-2px);box-shadow:0 12px 30px -18px rgba(26,24,20,.28);}
 .service-box h3{font-family:var(--font-display),serif;font-weight:400;font-size:24px;margin-bottom:12px;}
 .service-box p{color:var(--ash);font-size:14px;}
-.service-more{margin-top:auto;padding-top:24px;font-size:13px;letter-spacing:.04em;color:var(--ink);opacity:0;transform:translateY(4px);transition:opacity .35s ease,transform .35s ease;}
-.service-box:hover .service-more{opacity:1;transform:none;}
-@media (hover:none){.service-more{opacity:1;transform:none;}}
 
 /* SERVICE DETAIL PAGE */
 .service-detail{max-width:1160px;margin:0 auto;padding:150px clamp(24px,6vw,60px) 120px;}
@@ -280,8 +295,11 @@ button{font-family:inherit;cursor:pointer;}
 .contact-email:hover{color:var(--ash);border-color:var(--ash);}
 .footer{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:40px var(--side);border-top:1px solid var(--divider);font-size:12px;color:var(--faint);}
 .back-to-top-wrap{display:flex;justify-content:center;padding:34px 0 32px;}
-.back-to-top{display:inline-flex;flex-direction:column;align-items:center;gap:14px;color:var(--ash);transition:color .35s;}
+.back-to-top{display:inline-flex;color:var(--ash);transition:color .35s;}
 .back-to-top:hover{color:var(--ink);}
+/* The snapshotted box: arrow + line + label stack, with padding so the arrowhead
+   and the liquid ripple don't clip at the edges. */
+.btt-box{display:flex;flex-direction:column;align-items:center;gap:14px;padding:12px 18px;}
 .btt-arrow{position:relative;width:1px;height:40px;background:currentColor;}
 .btt-arrow::before{content:"";position:absolute;top:-1px;left:50%;width:7px;height:7px;border-top:1px solid currentColor;border-left:1px solid currentColor;transform:translate(-50%,0) rotate(45deg);}
 .btt-label{font-size:11px;letter-spacing:.22em;writing-mode:vertical-rl;text-orientation:mixed;}
