@@ -34,7 +34,7 @@ export default async function Home() {
       <Nav />
       <Opening location={HERO.location} headline={HERO.headline} subText={HERO.subText} />
       <Work featured={featuredWork} categories={workCategories} />
-      <Archive images={gallery} behanceUrl={archiveSettings?.behanceUrl} />
+      <Archive albums={gallery} behanceUrl={archiveSettings?.behanceUrl} />
       <Ventures ventures={ventures} />
       <Writing posts={writing} />
       <Services />

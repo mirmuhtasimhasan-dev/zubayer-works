@@ -4,9 +4,6 @@ import Reveal from "./Reveal";
 import { sanityImage } from "@/sanity/lib/image";
 import MotionHover from "./MotionHover";
 
-type Group = "Videography" | "Still Photos";
-const GROUPS: Group[] = ["Videography", "Still Photos"];
-
 // Normalize a YouTube/Vimeo URL to an embeddable one.
 function embedUrl(url?: string) {
   if (!url) return "";
@@ -48,10 +45,6 @@ function PhotoIcon() {
 }
 
 export default function Work({ featured, categories }: { featured: any; categories: any[] }) {
-  const byGroup = (g: Group) => (categories || []).filter((c) => c?.group === g);
-  const firstNonEmpty = GROUPS.find((g) => byGroup(g).length > 0) ?? "Videography";
-
-  const [group, setGroup] = useState<Group>(firstNonEmpty);
   const [activeCat, setActiveCat] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<{ img?: any; video?: string; videoFile?: string } | null>(null);
   const sliderRef = useRef<HTMLDivElement>(null);
@@ -79,12 +72,46 @@ export default function Work({ featured, categories }: { featured: any; categori
     return () => mq.removeEventListener?.("change", update);
   }, []);
 
+  // Premium touch effect: on phones the category tile nearest the row's centre
+  // grows and the rest shrink/fade as you swipe — a focused "cover-flow" feel.
+  // (Desktop keeps the mouse hover-zoom; this only runs on the mobile slider.)
+  useEffect(() => {
+    if (!isMobile || activeCat) return;
+    const el = sliderRef.current;
+    if (!el) return;
+    let raf = 0;
+    const apply = () => {
+      raf = 0;
+      const mid = el.scrollLeft + el.clientWidth / 2;
+      el.querySelectorAll<HTMLElement>(".eye-tile").forEach((tile) => {
+        const c = tile.offsetLeft + tile.offsetWidth / 2;
+        const dist = Math.min(1, Math.abs(c - mid) / (el.clientWidth * 0.5));
+        const media = tile.querySelector<HTMLElement>(".eye-tile-media");
+        if (media) media.style.transform = `scale(${(1.05 - dist * 0.2).toFixed(3)})`;
+        tile.style.opacity = (1 - dist * 0.5).toFixed(3);
+      });
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(apply); };
+    apply();
+    el.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+      el.querySelectorAll<HTMLElement>(".eye-tile").forEach((tile) => {
+        tile.style.opacity = "";
+        const media = tile.querySelector<HTMLElement>(".eye-tile-media");
+        if (media) media.style.transform = "";
+      });
+    };
+  }, [isMobile, activeCat, categories]);
+
   if (!featured && (!categories || categories.length === 0)) return null;
 
-  const cats = byGroup(group);
+  // Video categories only (Still Photos was removed).
+  const cats = (categories || []).filter((c) => c?.group !== "Still Photos");
   const active = activeCat ? cats.find((c) => c.id === activeCat) : null;
-
-  const switchGroup = (g: Group) => { setGroup(g); setActiveCat(null); };
   const openWork = (w: any, g?: string) => {
     if (w?.videoFile) setLightbox({ videoFile: w.videoFile }); // direct file = high quality
     else if (workKind(w, g) === "video" && w?.videoEmbed) setLightbox({ video: embedUrl(w.videoEmbed) });
@@ -211,21 +238,6 @@ export default function Work({ featured, categories }: { featured: any; categori
         </Reveal>
       )}
 
-      {/* GROUP TOGGLE */}
-      <div className="eye-toggle" role="tablist" aria-label="Work groups">
-        {GROUPS.map((g) => (
-          <button
-            key={g}
-            role="tab"
-            aria-selected={group === g}
-            className={`eye-pill ${group === g ? "active" : ""}`}
-            onClick={() => switchGroup(g)}
-          >
-            {g}
-          </button>
-        ))}
-      </div>
-
       {/* CATEGORY SLIDER, replaced in place by the drill-down when a category is
           open — same flow on desktop and phones, only sized down. On phones the
           works render as a 2-column grid instead of the horizontal slider. */}
@@ -290,7 +302,7 @@ export default function Work({ featured, categories }: { featured: any; categori
                       {c.cover ? (
                         <img {...sanityImage(c.cover, { widths: TILE_WIDTHS, sizes: TILE_SIZES })} alt={c.name} loading="lazy" draggable={false} />
                       ) : (
-                        <span className="eye-tile-placeholder">{group === "Videography" ? <VideoIcon /> : <PhotoIcon />}</span>
+                        <span className="eye-tile-placeholder"><VideoIcon /></span>
                       )}
                     </div>
                     <span className="eye-tile-name">{c.name}</span>
