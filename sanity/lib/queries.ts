@@ -73,6 +73,19 @@ export async function getArchiveSettings() {
   return client.fetch(`*[_type == "archiveSettings"][0]{ behanceUrl }`);
 }
 
+// Gallery page → "Videography" tab: video links whose thumbnails come from the URL.
+export async function getGalleryVideos() {
+  const vids = await client.fetch(`*[_type == "galleryVideo"] | order(order asc){
+    "id": _id, title, videoUrl, cover
+  }`);
+  await Promise.all(
+    (vids || []).map(async (v: any) => {
+      if (!v.cover && v.videoUrl) v.autoThumb = await getVideoThumbnail(v.videoUrl);
+    })
+  );
+  return vids;
+}
+
 export async function getVentures() {
   return client.fetch(`*[_type == "venture"] | order(order asc){
     "id": _id, name, tagline, description, "slug": slug.current, logo
@@ -91,6 +104,11 @@ export async function getVenture(slug: string) {
 
 export async function getVentureSlugs() {
   return client.fetch(`*[_type == "venture" && defined(slug.current)].slug.current`);
+}
+
+// Rotating pull-quotes above the Writing section (returns an array of strings).
+export async function getQuotes() {
+  return client.fetch(`*[_type == "quote" && defined(text)] | order(order asc, _createdAt asc).text`);
 }
 
 export async function getWriting() {

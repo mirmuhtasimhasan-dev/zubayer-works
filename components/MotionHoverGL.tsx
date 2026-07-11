@@ -36,6 +36,7 @@ interface GLProps {
   motionDecay: number; // seconds to settle back to calm after the pointer stops
   base: number; // how much the WHOLE media warps vs. only under the cursor (0..1)
   pull: number; // how strongly the flow leans toward the cursor
+  holdBase?: boolean; // crisp base image sits under the GL → keep the frame edges clean
 }
 
 const vertexShader = /* glsl */ `
@@ -49,7 +50,7 @@ const vertexShader = /* glsl */ `
 const fragmentShader = /* glsl */ `
   precision highp float;
   uniform sampler2D uTex;
-  uniform float uTime, uStrength, uAmp, uNoiseScale, uRadius, uBase, uPull, uSpill;
+  uniform float uTime, uStrength, uAmp, uNoiseScale, uRadius, uBase, uPull, uSpill, uHold;
   uniform vec2 uMouse;
   varying vec2 vUv;
 
@@ -94,16 +95,26 @@ const fragmentShader = /* glsl */ `
     vec2 s = muv + disp;
     vec4 col = texture2D(uTex, clamp(s, 0.0, 1.0));
 
-    // Transparent outside the (warped) media, with a soft edge so it bleeds cleanly.
-    vec2 m = smoothstep(0.0, 0.01, s) * (1.0 - smoothstep(0.99, 1.0, s));
-    col.a *= m.x * m.y;
+    // Any pixel that samples BEYOND the texture becomes fully transparent, so a
+    // displaced edge can never smear the (often dark) border pixels into a halo.
+    float inside = step(0.0, s.x) * step(s.x, 1.0) * step(0.0, s.y) * step(s.y, 1.0);
+
+    // Edge softness measured by the pixel's own position (muv), so the frame is
+    // stable. With holdBase the crisp base image shows under the GL, so we fade
+    // the ripple out over a wider outer band → the frame stays the clean photo,
+    // no warped dark edge. Without it, keep the thin bleed for the spill effect.
+    vec2 fadeLo = mix(vec2(0.01), vec2(0.06), uHold);
+    vec2 fadeHi = mix(vec2(0.99), vec2(0.94), uHold);
+    vec2 e = smoothstep(vec2(0.0), fadeLo, muv) * (1.0 - smoothstep(fadeHi, vec2(1.0), muv));
+
+    col.a *= inside * e.x * e.y;
     gl_FragColor = col;
   }
 `;
 
 function Scene({
   getMedia, type, controls, onFirstFrame, spill, ambient,
-  amplitude, noiseScale, flowSpeed, mouseRadius, motionGain, motionDecay, base, pull,
+  amplitude, noiseScale, flowSpeed, mouseRadius, motionGain, motionDecay, base, pull, holdBase,
 }: GLProps) {
   const invalidate = useThree((s) => s.invalidate);
   const texture = useRef<THREE.Texture | null>(null);
@@ -124,6 +135,7 @@ function Scene({
       uStrength: { value: 0 },
       uMouse: { value: new THREE.Vector2(0.5, 0.5) },
       uSpill: { value: uSpill },
+      uHold: { value: holdBase ? 1 : 0 },
       uAmp: { value: amplitude },
       uNoiseScale: { value: noiseScale },
       uRadius: { value: mouseRadius },
@@ -145,7 +157,11 @@ function Scene({
       if (img.complete && img.naturalWidth) tex.needsUpdate = true;
       else img.addEventListener("load", () => { tex.needsUpdate = true; invalidate(); }, { once: true });
     }
-    tex.colorSpace = THREE.SRGBColorSpace;
+    // Pass the texture through untouched: the shader only distorts coordinates and
+    // alpha, never colour. Decoding sRGB→linear here (without re-encoding in this
+    // custom shader) is what darkened the whole image on hover. NoColorSpace keeps
+    // the GL output identical to the plain <img> beneath it.
+    tex.colorSpace = THREE.NoColorSpace;
     tex.minFilter = THREE.LinearFilter;
     tex.magFilter = THREE.LinearFilter;
     tex.generateMipmaps = false;

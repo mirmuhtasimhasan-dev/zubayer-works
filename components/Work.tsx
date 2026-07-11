@@ -44,7 +44,7 @@ function PhotoIcon() {
   );
 }
 
-export default function Work({ featured, categories }: { featured: any; categories: any[] }) {
+export default function Work({ featured, categories, eyebrow = "The Eye" }: { featured: any; categories: any[]; eyebrow?: string }) {
   const [activeCat, setActiveCat] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<{ img?: any; video?: string; videoFile?: string } | null>(null);
   const sliderRef = useRef<HTMLDivElement>(null);
@@ -210,7 +210,7 @@ export default function Work({ featured, categories }: { featured: any; categori
 
   return (
     <section className="section eye" id="work">
-      <Reveal><p className="eyebrow">The Eye</p></Reveal>
+      <Reveal><p className="eyebrow">{eyebrow}</p></Reveal>
 
       {/* FEATURED */}
       {featured && (featured.cover || featured.image || featured.autoThumb) && (

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 // About is its own page (/about); the rest are sections on the home page. Using
 // "/#section" (not "#section") so they also work from other pages like /about.
 const LINKS: [string, string][] = [
+  ["Gallery", "/gallery"],
   ["About", "/about"],
   ["Ventures", "/#ventures"],
   ["Writing", "/#writing"],
