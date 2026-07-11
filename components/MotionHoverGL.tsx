@@ -51,6 +51,7 @@ const fragmentShader = /* glsl */ `
   precision highp float;
   uniform sampler2D uTex;
   uniform float uTime, uStrength, uAmp, uNoiseScale, uRadius, uBase, uPull, uSpill, uHold;
+  uniform float uMediaAspect, uBoxAspect;
   uniform vec2 uMouse;
   varying vec2 vUv;
 
@@ -82,6 +83,12 @@ const fragmentShader = /* glsl */ `
     // plane uv (0..1 over the full, overhanging canvas) -> media uv (centre box)
     vec2 muv = (vUv - uSpill) / (1.0 - 2.0 * uSpill);
 
+    // object-fit: cover — crop the texture to the box aspect exactly like the plain
+    // <img> beneath, so the GL copy is the SAME size (no zoom/jump on hover).
+    vec2 cuv = muv;
+    if (uBoxAspect > uMediaAspect) cuv.y = (muv.y - 0.5) * (uMediaAspect / uBoxAspect) + 0.5;
+    else                            cuv.x = (muv.x - 0.5) * (uBoxAspect / uMediaAspect) + 0.5;
+
     vec2 q = muv * uNoiseScale;
     vec2 flow = vec2(snoise(q + vec2(uTime, 0.0)), snoise(q + vec2(0.0, uTime)));
     flow += 0.35 * vec2(snoise(q * 2.1 + vec2(uTime * 1.3, 10.0)), snoise(q * 2.1 + vec2(10.0, uTime * 1.1)));
@@ -92,7 +99,7 @@ const fragmentShader = /* glsl */ `
     vec2 disp = flow * amp;
     disp += normalize(uMouse - muv + 1e-5) * prox * uPull * uStrength * uAmp;
 
-    vec2 s = muv + disp;
+    vec2 s = cuv + disp;
     vec4 col = texture2D(uTex, clamp(s, 0.0, 1.0));
 
     // Any pixel that samples BEYOND the texture becomes fully transparent, so a
@@ -136,6 +143,8 @@ function Scene({
       uMouse: { value: new THREE.Vector2(0.5, 0.5) },
       uSpill: { value: uSpill },
       uHold: { value: holdBase ? 1 : 0 },
+      uMediaAspect: { value: 1 },
+      uBoxAspect: { value: 1 },
       uAmp: { value: amplitude },
       uNoiseScale: { value: noiseScale },
       uRadius: { value: mouseRadius },
@@ -148,14 +157,24 @@ function Scene({
   useEffect(() => {
     const m = getMedia();
     if (!m) return;
+    // Feed the media's natural aspect ratio to the shader so it can crop like
+    // object-fit: cover (matching the plain <img>).
+    const setAspect = () => {
+      const w = (m as HTMLImageElement).naturalWidth || (m as HTMLVideoElement).videoWidth;
+      const h = (m as HTMLImageElement).naturalHeight || (m as HTMLVideoElement).videoHeight;
+      if (w && h) { uniforms.uMediaAspect.value = w / h; invalidate(); }
+    };
     let tex: THREE.Texture;
     if (type === "video") {
-      tex = new THREE.VideoTexture(m as HTMLVideoElement);
+      const vid = m as HTMLVideoElement;
+      tex = new THREE.VideoTexture(vid);
+      if (vid.videoWidth) setAspect();
+      else vid.addEventListener("loadedmetadata", setAspect, { once: true });
     } else {
       const img = m as HTMLImageElement;
       tex = new THREE.Texture(img);
-      if (img.complete && img.naturalWidth) tex.needsUpdate = true;
-      else img.addEventListener("load", () => { tex.needsUpdate = true; invalidate(); }, { once: true });
+      if (img.complete && img.naturalWidth) { tex.needsUpdate = true; setAspect(); }
+      else img.addEventListener("load", () => { tex.needsUpdate = true; setAspect(); invalidate(); }, { once: true });
     }
     // Pass the texture through untouched: the shader only distorts coordinates and
     // alpha, never colour. Decoding sRGB→linear here (without re-encoding in this
@@ -194,6 +213,7 @@ function Scene({
     if (!painted.current && texture.current) { painted.current = true; onFirstFrame?.(); }
     const dt = Math.min(delta, 0.05);
     uniforms.uTime.value = state.clock.elapsedTime * flowSpeed;
+    uniforms.uBoxAspect.value = state.size.width / Math.max(1, state.size.height);
 
     strength.current *= Math.exp(-dt / Math.max(motionDecay, 1e-4));
     if (strength.current < 0.001) strength.current = 0;
@@ -222,7 +242,9 @@ export default function MotionHoverGL(props: GLProps) {
       flat
       frameloop={props.type === "video" ? "always" : "demand"}
       gl={{ alpha: true, antialias: true }}
-      style={{ width: "100%", height: "100%" }}
+      // pointer-events:none so the (spilling) canvas never intercepts clicks —
+      // hover is tracked on the wrapper, so this doesn't affect the ripple.
+      style={{ width: "100%", height: "100%", pointerEvents: "none" }}
       onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
     >
       <Scene {...props} />

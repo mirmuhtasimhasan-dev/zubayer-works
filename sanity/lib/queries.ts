@@ -23,19 +23,41 @@ async function withAutoThumb(w: any) {
   return w;
 }
 
-// The single featured work item, shown full-width at the top of The Eye.
+// The featured work items, shown full-width at the top of The Eye. Mark as many
+// as you like as "featured" in the Studio; they stack in order.
 export async function getFeaturedWork() {
-  const featured = await client.fetch(`*[_type == "workItem" && featured == true] | order(order asc)[0]{
+  const items = await client.fetch(`*[_type == "workItem" && featured == true] | order(order asc, _createdAt asc){
     "id": _id, title, kind, cover, image, videoEmbed, "videoFile": videoFile.asset->url,
-    "categoryName": category->name, "categoryGroup": category->group
+    "categoryName": category->name, "categoryGroup": category->group,
+    "categorySlug": category->slug.current, "categoryId": category->_id
   }`);
-  return withAutoThumb(featured);
+  await Promise.all((items || []).map(withAutoThumb));
+  return items || [];
+}
+
+// One category with all its works, for its own page (/eye/<slug>). Falls back to _id.
+export async function getCategoryBySlug(slug: string) {
+  const cat = await client.fetch(
+    `*[_type == "category" && (slug.current == $slug || _id == $slug)][0]{
+      "id": _id, name, group, "slug": slug.current,
+      "works": *[_type == "workItem" && references(^._id)] | order(order asc, _createdAt asc){
+        "id": _id, title, kind, cover, image, videoEmbed, "videoFile": videoFile.asset->url
+      }
+    }`,
+    { slug }
+  );
+  if (cat?.works) await Promise.all(cat.works.map(withAutoThumb));
+  return cat;
+}
+
+export async function getCategorySlugs() {
+  return client.fetch(`*[_type == "category" && defined(slug.current)].slug.current`);
 }
 
 // Every category (grouped in code) with its works, for the toggle → slider → drill-down.
 export async function getWorkCategories() {
   const cats = await client.fetch(`*[_type == "category"] | order(order asc, name asc){
-    "id": _id, name, group, cover,
+    "id": _id, name, group, cover, "slug": slug.current,
     "works": *[_type == "workItem" && references(^._id)] | order(order asc, _createdAt asc){
       "id": _id, title, kind, cover, image, videoEmbed, "videoFile": videoFile.asset->url
     }

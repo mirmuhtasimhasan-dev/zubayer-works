@@ -21,6 +21,7 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "sanity": "^6.3.0",
+    "server-only": "^0.0.1",
     "styled-components": "^6.4.3",
     "three": "^0.180.0"
   },

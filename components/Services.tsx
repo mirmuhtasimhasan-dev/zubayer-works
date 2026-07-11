@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Reveal from "./Reveal";
 import LiquidHover from "./LiquidHover";
+import InteractiveFish from "./InteractiveFish";
 import { SERVICES } from "./servicesData";
 
 export default function Services() {
@@ -18,6 +19,9 @@ export default function Services() {
                 <h3>{s.title}</h3>
                 <p>{s.blurb}</p>
               </LiquidHover>
+              {/* Ambient fish swims over the card + chases the cursor; sits above
+                  the ripple layer so BOTH run together. pointer-events:none. */}
+              <InteractiveFish />
             </Link>
           </Reveal>
         ))}

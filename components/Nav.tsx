@@ -5,9 +5,10 @@ import { useEffect, useState } from "react";
 // "/#section" (not "#section") so they also work from other pages like /about.
 const LINKS: [string, string][] = [
   ["Gallery", "/gallery"],
-  ["About", "/about"],
   ["Ventures", "/#ventures"],
   ["Writing", "/#writing"],
+  ["Services", "/#services"],
+  ["About", "/about"],
   ["Contact", "/#contact"],
 ];
 
@@ -29,7 +30,7 @@ export default function Nav() {
   return (
     <>
       <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
-        <a href="/" className="nav-logo">Z. Ahmed</a>
+        <a href="/" className="nav-logo"><img src="/logo.png" alt="Zubayer Ahmed" className="nav-logo-img" /></a>
 
         <div className="nav-links">
           {LINKS.map(([label, href]) => (
@@ -44,7 +45,7 @@ export default function Nav() {
 
       <div className={`mobile-menu ${open ? "open" : ""}`}>
         <div className="mobile-menu-top">
-          <a href="/" className="nav-logo" onClick={close}>Z. Ahmed</a>
+          <a href="/" className="nav-logo" onClick={close}><img src="/logo.png" alt="Zubayer Ahmed" className="nav-logo-img" /></a>
           <button className="mobile-close" onClick={close} aria-label="Close menu">✕</button>
         </div>
         <div className="mobile-menu-links">

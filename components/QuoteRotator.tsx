@@ -7,7 +7,7 @@
  * without the blur. Fallback + cross-browser behaviour come from LiquidText.
  */
 import { useEffect, useRef, useState } from "react";
-import LiquidText from "./LiquidText";
+import LiquidQuote from "./LiquidQuote";
 
 const HOLD = 4200; // ms a quote stays sharp
 const FADE = 750; // ms of the blur-in / blur-out
@@ -43,19 +43,9 @@ export default function QuoteRotator({ quotes }: { quotes: string[] }) {
   return (
     <div className="quote-block" aria-live="polite">
       <div className={`quote-rot ${shown ? "is-shown" : ""}`}>
-        <LiquidText
+        <LiquidQuote
           key={index}
-          as="p"
-          className="quote-text"
-          text={`“${quotes[index]}”`}
-          instant
-          hoverTarget=".quote-rot"
-          style={{
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-          }}
+          text={`“${(quotes[index] || "").replace(/^[\s"“”']+|[\s"“”']+$/g, "")}”`}
         />
       </div>
     </div>

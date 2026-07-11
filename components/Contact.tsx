@@ -1,14 +1,14 @@
+import Link from "next/link";
 import Reveal from "./Reveal";
 import LiquidHover from "./LiquidHover";
 export default function Contact({ settings }: { settings: any }) {
-  const email = settings?.email || "hello@zubayer.works";
   return (
     <>
       <section className="section" id="contact">
         <Reveal><p className="eyebrow">Contact</p></Reveal>
         <Reveal>
-          <p className="contact-text">If something here made you think, write to me properly.</p>
-          <a className="contact-email" href={`mailto:${email}`}>{email}</a>
+          <p className="contact-text">If something here made you think, let us book a time to talk.</p>
+          <Link className="contact-email" href="/book">Book a session</Link>
         </Reveal>
       </section>
       <footer className="footer">
