@@ -87,10 +87,13 @@ const LiquidText = forwardRef<LiquidTextHandle, LiquidTextProps>(function Liquid
   const [revealDone, setRevealDone] = useState(false); // entrance finished
 
   const active = !!enabled && inView;
-  // After the entrance finishes (or in `instant` mode), the plain DOM text is
-  // the reliable base — always shown at rest, canvas only overlays on hover — so
-  // re-entering the viewport can never leave the heading blank.
-  const inst = instant || revealDone;
+  // ALWAYS treat the plain DOM text as the reliable base: it's shown at rest and
+  // the canvas only overlays on hover. This makes the text impossible to blank
+  // (the earlier word-by-word "reveal" mode could leave it hidden if the canvas
+  // was mid-mount / scrolled away). The entrance is now a pure CSS effect on the
+  // element itself, so it never depends on the GL.
+  const inst = true;
+  void revealed; void revealDone; void instant; // (reveal mode retired)
 
   useImperativeHandle(ref, () => ({ node: rootRef.current }), []);
 
@@ -98,6 +101,13 @@ const LiquidText = forwardRef<LiquidTextHandle, LiquidTextProps>(function Liquid
     setRevealDone(true);
     onRevealComplete?.();
   }, [onRevealComplete]);
+
+  // Fire onRevealComplete after the entrance delay (sequences following content
+  // like the hero subtext), regardless of WebGL — the text is already visible.
+  useEffect(() => {
+    const id = window.setTimeout(handleRevealDone, entranceDelay * 1000 + 250);
+    return () => window.clearTimeout(id);
+  }, [entranceDelay, handleRevealDone]);
 
   // Decide once, on the client, whether WebGL should run at all. Skip it on
   // touch / coarse pointers: mobile reflow makes the canvas word-layout drift
@@ -205,9 +215,11 @@ const LiquidText = forwardRef<LiquidTextHandle, LiquidTextProps>(function Liquid
     else if (!enabled) opacity = 1;
     else opacity = revealed ? 1 : 0;
 
-    // Once `inst`, the plain DOM text is always shown at rest; it's only hidden
-    // (canvas takes over) while hovering — so the text can never vanish.
-    const domHidden = inst ? hovering : glHidden;
+    // Hide the DOM text ONLY while hovering AND the canvas has actually painted
+    // (glHidden is set on the GL's first painted frame). So: at rest -> crisp DOM
+    // text; on hover -> the canvas ripple takes over cleanly (no double image);
+    // and if the canvas never paints, the DOM text stays -> it can never blank.
+    const domHidden = hovering && glHidden;
 
     return {
       position: "relative",

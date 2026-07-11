@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import MotionHover from "./MotionHover";
 import { sanityImage } from "@/sanity/lib/image";
 
 // Normalize a YouTube/Vimeo URL to an embeddable one.
@@ -52,12 +53,27 @@ export default function GalleryTabs({ videos, albums }: { videos: any[]; albums:
         videos?.length ? (
           <div className="eye-grid">
             {videos.map((v) => {
-              const src = v.cover ? sanityImage(v.cover, THUMB).src : v.autoThumb || "";
+              // Sanity images are CORS-ok; the YouTube thumb is routed through
+              // /api/img so it can be used as a WebGL texture for the ripple.
+              const src = v.cover
+                ? sanityImage(v.cover, THUMB).src
+                : v.autoThumb
+                ? `/api/img?url=${encodeURIComponent(v.autoThumb)}`
+                : "";
               return (
                 <button key={v.id} className="eye-work" onClick={() => setLb(embedUrl(v.videoUrl))}>
                   <div className="eye-work-media">
                     {src ? (
-                      <img src={src} alt={v.title || ""} loading="lazy" />
+                      // Same ripple feel as the featured Eye tiles (default params);
+                      // holdBase + activateOnHover only so the many gallery tiles do
+                      // not exhaust the browser's WebGL contexts. No zoom/swell.
+                      <MotionHover
+                        type="image"
+                        src={src}
+                        holdBase
+                        activateOnHover
+                        style={{ position: "absolute", inset: 0 }}
+                      />
                     ) : (
                       <span className="eye-tile-placeholder"><VideoIcon /></span>
                     )}

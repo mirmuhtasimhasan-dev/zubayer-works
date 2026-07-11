@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Nav from "@/components/Nav";
 import LiquidHover from "@/components/LiquidHover";
-import { SERVICES, SERVICES_EMAIL } from "@/components/servicesData";
+import { SERVICES } from "@/components/servicesData";
 
 export function generateStaticParams() {
   return SERVICES.map((s) => ({ slug: s.slug }));
@@ -60,7 +60,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
                   clickable link inside it. */}
               <LiquidHover contentClassName="service-cta-box" strength={0.03} ambient={0.4}>
                 <p className="service-cta-text">{service.cta}</p>
-                <a className="service-cta-email" href={`mailto:${SERVICES_EMAIL}`}>{SERVICES_EMAIL}</a>
+                <Link className="service-cta-email" href="/book">Book a session</Link>
               </LiquidHover>
             </div>
           </div>

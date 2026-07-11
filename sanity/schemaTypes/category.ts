@@ -8,6 +8,13 @@ export default defineType({
   type: "document",
   fields: [
     defineField({ name: "name", title: "Name", type: "string", validation: (r) => r.required() }),
+    defineField({
+      name: "slug",
+      title: "Slug (page URL)",
+      type: "slug",
+      options: { source: "name", maxLength: 96 },
+      description: "Auto-filled from the name — the category's page opens at /eye/<slug>.",
+    }),
     // Kept only so existing content/queries stay valid; always "Videography" now
     // (Still Photos was removed), so it's hidden from the editor.
     defineField({ name: "group", title: "Group", type: "string", initialValue: "Videography", hidden: true }),

@@ -14,8 +14,12 @@ export const structure: StructureResolver = (S) =>
         .title("Archive Settings")
         .id("archiveSettings")
         .child(S.document().schemaType("archiveSettings").documentId("archiveSettings")),
+      S.listItem()
+        .title("Booking Settings")
+        .id("bookingSettings")
+        .child(S.document().schemaType("bookingSettings").documentId("bookingSettings")),
       S.divider(),
       ...S.documentTypeListItems().filter(
-        (li) => !["aboutPage", "archiveSettings"].includes(li.getId() as string)
+        (li) => !["aboutPage", "archiveSettings", "bookingSettings"].includes(li.getId() as string)
       ),
     ]);
