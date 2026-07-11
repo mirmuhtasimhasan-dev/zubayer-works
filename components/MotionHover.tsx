@@ -249,6 +249,7 @@ export default function MotionHover({
             motionDecay={motionDecay}
             base={base}
             pull={pull}
+            holdBase={holdBase}
           />
         </div>
       )}

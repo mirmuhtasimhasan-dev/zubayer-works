@@ -1,4 +1,5 @@
 import { Cormorant_Garamond, Inter } from "next/font/google";
+import CursorDot from "@/components/CursorDot";
 
 const display = Cormorant_Garamond({
   subsets: ["latin"],
@@ -18,6 +19,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className={`${display.variable} ${body.variable} site`}>
       {children}
+      <CursorDot />
     </div>
   );
 }

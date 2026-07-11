@@ -6,7 +6,8 @@ import Ventures from "@/components/Ventures";
 import Writing from "@/components/Writing";
 import Services from "@/components/Services";
 import Contact from "@/components/Contact";
-import { getFeaturedWork, getWorkCategories, getGallery, getArchiveSettings, getVentures, getWriting } from "@/sanity/lib/queries";
+import { getFeaturedWork, getWorkCategories, getGallery, getArchiveSettings, getVentures, getQuotes } from "@/sanity/lib/queries";
+import { getSubstackPosts } from "@/lib/substack";
 
 export const revalidate = 30;
 
@@ -25,9 +26,17 @@ const FOOTER = {
   footerLine: "Mostly making things. Occasionally on time.",
 };
 
+// Shown only until the client adds their own "Quotes (Writing)" in the Studio —
+// any Sanity quotes replace these.
+const DEFAULT_QUOTES = [
+  "Some things are only ever true at 3 a.m.",
+  "Every essay is a letter I never got around to sending.",
+  "Memory is a shoebox — mostly dust, and a few things that still cut.",
+];
+
 export default async function Home() {
-  const [featuredWork, workCategories, gallery, archiveSettings, ventures, writing] = await Promise.all([
-    getFeaturedWork(), getWorkCategories(), getGallery(), getArchiveSettings(), getVentures(), getWriting(),
+  const [featuredWork, workCategories, gallery, archiveSettings, ventures, writing, quotes] = await Promise.all([
+    getFeaturedWork(), getWorkCategories(), getGallery(), getArchiveSettings(), getVentures(), getSubstackPosts(3), getQuotes(),
   ]);
   return (
     <main>
@@ -36,7 +45,7 @@ export default async function Home() {
       <Work featured={featuredWork} categories={workCategories} />
       <Archive albums={gallery} behanceUrl={archiveSettings?.behanceUrl} />
       <Ventures ventures={ventures} />
-      <Writing posts={writing} />
+      <Writing posts={writing} quotes={quotes?.length ? quotes : DEFAULT_QUOTES} />
       <Services />
       <Contact settings={FOOTER} />
     </main>
