@@ -15,11 +15,15 @@ export const structure: StructureResolver = (S) =>
         .id("archiveSettings")
         .child(S.document().schemaType("archiveSettings").documentId("archiveSettings")),
       S.listItem()
+        .title("Writing Settings")
+        .id("writingSettings")
+        .child(S.document().schemaType("writingSettings").documentId("writingSettings")),
+      S.listItem()
         .title("Booking Settings")
         .id("bookingSettings")
         .child(S.document().schemaType("bookingSettings").documentId("bookingSettings")),
       S.divider(),
       ...S.documentTypeListItems().filter(
-        (li) => !["aboutPage", "archiveSettings", "bookingSettings"].includes(li.getId() as string)
+        (li) => !["aboutPage", "archiveSettings", "bookingSettings", "writingSettings"].includes(li.getId() as string)
       ),
     ]);
