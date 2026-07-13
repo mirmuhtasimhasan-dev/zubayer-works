@@ -30,7 +30,10 @@ export default function Nav() {
   return (
     <>
       <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
-        <a href="/" className="nav-logo"><img src="/logo.png" alt="Zubayer Ahmed" className="nav-logo-img" /></a>
+        <a href="/" className="nav-logo">
+          <img src="/logo.png" alt="Zubayer Ahmed" className="nav-logo-img" />
+          <img src="/signature.png" alt="" aria-hidden className="nav-sign" />
+        </a>
 
         <div className="nav-links">
           {LINKS.map(([label, href]) => (
@@ -45,7 +48,10 @@ export default function Nav() {
 
       <div className={`mobile-menu ${open ? "open" : ""}`}>
         <div className="mobile-menu-top">
-          <a href="/" className="nav-logo" onClick={close}><img src="/logo.png" alt="Zubayer Ahmed" className="nav-logo-img" /></a>
+          <a href="/" className="nav-logo" onClick={close}>
+            <img src="/logo.png" alt="Zubayer Ahmed" className="nav-logo-img" />
+            <img src="/signature.png" alt="" aria-hidden className="nav-sign" />
+          </a>
           <button className="mobile-close" onClick={close} aria-label="Close menu">✕</button>
         </div>
         <div className="mobile-menu-links">
