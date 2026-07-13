@@ -40,7 +40,7 @@ export default function GalleryTabs({ videos, albums }: { videos: any[]; albums:
   }, [lb]);
 
   return (
-    <section className="section" id="gallery">
+    <section className="section section-page" id="gallery">
       <div className="eye-toggle" role="tablist" aria-label="Gallery">
         <button role="tab" aria-selected={tab === "video"} className={`eye-pill ${tab === "video" ? "active" : ""}`} onClick={() => setTab("video")}>
           Videography
