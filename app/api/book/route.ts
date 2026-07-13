@@ -33,7 +33,9 @@ export async function POST(req: Request) {
   if (!email) missing.push("email");
   if (!sessionType) missing.push("session type");
   if (!date) missing.push("date");
-  if (!timeSlot) missing.push("time");
+  // NOTE: timeSlot is optional for now — the "Choose a time" step is parked in the
+  // form. The slot rules below still apply whenever a slot IS sent, so restoring
+  // the step needs no change here.
   if (missing.length) {
     return NextResponse.json({ ok: false, error: `Please add your ${missing.join(", ")}.` }, { status: 400 });
   }
@@ -58,20 +60,23 @@ export async function POST(req: Request) {
   if (blocked.includes(date)) {
     return NextResponse.json({ ok: false, error: "That day is unavailable." }, { status: 400 });
   }
-  if (!timeSlots.includes(timeSlot)) {
+  if (timeSlot && !timeSlots.includes(timeSlot)) {
     return NextResponse.json({ ok: false, error: "That time is not available." }, { status: 400 });
   }
 
-  // Authoritative double-booking guard (fresh, non-cached read).
-  const clash = await writeClient.fetch<number>(
-    `count(*[_type == "booking" && date == $date && timeSlot == $timeSlot && status != "cancelled"])`,
-    { date, timeSlot }
-  );
-  if (clash > 0) {
-    return NextResponse.json(
-      { ok: false, error: "That time was just taken. Please pick another." },
-      { status: 409 }
+  // Authoritative double-booking guard (fresh, non-cached read). Only meaningful
+  // when a slot was picked — without one, several bookings may share a day.
+  if (timeSlot) {
+    const clash = await writeClient.fetch<number>(
+      `count(*[_type == "booking" && date == $date && timeSlot == $timeSlot && status != "cancelled"])`,
+      { date, timeSlot }
     );
+    if (clash > 0) {
+      return NextResponse.json(
+        { ok: false, error: "That time was just taken. Please pick another." },
+        { status: 409 }
+      );
+    }
   }
 
   // Create the booking.

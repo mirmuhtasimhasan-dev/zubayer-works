@@ -12,7 +12,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const service = SERVICES.find((s) => s.slug === slug);
-  return { title: service ? `${service.title} — Zubayer Ahmed` : "Services" };
+  return { title: service ? `${service.title} — Zubayer Ahmed` : "Engagements" };
 }
 
 export default async function ServicePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -29,7 +29,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         <div className="service-detail-inner">
           {/* Left rail: back + a numbered index of every service (current active) */}
           <aside className="service-rail">
-            <Link href="/#services" className="post-back">← Services</Link>
+            <Link href="/#services" className="post-back">← Engagements</Link>
             <ol className="service-rail-list">
               {SERVICES.map((s, i) => (
                 <li key={s.slug} className={s.slug === slug ? "is-active" : ""}>
@@ -43,7 +43,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
           </aside>
 
           <div className="service-main">
-            <p className="service-kicker">Service · {String(idx + 1).padStart(2, "0")} / {String(SERVICES.length).padStart(2, "0")}</p>
+            <p className="service-kicker">Engagement · {String(idx + 1).padStart(2, "0")} / {String(SERVICES.length).padStart(2, "0")}</p>
             <h1 className="service-title">{service.title}</h1>
 
             {lead && <p className="service-lead">{lead}</p>}

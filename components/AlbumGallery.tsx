@@ -39,9 +39,6 @@ export default function AlbumGallery({ photos }: { photos: any[] }) {
               key={p._key || i}
               onClick={() => setLb(i)}
               aria-label={p.caption || `Photo ${i + 1}`}
-              // Natural proportions so the masonry keeps each photo's shape and
-              // MotionHover fills the cell exactly (no crop).
-              style={{ aspectRatio: p.ar ? String(p.ar) : "4 / 5" }}
             >
               {/* Featured-style liquid ripple on hover — canvas only mounts while
                   hovered (activateOnHover) so a big album never runs out of WebGL. */}

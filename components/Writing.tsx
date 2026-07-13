@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import Reveal from "./Reveal";
 import QuoteRotator from "./QuoteRotator";
 import { SUBSTACK_URL, type SubstackPost } from "@/lib/substack";
@@ -38,9 +39,25 @@ export default function Writing({ posts, quotes }: { posts: SubstackPost[]; quot
           </Reveal>
         ))}
       </div>
+      {/* Same "peek strip" as the archive's Behance link: calm at rest, and on
+          hover the latest posts' images slide in from the right with a stagger. */}
       <div className="writing-foot">
-        <a className="writing-more" href={SUBSTACK_URL} target="_blank" rel="noopener noreferrer">
-          Read more on Substack <span aria-hidden>&#8599;</span>
+        <a className="peek" href={SUBSTACK_URL} target="_blank" rel="noopener noreferrer">
+          <span className="peek-label">Read more on Substack</span>
+          <span className="peek-right">
+            <span className="peek-strip" aria-hidden>
+              {posts
+                .filter((p) => p.image)
+                .slice(0, 4)
+                .map((p, i) => (
+                  <span className="peek-thumb" key={p.id} style={{ ["--i" as string]: i } as CSSProperties}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={p.image!} alt="" loading="lazy" draggable={false} />
+                  </span>
+                ))}
+            </span>
+            <span className="peek-arrow" aria-hidden>&#8599;</span>
+          </span>
         </a>
       </div>
       </>

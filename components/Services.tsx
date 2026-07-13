@@ -7,7 +7,7 @@ import { SERVICES } from "./servicesData";
 export default function Services() {
   return (
     <section className="section" id="services">
-      <Reveal><p className="eyebrow">Services</p></Reveal>
+      <Reveal><p className="eyebrow">Engagements</p></Reveal>
       <div className="services-grid">
         {SERVICES.map((s) => (
           <Reveal key={s.slug} className="service-card-cell">

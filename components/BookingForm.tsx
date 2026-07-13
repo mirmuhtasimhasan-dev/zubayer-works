@@ -87,7 +87,6 @@ export default function BookingForm({ today, timeSlots, leadDays, blockedDates, 
     const need: string[] = [];
     if (!sessionType) need.push("a session type");
     if (!day) need.push("a day");
-    if (!timeSlot) need.push("a time");
     if (!name.trim()) need.push("your name");
     if (!email.trim()) need.push("your email");
     if (need.length) { setError(`Please choose ${need.join(", ")}.`); return; }
@@ -144,7 +143,7 @@ export default function BookingForm({ today, timeSlots, leadDays, blockedDates, 
               </svg>
             </span>
             <h1 className="bk-title">You are <em>on the calendar.</em></h1>
-            <p className="bk-recap">{sessionTitle}<span className="bk-dot">&#183;</span>{fmtShort(day)}<span className="bk-dot">&#183;</span>{timeSlot}</p>
+            <p className="bk-recap">{sessionTitle}<span className="bk-dot">&#183;</span>{fmtShort(day)}</p>
             <p className="bk-lede">A confirmation is on its way to your email, and Zubayer gets a WhatsApp nudge too.</p>
             <button className="bk-startover" onClick={reset}>Start over</button>
           </div>
@@ -154,7 +153,7 @@ export default function BookingForm({ today, timeSlots, leadDays, blockedDates, 
           <div className="bk-head bk-reveal" style={{ ["--i" as string]: 0 } as CSSProperties}>
             <p className="bk-kicker"><span className="bk-rule" />Book a session</p>
             <h1 className="bk-title">Let us start with a <em>conversation.</em></h1>
-            <p className="bk-lede">Pick what we are making, a day and a time that work, and leave your details. I will take it from there.</p>
+            <p className="bk-lede">Pick what we are making and a day that works, then leave your details. I will take it from there.</p>
           </div>
 
           {/* 01 session type */}
@@ -211,29 +210,13 @@ export default function BookingForm({ today, timeSlots, leadDays, blockedDates, 
             </div>
           </section>
 
-          {/* 03 time */}
-          <section className="bk-sec bk-reveal" style={{ ["--i" as string]: 3 } as CSSProperties}>
-            <div className="bk-sec-head"><span className="bk-idx">03</span><span className="bk-label">Choose a time</span><span className="bk-subnote">Dhaka time / 30 min</span></div>
-            {day ? (
-              <div className="bk-slots">
-                {slots.map((s) => {
-                  const gone = takenSet.has(`${day}|${s}`);
-                  const on = timeSlot === s;
-                  return (
-                    <button key={s} type="button" className={`bk-slot ${on ? "is-on" : ""}`} disabled={gone} onClick={() => setTimeSlot(s)}>
-                      {s}
-                    </button>
-                  );
-                })}
-              </div>
-            ) : (
-              <p className="bk-hint">Pick a day first.</p>
-            )}
-          </section>
+          {/* The "Choose a time" step is parked for now — the slot machinery
+              (settings, API, schema) is all still in place, so bringing it back is
+              just restoring this section and the `timeSlot` requirement. */}
 
-          {/* 04 details */}
-          <section className="bk-sec bk-reveal" style={{ ["--i" as string]: 4 } as CSSProperties}>
-            <div className="bk-sec-head"><span className="bk-idx">04</span><span className="bk-label">Your details</span></div>
+          {/* 03 details */}
+          <section className="bk-sec bk-reveal" style={{ ["--i" as string]: 3 } as CSSProperties}>
+            <div className="bk-sec-head"><span className="bk-idx">03</span><span className="bk-label">Your details</span></div>
             <div className="bk-fields">
               <label className="bk-field"><span className="bk-field-lab">Name</span><input value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" /><span className="bk-underline" /></label>
               <label className="bk-field"><span className="bk-field-lab">Email</span><input value={email} onChange={(e) => setEmail(e.target.value)} type="email" autoComplete="email" inputMode="email" /><span className="bk-underline" /></label>
@@ -244,14 +227,14 @@ export default function BookingForm({ today, timeSlots, leadDays, blockedDates, 
 
           {error && <p className="bk-error bk-reveal" role="alert">{error}</p>}
 
-          <div className="bk-confirm-row bk-reveal" style={{ ["--i" as string]: 5 } as CSSProperties}>
+          <div className="bk-confirm-row bk-reveal" style={{ ["--i" as string]: 4 } as CSSProperties}>
             <button type="button" className="bk-btn" onClick={submit} disabled={submitting}>
               {submitting ? "Confirming..." : "Confirm booking"} <span className="bk-btn-arrow" aria-hidden>&#8594;</span>
             </button>
             {summary && <span className="bk-summary">{summary}</span>}
           </div>
 
-          <p className="bk-fine bk-reveal" style={{ ["--i" as string]: 6 } as CSSProperties}>
+          <p className="bk-fine bk-reveal" style={{ ["--i" as string]: 5 } as CSSProperties}>
             <span className="bk-fine-item"><i />A 30 minute call</span>
             <span className="bk-fine-item"><i />Replies within a day</span>
             <span className="bk-fine-item"><i />Free, always</span>
