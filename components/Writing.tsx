@@ -1,7 +1,10 @@
-import type { CSSProperties } from "react";
 import Reveal from "./Reveal";
 import QuoteRotator from "./QuoteRotator";
+import MagneticButton from "./MagneticButton";
 import { SUBSTACK_URL, type SubstackPost } from "@/lib/substack";
+
+// Change the button's wording here.
+const CTA_LABEL = "Read everything on Substack";
 
 function fmtDate(d?: string | null) {
   if (!d) return "";
@@ -10,8 +13,18 @@ function fmtDate(d?: string | null) {
   return dt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-export default function Writing({ posts, quotes }: { posts: SubstackPost[]; quotes?: string[] }) {
+export default function Writing({
+  posts,
+  quotes,
+  substackUrl,
+}: {
+  posts: SubstackPost[];
+  quotes?: string[];
+  /** Studio-managed (Writing Settings); falls back to the feed's own URL. */
+  substackUrl?: string;
+}) {
   if (!posts?.length && !quotes?.length) return null;
+  const href = substackUrl || SUBSTACK_URL;
   return (
     <section className="section" id="writing">
       {quotes?.length ? <QuoteRotator quotes={quotes} /> : null}
@@ -39,26 +52,11 @@ export default function Writing({ posts, quotes }: { posts: SubstackPost[]; quot
           </Reveal>
         ))}
       </div>
-      {/* Same "peek strip" as the archive's Behance link: calm at rest, and on
-          hover the latest posts' images slide in from the right with a stagger. */}
+      {/* Closing CTA: an ink pill that leans toward the cursor as it approaches. */}
       <div className="writing-foot">
-        <a className="peek" href={SUBSTACK_URL} target="_blank" rel="noopener noreferrer">
-          <span className="peek-label">Read more on Substack</span>
-          <span className="peek-right">
-            <span className="peek-strip" aria-hidden>
-              {posts
-                .filter((p) => p.image)
-                .slice(0, 4)
-                .map((p, i) => (
-                  <span className="peek-thumb" key={p.id} style={{ ["--i" as string]: i } as CSSProperties}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={p.image!} alt="" loading="lazy" draggable={false} />
-                  </span>
-                ))}
-            </span>
-            <span className="peek-arrow" aria-hidden>&#8599;</span>
-          </span>
-        </a>
+        <Reveal>
+          <MagneticButton href={href} label={CTA_LABEL} />
+        </Reveal>
       </div>
       </>
       ) : null}

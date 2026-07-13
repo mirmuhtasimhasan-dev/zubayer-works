@@ -99,6 +99,10 @@ export async function getEngagements() {
   }`);
 }
 
+export async function getWritingSettings() {
+  return client.fetch(`*[_type == "writingSettings"][0]{ substackUrl }`);
+}
+
 export async function getArchiveSettings() {
   return client.fetch(`*[_type == "archiveSettings"][0]{ behanceUrl }`);
 }

@@ -738,3 +738,23 @@ button{font-family:inherit;cursor:pointer;}
   .snd-eq.is-on i{animation:none;height:8px;}
   .snd-pill{display:none;}
 }
+
+/* ===== MAGNETIC BUTTON =====
+   The wrapper reserves the layout; only the pill inside is transformed, so it can
+   lean toward the cursor without shifting anything around it. The margin gives it
+   room to travel (max pull is well under it) so it never overlaps its neighbours. */
+.mag-wrap{display:flex;justify-content:flex-start;padding:14px 0;}
+.mag-btn{display:inline-flex;align-items:center;border-radius:999px;background:var(--ink);color:var(--paper);padding:16px 30px;text-decoration:none;will-change:transform;transition:transform .12s ease-out,background .3s ease;}
+.mag-btn-inner{display:inline-flex;align-items:center;gap:12px;will-change:transform;}
+.mag-btn-label{font-family:var(--font-display),serif;font-weight:400;font-size:17px;line-height:1;letter-spacing:.01em;white-space:nowrap;}
+.mag-btn-arrow{font-size:15px;line-height:1;}
+.mag-btn:focus-visible{outline:2px solid var(--ink);outline-offset:4px;}
+@media (hover:none),(pointer:coarse){
+  /* No cursor to lean toward: a plain pill with a firm pressed state. */
+  .mag-btn{min-height:48px;padding:0 26px;transform:none!important;transition:transform .12s ease,background .2s ease;}
+  .mag-btn-inner{transform:none!important;}
+  .mag-btn:active{transform:scale(.96)!important;background:#332f28;}
+}
+@media (prefers-reduced-motion:reduce){
+  .mag-btn,.mag-btn-inner{transform:none!important;transition:none;}
+}

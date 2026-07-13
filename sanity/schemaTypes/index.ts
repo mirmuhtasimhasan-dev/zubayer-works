@@ -10,5 +10,6 @@ import aboutPage from "./aboutPage";
 import archiveSettings from "./archiveSettings";
 import booking from "./booking";
 import bookingSettings from "./bookingSettings";
+import writingSettings from "./writingSettings";
 
-export const schemaTypes = [category, workItem, galleryImage, galleryVideo, venture, engagement, writingPiece, quote, aboutPage, archiveSettings, booking, bookingSettings];
+export const schemaTypes = [category, workItem, galleryImage, galleryVideo, venture, engagement, writingPiece, quote, aboutPage, archiveSettings, booking, bookingSettings, writingSettings];
