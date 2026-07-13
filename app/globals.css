@@ -73,6 +73,14 @@ button{font-family:inherit;cursor:pointer;}
 .eye-play::after{border-left:17px solid var(--ink);border-top-width:11px;border-bottom-width:11px;margin-left:5px;}
 .eye-work-play::after{border-left:13px solid var(--ink);margin-left:4px;}
 
+/* Section head: kicker (links to the YouTube channel), title, intro. */
+.eye-head{margin-bottom:52px;}
+.eye-channel{display:inline-block;margin-bottom:18px;color:var(--ash);transition:color .3s ease;}
+.eye-channel:hover{color:var(--ink);}
+.eye-title{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(34px,4.4vw,52px);line-height:1.08;margin-bottom:20px;}
+.eye-intro{max-width:52ch;color:var(--ash);font-size:15px;line-height:1.65;}
+@media (max-width:600px){.eye-head{margin-bottom:34px;}.eye-intro{font-size:14px;}}
+
 /* Featured */
 .eye-featured{display:block;width:100%;text-align:left;background:none;border:0;padding:0;margin:8px 0 52px;cursor:pointer;}
 /* Secondary featured items sit a touch narrower & centred for a premium tiered look. */
@@ -240,70 +248,36 @@ button{font-family:inherit;cursor:pointer;}
 .arch-end-arrow{align-self:flex-end;font-size:28px;line-height:1;}
 .arch-end-text{font-family:var(--font-display),serif;font-size:24px;line-height:1.22;}
 
-/* ===== BEHANCE "PEEK STRIP" =====
-   A calm, editorial hairline row. On hover, four real archive photos fade in and
-   slide left with a stagger — the archive peeking out from behind the link.
-   No fill, no shadow, no scale: the motion carries it. */
-.arch-foot{margin-top:52px;padding:0 var(--side);}
-.peek{--peek-ease:cubic-bezier(.7,0,.2,1);display:flex;align-items:center;justify-content:space-between;gap:24px;width:100%;padding:22px 0;border-top:.5px solid var(--divider);border-bottom:.5px solid var(--divider);color:var(--ink);text-decoration:none;}
-.peek-label{font-family:var(--font-display),serif;font-weight:400;font-size:21px;line-height:1.25;transition:transform .5s var(--peek-ease);}
-.peek-right{display:flex;align-items:center;gap:16px;}
-/* The strip always occupies its space (thumbs only fade/slide) → no layout shift. */
-.peek-strip{display:flex;align-items:center;gap:6px;}
-.peek-thumb{display:block;width:52px;height:66px;border-radius:3px;overflow:hidden;background:var(--divider);opacity:0;transform:translateX(26px);transition:opacity .5s var(--peek-ease),transform .5s var(--peek-ease);transition-delay:calc(var(--i,0) * 50ms);}
-.peek-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
-.peek-arrow{font-size:18px;line-height:1;transition:transform .5s var(--peek-ease);}
-@media (hover:hover){
-  .peek:hover .peek-thumb,.peek:focus-visible .peek-thumb{opacity:1;transform:none;}
-  .peek:hover .peek-label,.peek:focus-visible .peek-label{transform:translateX(-4px);}
-  .peek:hover .peek-arrow,.peek:focus-visible .peek-arrow{transform:translate(4px,-4px);}
+/* ===== BEHANCE BADGE =====
+   Text spinning around a ring, the Behance mark at the centre, and an inner disc
+   that floods with ink on hover (the mark inverting to paper against it). */
+.arch-foot{margin-top:52px;padding:0 var(--side);display:flex;justify-content:center;}
+.bhb{--bhb-accent:#1769FF;position:relative;display:grid;place-items:center;width:var(--bhb-size);height:var(--bhb-size);border-radius:50%;color:var(--ink);flex:none;}
+.bhb:focus-visible{outline:1px solid var(--ink);outline-offset:6px;}
+.bhb-ring{position:absolute;inset:0;width:100%;height:100%;animation:bhbSpin var(--bhb-spin) linear infinite;transform-origin:50% 50%;}
+.bhb:hover .bhb-ring{animation-duration:var(--bhb-spin-hover);}
+.bhb-ring-text{font-family:var(--font-display),serif;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;fill:var(--ash);}
+@keyframes bhbSpin{to{transform:rotate(360deg);}}
+.bhb-disc{position:absolute;inset:0;width:100%;height:100%;overflow:visible;}
+.bhb-disc-ring{fill:none;stroke:var(--ink);stroke-width:.5;transition:stroke .4s ease;}
+.bhb:hover .bhb-disc-ring{stroke:var(--bhb-accent);}
+.bhb-disc-fill{fill:var(--bhb-accent);transform:scale(0);transform-origin:50% 50%;transition:transform .4s cubic-bezier(.7,0,.2,1);}
+.bhb:hover .bhb-disc-fill{transform:scale(1);}
+.bhb-mark{position:relative;width:26px;height:26px;color:var(--ink);transition:color .35s ease,transform .4s cubic-bezier(.7,0,.2,1);}
+.bhb:hover .bhb-mark{color:var(--paper);transform:scale(1.08);}
+@media (hover:none),(pointer:coarse){
+  /* No hover: the disc stays outlined and the ring keeps turning, with a firm
+     pressed state and a comfortable tap target. */
+  .bhb{-webkit-tap-highlight-color:transparent;}
+  .bhb-disc-ring{stroke:var(--ash);}
+  .bhb:active .bhb-disc-fill{transform:scale(1);}
+  .bhb:active .bhb-disc-ring{stroke:var(--bhb-accent);}
+  .bhb:active .bhb-mark{color:var(--paper);transform:scale(.96);}
 }
-.peek:focus-visible{outline:1px solid var(--ink);outline-offset:6px;}
-/* Touch / no-hover: show the photos statically, smaller. */
-@media (hover:none){
-  .peek-thumb{opacity:1;transform:none;transition:none;width:40px;height:50px;}
-}
-@media (max-width:700px){
-  .arch-foot{margin-top:38px;}
-  .peek{gap:14px;padding:18px 0;}
-  .peek-label{font-size:17px;}
-  .peek-right{gap:12px;}
-  .peek-thumb{width:36px;height:46px;}
-  .peek-strip{gap:4px;}
-}
-/* Very narrow: drop the strip rather than let the row overflow. */
-@media (max-width:460px){.peek-strip{display:none;}}
 @media (prefers-reduced-motion:reduce){
-  .peek-thumb{opacity:1;transform:none;transition:none;}
-  .peek-label,.peek-arrow{transition:none;}
-  .peek:hover .peek-label,.peek:hover .peek-arrow{transform:none;}
+  .bhb-ring{animation:none;}
+  .bhb-disc-fill,.bhb-mark{transition:none;}
 }
-.lightbox{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.96);display:flex;align-items:center;justify-content:center;}
-/* Album lightbox: no shade at all — the photo just floats over the page. */
-.lightbox-light{background:transparent;}
-.lightbox-light .lb-close,.lightbox-light .lb-arrow{color:var(--ink);}
-.lightbox-light .lb-figure img{box-shadow:none;}
-.lightbox-light .lb-figure figcaption{color:var(--ash);}
-.lightbox img{max-width:88vw;max-height:88vh;object-fit:contain;}
-.lb-arrow{position:absolute;top:50%;transform:translateY(-50%);background:none;border:0;color:#fff;font-size:46px;opacity:.7;padding:20px;cursor:pointer;z-index:2;}
-.lb-arrow:hover{opacity:1;}.lb-arrow.left{left:2vw;}.lb-arrow.right{right:2vw;}
-.lb-figure{margin:0;max-width:88vw;max-height:88vh;display:flex;flex-direction:column;align-items:center;gap:12px;}
-.lb-figure img{max-width:88vw;max-height:82vh;object-fit:contain;}
-.lb-figure figcaption{color:rgba(255,255,255,.72);font-size:13px;letter-spacing:.03em;}
-@media (max-width:600px){.lb-arrow{font-size:32px;padding:12px;}}
-
-/* ALBUM PAGE (an Archive item opens here with all its photos) */
-.album{max-width:1180px;margin:0 auto;padding:150px clamp(24px,6vw,60px) 120px;}
-.album-title{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(30px,5vw,52px);line-height:1.05;margin:20px 0 6px;}
-.album-place{color:var(--ash);font-size:14px;letter-spacing:.04em;margin-bottom:44px;}
-/* Even grid: every cell is the SAME fixed size, so the album reads as one tidy
-   set. The photo is cover-cropped to fill it; clicking opens the lightbox, which
-   shows the full uncropped image. */
-.album-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
-/* White print border around every photo, so the album reads as a set of prints. */
-.album-cell{position:relative;display:block;width:100%;aspect-ratio:4/5;margin:0;padding:0;border:12px solid #fff;background:var(--divider);cursor:pointer;overflow:hidden;box-shadow:0 8px 24px -16px rgba(26,24,20,.35);}
-@media (max-width:1000px){.album-grid{grid-template-columns:repeat(2,1fr);}}
-@media (max-width:600px){.album-grid{grid-template-columns:repeat(2,1fr);gap:10px;}.album-cell{border-width:8px;}}
 
 /* GALLERY PAGE — Still Photos: album covers that open each album. */
 .gallery-albums{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-top:36px;}
@@ -337,6 +311,11 @@ button{font-family:inherit;cursor:pointer;}
 .venture-card-liquid{flex:1;display:flex;flex-direction:column;}
 /* The ONLY hover is the liquid ripple (LiquidHover). No bg/lift/shadow/scale here. */
 .venture-box{position:relative;overflow:hidden;flex:1;display:flex;flex-direction:column;padding:40px 34px 32px;background:var(--divider);}
+/* Section head: kicker + title, same rhythm as The Eye. */
+.ven-head{margin-bottom:52px;}
+.ven-title{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(34px,4.4vw,52px);line-height:1.08;}
+@media (max-width:600px){.ven-head{margin-bottom:34px;}}
+
 /* Logo chip + title side by side */
 .venture-head{display:flex;align-items:center;gap:16px;margin-bottom:22px;}
 /* Bare logo — no chip/box behind it. The fixed slot keeps the row aligned, and
@@ -464,7 +443,7 @@ button{font-family:inherit;cursor:pointer;}
 
 /* WRITING */
 /* Rotating pull-quote above the essay list (blur-to-sharp entrance + liquid hover). */
-.quote-block{margin-bottom:44px;text-align:center;}
+.quote-block{margin-bottom:120px;text-align:center;}
 .quote-rot{opacity:0;filter:blur(14px);transform:translateY(6px);transition:opacity .75s ease,filter .75s ease,transform .75s ease;}
 .quote-rot.is-shown{opacity:1;filter:blur(0);transform:none;}
 /* Centred; the full quote wraps freely. <LiquidText> gives it the hero's ripple. */
@@ -472,7 +451,7 @@ button{font-family:inherit;cursor:pointer;}
 @media (prefers-reduced-motion:reduce){
   .quote-rot{filter:none!important;transform:none!important;transition:opacity .3s ease;}
 }
-@media (max-width:600px){.quote-block{margin-bottom:34px;}.quote-text{font-size:21px;}}
+@media (max-width:600px){.quote-block{margin-bottom:56px;}.quote-text{font-size:21px;}}
 
 .writing-item{border-top:1px solid var(--divider);}
 .writing-item:last-child{border-bottom:1px solid var(--divider);}
@@ -485,7 +464,6 @@ button{font-family:inherit;cursor:pointer;}
 .writing-ex{font-size:13px;line-height:1.5;color:var(--ash);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .writing-date{flex:0 0 auto;font-size:12px;letter-spacing:.06em;color:var(--faint);white-space:nowrap;}
 .writing-item a:hover .writing-t{color:var(--ash);}
-/* Uses the shared "peek strip" (.peek) — see the Behance link in The Archive. */
 .writing-foot{margin-top:44px;}
 @media (max-width:600px){
   .writing-item a{gap:14px;}
@@ -671,7 +649,7 @@ button{font-family:inherit;cursor:pointer;}
    text / image / card shows instead. */
 @media (hover:none),(pointer:coarse){
   /* Tappable cards: pressed feedback, no sticky :hover. */
-  .service-card,.venture-card,.gallery-album,.arch-card,.eye-work,.writing-item a,.peek{
+  .service-card,.venture-card,.gallery-album,.arch-card,.eye-work,.writing-item a,.mag-btn{
     -webkit-tap-highlight-color:transparent;
   }
   .service-card:active .service-box,
