@@ -468,7 +468,7 @@ button{font-family:inherit;cursor:pointer;}
 .quote-rot{opacity:0;filter:blur(14px);transform:translateY(6px);transition:opacity .75s ease,filter .75s ease,transform .75s ease;}
 .quote-rot.is-shown{opacity:1;filter:blur(0);transform:none;}
 /* Centred; the full quote wraps freely. <LiquidText> gives it the hero's ripple. */
-.quote-text{font-family:var(--font-body);font-weight:400;font-size:clamp(16px,1.9vw,21px);line-height:1.5;color:var(--ink);max-width:44ch;margin-left:auto;margin-right:auto;}
+.quote-text{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(20px,2.4vw,27px);line-height:1.4;color:var(--ink);max-width:44ch;margin-left:auto;margin-right:auto;}
 @media (prefers-reduced-motion:reduce){
   .quote-rot{filter:none!important;transform:none!important;transition:opacity .3s ease;}
 }
