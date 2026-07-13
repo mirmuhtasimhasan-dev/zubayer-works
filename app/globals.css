@@ -16,6 +16,9 @@ button{font-family:inherit;cursor:pointer;}
 
 .eyebrow{font-family:var(--font-body);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ash);margin-bottom:28px;}
 .section{padding:120px var(--side);}
+/* A section that is the FIRST thing on a standalone page has to clear the fixed
+   nav itself (on the home page the full-height hero does that). */
+.section-page{padding-top:150px;}
 
 /* NAV */
 .nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:32px var(--side);border-bottom:1px solid transparent;background:rgba(247,244,238,.8);backdrop-filter:blur(8px);transition:padding .3s ease,border-color .3s ease;}
@@ -540,7 +543,9 @@ button{font-family:inherit;cursor:pointer;}
 @media (max-width:820px){
   .service-detail{padding:120px clamp(24px,6vw,60px) 80px;}
   .service-detail-inner{grid-template-columns:1fr;gap:34px;}
-  .service-rail{position:static;gap:20px;}
+  /* Read the engagement first; the back link + the other engagements follow it. */
+  .service-main{order:1;}
+  .service-rail{position:static;gap:20px;order:2;padding-top:14px;border-top:1px solid var(--divider);}
 }
 
 /* CONTACT */
@@ -598,6 +603,8 @@ button{font-family:inherit;cursor:pointer;}
 @media (max-width:820px){
   :root{ --side:7vw; }
   .section{padding:36px var(--side);}
+  /* …but a first-on-the-page section still has to clear the fixed nav. */
+  .section-page{padding-top:112px;}
   .opening{min-height:auto;padding:138px var(--side) 68px;}
   .scroll-hint{display:none;}
   .archive{padding:54px 0;}
