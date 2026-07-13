@@ -23,11 +23,15 @@ button{font-family:inherit;cursor:pointer;}
 /* NAV */
 .nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:32px var(--side);border-bottom:1px solid transparent;background:rgba(247,244,238,.8);backdrop-filter:blur(8px);transition:padding .3s ease,border-color .3s ease;}
 .nav.scrolled{padding:18px var(--side);border-bottom:1px solid var(--divider);}
-.nav-logo{font-family:var(--font-display),serif;font-size:23px;font-weight:500;letter-spacing:.02em;color:var(--ink);display:inline-flex;align-items:center;}
+.nav-logo{font-family:var(--font-display),serif;font-size:23px;font-weight:500;letter-spacing:.02em;color:var(--ink);display:inline-flex;align-items:center;gap:12px;}
 /* multiply blends the logo's white background into the cream nav (white → nav
    colour), leaving just the black mark — no white box. */
 .nav-logo-img{height:34px;width:auto;display:block;}
-@media (max-width:600px){.nav-logo-img{height:28px;}}
+/* The client's signature, beside the mark. Transparent ink PNG, so it sits on the
+   cream nav with no box. Hidden on the narrowest screens, where the nav is tight. */
+.nav-sign{height:44px;width:auto;display:block;}
+@media (max-width:520px){.nav-sign{display:none;}}
+@media (max-width:600px){.nav-logo-img{height:28px;}.nav-sign{height:36px;}}
 .nav-links{display:flex;gap:28px;}
 .nav-links a{font-size:13px;letter-spacing:.04em;color:var(--ash);transition:color .3s;}
 .nav-links a:hover{color:var(--ink);}
