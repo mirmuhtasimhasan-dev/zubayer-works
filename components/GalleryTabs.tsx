@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { imgProxy } from "@/lib/imgProxy";
 import Link from "next/link";
 import MotionHover from "./MotionHover";
 import { sanityImage } from "@/sanity/lib/image";
@@ -58,7 +59,7 @@ export default function GalleryTabs({ videos, albums }: { videos: any[]; albums:
               const src = v.cover
                 ? sanityImage(v.cover, THUMB).src
                 : v.autoThumb
-                ? `/api/img?url=${encodeURIComponent(v.autoThumb)}`
+                ? imgProxy(v.autoThumb)
                 : "";
               return (
                 <button key={v.id} className="eye-work" onClick={() => setLb(embedUrl(v.videoUrl))}>

@@ -1,18 +1,68 @@
 import type { ReactNode } from "react";
 
-// Edit service copy here. Each one gets a card on the home page and its own
-// /services/[slug] page (description + a contact block).
+/**
+ * Engagements now live in Sanity (Studio -> Engagement): the client adds, edits,
+ * reorders and removes them. This file only holds:
+ *   - the icon set they can choose from in the Studio, and
+ *   - a fallback list used if the Studio has no engagements yet, so the section
+ *     is never empty.
+ */
 export interface Service {
   slug: string;
   title: string;
   blurb: string; // short line on the home card
   description: string[]; // paragraphs on the detail page
-  cta: string; // line above the email on the detail page
-  icon: ReactNode;
+  cta: string; // line above the "Book a session" link
+  icon?: string; // key into ICONS
 }
 
-export const SERVICES_EMAIL = "hello@zubayer.works";
+const stroke = {
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 1.4,
+  strokeLinecap: "round" as const,
+  strokeLinejoin: "round" as const,
+};
 
+// Keys must match the `icon` list in sanity/schemaTypes/engagement.ts.
+export const ICONS: Record<string, ReactNode> = {
+  film: (
+    <svg viewBox="0 0 24 24" {...stroke}>
+      <rect x="2" y="7" width="14" height="10" rx="1.5" />
+      <path d="M16 10l5-3v10l-5-3z" />
+    </svg>
+  ),
+  play: (
+    <svg viewBox="0 0 24 24" {...stroke}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M10 8.4l6 3.6-6 3.6z" />
+    </svg>
+  ),
+  compass: (
+    <svg viewBox="0 0 24 24" {...stroke}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M15.6 8.4l-2.3 4.9-4.9 2.3 2.3-4.9z" />
+    </svg>
+  ),
+  camera: (
+    <svg viewBox="0 0 24 24" {...stroke}>
+      <path d="M3 8h3l1.5-2h9L18 8h3v11H3z" />
+      <circle cx="12" cy="13" r="3.4" />
+    </svg>
+  ),
+  pen: (
+    <svg viewBox="0 0 24 24" {...stroke}>
+      <path d="M4 20l4-1 10-10-3-3L5 16z" />
+      <path d="M14 6l3 3" />
+    </svg>
+  ),
+};
+
+export function iconFor(key?: string): ReactNode {
+  return ICONS[key || "film"] ?? ICONS.film;
+}
+
+// Shown only when the Studio has no engagements yet.
 export const SERVICES: Service[] = [
   {
     slug: "documentary-filmmaking",
@@ -23,12 +73,7 @@ export const SERVICES: Service[] = [
       "From a single portrait to a multi-part series, the work spans research, direction, cinematography and edit — one hand guiding the story so the tone never breaks.",
     ],
     cta: "Have a story worth telling properly? Tell me about it.",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="7" width="14" height="10" rx="1.5" />
-        <path d="M16 10l5-3v10l-5-3z" />
-      </svg>
-    ),
+    icon: "film",
   },
   {
     slug: "story-based-advertising",
@@ -39,12 +84,7 @@ export const SERVICES: Service[] = [
       "Concept, script, direction and post — delivered as a film people actually want to watch and pass along.",
     ],
     cta: "Want an ad that doesn't feel like one? Let's make it.",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="9" />
-        <path d="M10 8.4l6 3.6-6 3.6z" />
-      </svg>
-    ),
+    icon: "play",
   },
   {
     slug: "brand-development-consultancy",
@@ -55,11 +95,6 @@ export const SERVICES: Service[] = [
       "Strategy, naming, visual direction and the guidelines to keep it coherent as you grow.",
     ],
     cta: "Building something that needs a spine? Let's shape it.",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="9" />
-        <path d="M15.6 8.4l-2.3 4.9-4.9 2.3 2.3-4.9z" />
-      </svg>
-    ),
+    icon: "compass",
   },
 ];

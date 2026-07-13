@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { imgProxy } from "@/lib/imgProxy";
 import MotionHover from "./MotionHover";
 import { sanityImage } from "@/sanity/lib/image";
 
@@ -62,7 +63,7 @@ export default function CategoryWorks({ works, group }: { works: any[]; group?: 
       : w.image
       ? sanityImage(w.image, { widths: TILE_WIDTHS, sizes: GRID_SIZES }).src
       : w.autoThumb
-      ? `/api/img?url=${encodeURIComponent(w.autoThumb)}`
+      ? imgProxy(w.autoThumb)
       : "";
     return (
       <button key={w.id} className="eye-work" onClick={() => openWork(w, group)}>

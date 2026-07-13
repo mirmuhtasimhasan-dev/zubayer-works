@@ -493,7 +493,9 @@ button{font-family:inherit;cursor:pointer;}
 }
 
 /* SERVICES */
+/* Three per row; extra engagements flow onto the next row automatically. */
 .services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+@media (max-width:1000px){.services-grid{grid-template-columns:repeat(2,1fr);}}
 .service-icon{display:block;width:30px;height:30px;color:var(--ink);margin-bottom:22px;}
 .service-icon svg{width:100%;height:100%;display:block;}
 .service-card-cell{display:flex;}
@@ -503,7 +505,10 @@ button{font-family:inherit;cursor:pointer;}
 .service-card-liquid{flex:1;display:flex;flex-direction:column;}
 /* The actual BOX (snapshotted + distorted) — bg, padding, edges ripple as one. */
 .service-box{position:relative;overflow:hidden;flex:1;display:flex;flex-direction:column;padding:40px 32px;background:var(--divider);box-shadow:0 0 0 rgba(26,24,20,0);transition:background .5s ease,transform .5s ease,box-shadow .5s ease;}
-.service-box:hover{background:#e4ddce;transform:translateY(-2px);box-shadow:0 12px 30px -18px rgba(26,24,20,.28);}
+/* Hover lift only where hover is real — otherwise it sticks after a tap. */
+@media (hover:hover) and (pointer:fine){
+  .service-box:hover{background:#e4ddce;transform:translateY(-2px);box-shadow:0 12px 30px -18px rgba(26,24,20,.28);}
+}
 .service-box h3{font-family:var(--font-display),serif;font-weight:400;font-size:24px;margin-bottom:12px;}
 .service-box p{color:var(--ash);font-size:14px;}
 
@@ -649,4 +654,45 @@ button{font-family:inherit;cursor:pointer;}
 }
 @media (hover:none),(pointer:coarse){
   .cursor-lens{display:none !important;}
+}
+
+/* ===== TOUCH LAYER =====
+   Phones have no hover, so every hover affordance gets a tap equivalent here:
+   a clear PRESSED state instead of a lift, firm swipe-snapping, and play buttons
+   big enough to be an obvious single-tap target. The WebGL/liquid effects mount
+   only on fine pointers (guarded in JS), so nothing is left dead — the plain
+   text / image / card shows instead. */
+@media (hover:none),(pointer:coarse){
+  /* Tappable cards: pressed feedback, no sticky :hover. */
+  .service-card,.venture-card,.gallery-album,.arch-card,.eye-work,.writing-item a,.peek{
+    -webkit-tap-highlight-color:transparent;
+  }
+  .service-card:active .service-box,
+  .venture-card:active .venture-box{
+    background:#e4ddce;transform:scale(.985);transition:transform .12s ease,background .12s ease;
+  }
+  .gallery-album:active .gallery-album-media img,
+  .arch-card:active .arch-card-media,
+  .eye-work:active .eye-work-media,
+  .album-cell:active{transform:scale(.97);transition:transform .12s ease;}
+  .eye-featured-media:active{transform:scale(.99);transition:transform .12s ease;}
+
+  /* Archive row: native horizontal swipe, snapping firmly. Vertical page scroll
+     is untouched (no touch-action lock, no preventDefault). Arrows are hidden. */
+  .arch-row{scroll-snap-type:x mandatory;cursor:auto;}
+
+  /* Video: one obvious tap target. */
+  .eye-play{width:72px;height:72px;}
+  .eye-work-play{width:58px;height:58px;}
+
+  /* Comfortable tap targets. */
+  .eye-pill,.arch-arrow,.lb-close,.lb-arrow,.nav-links a,.mobile-menu-links a{min-height:44px;}
+  .lb-close,.lb-arrow{min-width:44px;}
+}
+@media (prefers-reduced-motion:reduce){
+  .service-card:active .service-box,.venture-card:active .venture-box,
+  .gallery-album:active .gallery-album-media img,.arch-card:active .arch-card-media,
+  .eye-work:active .eye-work-media,.album-cell:active,.eye-featured-media:active{
+    transform:none;
+  }
 }

@@ -1,6 +1,13 @@
 // Same-origin image proxy so external thumbnails (YouTube/Vimeo) can be used as
 // WebGL textures — cross-origin images without CORS headers can't be textured
 // directly, but a same-origin proxy sidesteps that. Host-allowlisted.
+//
+// The upstream URL is base64url-encoded into the PATH (see lib/imgProxy.ts). It
+// used to be a `?url=` query string, but Netlify's CDN served a single cached
+// response for every query string, so every video thumbnail came back as the same
+// image in production. A path segment is always part of the cache key.
+import { decodeImgSpec } from "@/lib/imgProxy";
+
 const ALLOWED = new Set([
   "img.youtube.com",
   "i.ytimg.com",
@@ -8,9 +15,10 @@ const ALLOWED = new Set([
   "cdn.sanity.io",
 ]);
 
-export async function GET(req: Request) {
-  const url = new URL(req.url).searchParams.get("url");
-  if (!url) return new Response("missing url", { status: 400 });
+export async function GET(_req: Request, { params }: { params: Promise<{ spec: string }> }) {
+  const { spec } = await params;
+  const url = decodeImgSpec(spec);
+  if (!url) return new Response("bad spec", { status: 400 });
 
   let target: URL;
   try {
@@ -18,6 +26,7 @@ export async function GET(req: Request) {
   } catch {
     return new Response("bad url", { status: 400 });
   }
+  if (target.protocol !== "https:") return new Response("bad protocol", { status: 400 });
   if (!ALLOWED.has(target.hostname)) return new Response("forbidden host", { status: 403 });
 
   try {
@@ -28,7 +37,7 @@ export async function GET(req: Request) {
       status: 200,
       headers: {
         "Content-Type": upstream.headers.get("content-type") || "image/jpeg",
-        "Cache-Control": "public, max-age=86400, immutable",
+        "Cache-Control": "public, max-age=86400, s-maxage=86400",
       },
     });
   } catch {
