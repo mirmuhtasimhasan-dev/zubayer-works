@@ -69,9 +69,23 @@ export interface LiquidControls {
   reveal?: (stepMs?: number, fadeMs?: number) => void;
 }
 
+/** Live health of the GL overlay. The parent polls this and will ONLY hide the
+ *  real DOM headline while the canvas is provably painting real content — so a
+ *  stalled loop, a lost context or an empty texture can never blank the hero. */
+export interface LiquidStatus {
+  /** performance.now() of the last rendered frame (0 = never painted). */
+  lastFrame: number;
+  /** The texture actually contains painted words. */
+  hasContent: boolean;
+  /** The WebGL context is currently lost. */
+  contextLost: boolean;
+}
+
 interface GLProps {
   getEl: () => HTMLElement | null;
   controls: React.MutableRefObject<LiquidControls>;
+  /** Written to by the GL every frame; read by the parent's watchdog. */
+  status: React.MutableRefObject<LiquidStatus>;
   onActive?: () => void;
   /** Fired once every word has finished blooming in. */
   onRevealDone?: () => void;
@@ -175,8 +189,9 @@ function cssAlign(value: string): "left" | "center" | "right" {
   return "left";
 }
 
-function Scene({ getEl, controls, onActive, onRevealDone, instant }: GLProps) {
+function Scene({ getEl, controls, status, onActive, onRevealDone, instant }: GLProps) {
   const dpr = useThree((s) => s.viewport.dpr);
+  const renderer = useThree((s) => s.gl);
 
   const offscreen = useRef<HTMLCanvasElement | null>(null);
   const texture = useRef<THREE.CanvasTexture | null>(null);
@@ -225,6 +240,17 @@ function Scene({ getEl, controls, onActive, onRevealDone, instant }: GLProps) {
     const cs = getComputedStyle(el);
     const rect = el.getBoundingClientRect();
     const contentWidth = el.clientWidth;
+
+    // 0x0 / mid-layout guard: measuring here would wrap every word onto its own
+    // line into a pad-sized canvas -> an EMPTY texture. Report "no content" so the
+    // parent keeps showing the real DOM headline, and try again on the next
+    // resize / rAF rebuild.
+    if (contentWidth < 1 || rect.width < 1 || rect.height < 1) {
+      words.current = [];
+      status.current.hasContent = false;
+      return;
+    }
+
     const fontSize = parseFloat(cs.fontSize) || 16;
     const lineHeight = parseFloat(cs.lineHeight) || fontSize * 1.2;
     const pad = PAD_EM * fontSize;
@@ -251,34 +277,87 @@ function Scene({ getEl, controls, onActive, onRevealDone, instant }: GLProps) {
     const halfLeading = (lineHeight - (asc + desc)) / 2;
     const spaceW = ctx.measureText(" ").width;
 
-    const lines: string[][] = [];
-    for (const paragraph of el.textContent?.split("\n") ?? []) {
-      const tokens = paragraph.split(/\s+/).filter(Boolean);
-      let line: string[] = [];
-      for (const w of tokens) {
-        const test = line.concat(w);
-        if (line.length && ctx.measureText(test.join(" ")).width > contentWidth) {
-          lines.push(line);
-          line = [w];
-        } else {
-          line = test;
+    // Take the browser's ACTUAL line breaks (and each line's real left edge) by
+    // walking the text node with a Range. Re-wrapping here with measureText can
+    // disagree with the DOM (different line count) — the canvas would then paint
+    // more lines than its height allows and clip the last one.
+    const lines: { tokens: string[]; left: number | null }[] = [];
+    const textNode = Array.from(el.childNodes).find(
+      (n) => n.nodeType === 3 && (n.textContent || "").trim().length > 0
+    ) as Text | undefined;
+
+    if (textNode) {
+      const s = textNode.textContent || "";
+      const probe = document.createRange();
+      const pushLine = (from: number, to: number) => {
+        let a = from;
+        let b = to;
+        while (a < b && /\s/.test(s[a])) a++;
+        while (b > a && /\s/.test(s[b - 1])) b--;
+        if (b <= a) return;
+        const tokens = s.slice(a, b).split(/\s+/).filter(Boolean);
+        if (!tokens.length) return;
+        probe.setStart(textNode, a);
+        probe.setEnd(textNode, b);
+        const lr = probe.getBoundingClientRect();
+        lines.push({ tokens, left: lr.width ? lr.left - rect.left : null });
+      };
+
+      const walk = document.createRange();
+      let start = 0;
+      let prevTop: number | null = null;
+      for (let i = 0; i < s.length; i++) {
+        walk.setStart(textNode, i);
+        walk.setEnd(textNode, i + 1);
+        const r = walk.getClientRects()[0];
+        if (!r) continue;
+        if (prevTop === null) prevTop = r.top;
+        else if (r.top - prevTop > 1) {
+          pushLine(start, i);
+          start = i;
+          prevTop = r.top;
         }
       }
-      if (line.length) lines.push(line);
+      pushLine(start, s.length);
+    }
+
+    // Fallback (no text node): wrap it ourselves, aligned by CSS text-align.
+    if (!lines.length) {
+      for (const paragraph of el.textContent?.split("\n") ?? []) {
+        const tokens = paragraph.split(/\s+/).filter(Boolean);
+        let line: string[] = [];
+        for (const w of tokens) {
+          const test = line.concat(w);
+          if (line.length && ctx.measureText(test.join(" ")).width > contentWidth) {
+            lines.push({ tokens: line, left: null });
+            line = [w];
+          } else {
+            line = test;
+          }
+        }
+        if (line.length) lines.push({ tokens: line, left: null });
+      }
     }
 
     const list: Word[] = [];
     let y = pad + halfLeading + asc;
     for (const line of lines) {
-      const lineWidth = ctx.measureText(line.join(" ")).width;
-      const startX =
-        align === "center"
-          ? pad + (contentWidth - lineWidth) / 2
-          : align === "right"
-          ? pad + (contentWidth - lineWidth)
-          : pad;
+      // Prefer the line's measured left edge from the DOM; otherwise derive it
+      // from the CSS alignment.
+      let startX: number;
+      if (line.left !== null) {
+        startX = pad + line.left;
+      } else {
+        const lineWidth = ctx.measureText(line.tokens.join(" ")).width;
+        startX =
+          align === "center"
+            ? pad + (contentWidth - lineWidth) / 2
+            : align === "right"
+            ? pad + (contentWidth - lineWidth)
+            : pad;
+      }
       let x = startX;
-      for (const w of line) {
+      for (const w of line.tokens) {
         const width = ctx.measureText(w).width;
         list.push({ text: w, x, baseline: y, width });
         x += width + spaceW;
@@ -287,7 +366,8 @@ function Scene({ getEl, controls, onActive, onRevealDone, instant }: GLProps) {
     }
     words.current = list;
     meta.current = { cssW, cssH, ratio, font, color: cs.color, letterSpacing };
-  }, [getEl, dpr]);
+    status.current.hasContent = list.length > 0;
+  }, [getEl, dpr, status]);
 
   // Paint the words at the given time (per-word opacity from the reveal phase).
   const renderTexture = useCallback(
@@ -346,6 +426,11 @@ function Scene({ getEl, controls, onActive, onRevealDone, instant }: GLProps) {
   useEffect(() => {
     rebuild();
     let cancelled = false;
+    // Re-measure once layout has settled — on re-entering the viewport the first
+    // synchronous measure can still see a 0-width / stale box.
+    const raf = requestAnimationFrame(() => {
+      if (!cancelled) rebuild();
+    });
     const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
     fonts?.ready.then(() => {
       if (!cancelled) rebuild();
@@ -360,10 +445,48 @@ function Scene({ getEl, controls, onActive, onRevealDone, instant }: GLProps) {
     window.addEventListener("resize", onResize);
     return () => {
       cancelled = true;
+      cancelAnimationFrame(raf);
       ro?.disconnect();
       window.removeEventListener("resize", onResize);
     };
   }, [rebuild, getEl]);
+
+  // Context loss: keep the canvas alive (preventDefault) but tell the parent, which
+  // instantly falls back to the real DOM headline. On restore, the GPU texture is
+  // gone — drop it and rebuild from scratch.
+  useEffect(() => {
+    const canvas = renderer.domElement;
+    const onLost = (e: Event) => {
+      e.preventDefault();
+      status.current.contextLost = true;
+      status.current.hasContent = false;
+    };
+    const onRestored = () => {
+      status.current.contextLost = false;
+      texture.current?.dispose();
+      texture.current = null;
+      uniforms.uTex.value = null;
+      rebuild();
+    };
+    canvas.addEventListener("webglcontextlost", onLost as EventListener);
+    canvas.addEventListener("webglcontextrestored", onRestored);
+    return () => {
+      canvas.removeEventListener("webglcontextlost", onLost as EventListener);
+      canvas.removeEventListener("webglcontextrestored", onRestored);
+    };
+  }, [renderer, rebuild, status, uniforms]);
+
+  // Strict-Mode safe: drop the texture on unmount so a re-mount rebuilds a fresh
+  // one (rebuild() only creates a texture when texture.current is null).
+  useEffect(
+    () => () => {
+      texture.current?.dispose();
+      texture.current = null;
+      status.current.hasContent = false;
+      status.current.lastFrame = 0;
+    },
+    [status]
+  );
 
   useEffect(() => {
     const handle = controls.current;
@@ -396,11 +519,14 @@ function Scene({ getEl, controls, onActive, onRevealDone, instant }: GLProps) {
   }, [controls]);
 
   useFrame((state, delta) => {
+    const now = performance.now();
+    // Heartbeat: the parent's watchdog hides the DOM text ONLY while frames keep
+    // arriving. If this loop ever stalls, the headline reappears within ~250ms.
+    status.current.lastFrame = now;
     if (!painted.current) {
       painted.current = true;
       onActive?.();
     }
-    const now = performance.now();
     const dt = Math.min(delta, 0.05);
 
     // Word-by-word entrance: repaint the texture while words are fading in.
@@ -448,7 +574,9 @@ export default function LiquidTextGL(props: GLProps) {
   return (
     <Canvas
       dpr={[1, 2]}
-      gl={{ alpha: true, antialias: true }}
+      // preserveDrawingBuffer: with a false buffer the browser may clear the canvas
+      // after compositing, so any frame that lingers on screen could go blank.
+      gl={{ alpha: true, antialias: true, preserveDrawingBuffer: true }}
       style={{ width: "100%", height: "100%" }}
       onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
     >

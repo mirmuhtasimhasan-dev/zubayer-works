@@ -28,7 +28,8 @@ export default defineType({
       options: { dateFormat: "YYYY-MM-DD" },
       validation: (r) => r.required(),
     }),
-    defineField({ name: "timeSlot", title: "Time slot", type: "string", validation: (r) => r.required() }),
+    // Optional: the "Choose a time" step is parked in the booking form for now.
+    defineField({ name: "timeSlot", title: "Time slot", type: "string" }),
     defineField({ name: "note", title: "Note", type: "text" }),
     defineField({
       name: "status",

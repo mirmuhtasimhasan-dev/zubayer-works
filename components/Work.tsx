@@ -22,7 +22,7 @@ function workKind(w: any, group?: string): "video" | "photo" {
 
 const LIGHTBOX_IMG = { widths: [1024, 1600, 2000, 2600], sizes: "92vw" };
 
-export default function Work({ featured, eyebrow = "The Eye" }: { featured: any[]; categories?: any[]; eyebrow?: string }) {
+export default function Work({ featured, categories, eyebrow = "The Eye" }: { featured: any[]; categories?: any[]; eyebrow?: string }) {
   const [lightbox, setLightbox] = useState<{ img?: any; video?: string; videoFile?: string } | null>(null);
 
   useEffect(() => {
@@ -35,6 +35,10 @@ export default function Work({ featured, eyebrow = "The Eye" }: { featured: any[
 
   const items = (featured || []).filter((f: any) => f && (f.cover || f.image || f.autoThumb));
   if (!items.length) return null;
+
+  // Same filter the /eye index uses, so the count next to "Watch more works"
+  // matches exactly how many categories are actually behind the link.
+  const eyeCats = (categories || []).filter((c: any) => c?.group !== "Still Photos");
 
   const openWork = (w: any, g?: string) => {
     if (w?.videoFile) setLightbox({ videoFile: w.videoFile }); // direct file = high quality
@@ -62,7 +66,19 @@ export default function Work({ featured, eyebrow = "The Eye" }: { featured: any[
         const kind = workKind(f, f.categoryGroup);
         // First featured → the full Eye (every category); the rest → their own category.
         const catId = f.categorySlug || f.categoryId;
-        const watchHref = i === 0 || !catId ? "/eye" : `/eye/${catId}`;
+        const toEyeIndex = i === 0 || !catId;
+        const watchHref = toEyeIndex ? "/eye" : `/eye/${catId}`;
+        // First card -> the whole Eye, counted in CATEGORIES ("Watch more works (3)").
+        // The others -> one category, counted in WORKS ("Watch more (5)").
+        const catWorks =
+          (categories || []).find((c: any) => c?.id === f.categoryId)?.works?.length ?? 0;
+        const watchLabel = toEyeIndex
+          ? eyeCats.length
+            ? `Watch more works (${eyeCats.length})`
+            : "Watch more works"
+          : catWorks
+          ? `Watch more (${catWorks})`
+          : "Watch more";
         return (
           <Reveal key={f.id}>
             <div className={`eye-featured${i > 0 ? " eye-featured-sub" : ""}`}>
@@ -82,7 +98,7 @@ export default function Work({ featured, eyebrow = "The Eye" }: { featured: any[
               <div className="eye-featured-meta">
                 <span className="eye-featured-title">{f.title}</span>
                 <Link className="eye-watch-more" href={watchHref}>
-                  Watch more <span aria-hidden>&#8594;</span>
+                  {watchLabel} <span aria-hidden>&#8594;</span>
                 </Link>
               </div>
             </div>

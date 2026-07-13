@@ -71,7 +71,8 @@ export async function getWorkCategories() {
 // drafts are skipped.
 export async function getGallery() {
   return client.fetch(`*[_type == "galleryImage" && defined(title) && defined(image)] | order(order asc){
-    "id": _id, title, place, image, "slug": slug.current, "count": count(photos)
+    "id": _id, title, place, image, "slug": slug.current,
+    "count": count(photos[defined(asset)])
   }`);
 }
 
@@ -80,7 +81,7 @@ export async function getAlbum(slug: string) {
   return client.fetch(
     `*[_type == "galleryImage" && (slug.current == $slug || _id == $slug)][0]{
       "id": _id, title, place, "slug": slug.current,
-      "photos": photos[]{ ..., "ar": asset->metadata.dimensions.aspectRatio }
+      "photos": photos[defined(asset)]{ ..., "ar": asset->metadata.dimensions.aspectRatio }
     }`,
     { slug }
   );

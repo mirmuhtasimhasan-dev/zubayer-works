@@ -29,7 +29,7 @@ import {
   type ElementType,
 } from "react";
 import dynamic from "next/dynamic";
-import { PAD_EM, type LiquidControls } from "./LiquidTextGL";
+import { PAD_EM, type LiquidControls, type LiquidStatus } from "./LiquidTextGL";
 
 const LiquidTextGL = dynamic(() => import("./LiquidTextGL"), { ssr: false });
 
@@ -75,12 +75,18 @@ const LiquidText = forwardRef<LiquidTextHandle, LiquidTextProps>(function Liquid
 ) {
   const rootRef = useRef<HTMLElement>(null);
   const controls = useRef<LiquidControls>({});
+  // Live health of the GL overlay, written by LiquidTextGL every frame.
+  const status = useRef<LiquidStatus>({ lastFrame: 0, hasContent: false, contextLost: false });
 
   // null = undecided (first render) so .op-head's opacity:0 keeps it hidden and
   // there's no crisp flash before we know whether WebGL/entrance will run.
   const [enabled, setEnabled] = useState<boolean | null>(null);
   const [inView, setInView] = useState(false);
-  const [glHidden, setGlHidden] = useState(false); // hide DOM text (canvas is painting)
+  // TRUE only while the canvas is PROVABLY showing the headline right now: frames
+  // still arriving, texture has words, context not lost. The DOM text is hidden
+  // ONLY when this is true — so a stalled loop / lost context / empty texture can
+  // never blank the hero; the real <h1> just stays.
+  const [glLive, setGlLive] = useState(false);
   const [revealed, setRevealed] = useState(false); // entrance has started
   const [hovering, setHovering] = useState(false); // instant mode: canvas only shows on hover
   const leaveTimer = useRef<number | undefined>(undefined);
@@ -138,10 +144,29 @@ const LiquidText = forwardRef<LiquidTextHandle, LiquidTextProps>(function Liquid
   // "back to top") can never leave a stale hover that blanks the heading.
   useEffect(() => {
     if (!active) {
-      setGlHidden(false);
+      setGlLive(false);
       setHovering(false);
       window.clearTimeout(leaveTimer.current);
+      status.current = { lastFrame: 0, hasContent: false, contextLost: false };
     }
+  }, [active]);
+
+  // WATCHDOG — the guarantee. While the canvas is mounted, poll its heartbeat: it
+  // counts as "live" only if it painted within the last 250ms, has real content in
+  // the texture, and has not lost its context. The moment any of that stops being
+  // true, glLive flips false -> the canvas is hidden and the crisp DOM headline is
+  // back. A blank hero is therefore impossible, whatever WebGL does.
+  useEffect(() => {
+    if (!active) return;
+    let raf = 0;
+    const tick = () => {
+      const s = status.current;
+      const live = !s.contextLost && s.hasContent && performance.now() - s.lastFrame < 250;
+      setGlLive((prev) => (prev === live ? prev : live));
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
   }, [active]);
 
   // Reveal + play the word-by-word entrance after the configured delay.
@@ -204,7 +229,6 @@ const LiquidText = forwardRef<LiquidTextHandle, LiquidTextProps>(function Liquid
   }, [active, hover, hoverTarget]);
 
   const getEl = useCallback(() => rootRef.current, []);
-  const onActive = useCallback(() => setGlHidden(true), []);
 
   const rootStyle = useMemo<CSSProperties>(() => {
     // undecided -> leave to CSS (.op-head opacity:0 hides it, no flash);
@@ -215,11 +239,11 @@ const LiquidText = forwardRef<LiquidTextHandle, LiquidTextProps>(function Liquid
     else if (!enabled) opacity = 1;
     else opacity = revealed ? 1 : 0;
 
-    // Hide the DOM text ONLY while hovering AND the canvas has actually painted
-    // (glHidden is set on the GL's first painted frame). So: at rest -> crisp DOM
-    // text; on hover -> the canvas ripple takes over cleanly (no double image);
-    // and if the canvas never paints, the DOM text stays -> it can never blank.
-    const domHidden = hovering && glHidden;
+    // Hide the DOM text ONLY while hovering AND the canvas is verifiably live
+    // (watchdog above). At rest -> crisp DOM text; on hover with a healthy canvas
+    // -> the ripple takes over cleanly (no double image); if the canvas stalls,
+    // dies, or paints nothing -> the DOM text is still there. Never blank.
+    const domHidden = hovering && glLive;
 
     return {
       position: "relative",
@@ -227,11 +251,13 @@ const LiquidText = forwardRef<LiquidTextHandle, LiquidTextProps>(function Liquid
       // Let a horizontal finger-drag warp the text while vertical swipes still
       // scroll the page.
       touchAction: "pan-y",
+      // Match the canvas fade so the hand-off never flashes an empty frame.
+      transition: "color .18s ease",
       ...style,
       ...(opacity !== undefined ? { opacity } : null),
       ...(domHidden ? { color: "transparent" } : null),
     };
-  }, [style, glHidden, enabled, revealed, inst, hovering]);
+  }, [style, glLive, enabled, revealed, inst, hovering]);
 
   return createElement(
     as,
@@ -247,12 +273,13 @@ const LiquidText = forwardRef<LiquidTextHandle, LiquidTextProps>(function Liquid
               position: "absolute",
               inset: `-${PAD_EM}em`,
               pointerEvents: "none",
-              // once inst: canvas visible only on hover; otherwise DOM text shows.
-              opacity: inst ? (hovering ? 1 : 0) : 1,
+              // Show the canvas ONLY while hovering AND it is verifiably live — a
+              // paused / dead / empty canvas is never left visible.
+              opacity: hovering && glLive ? 1 : 0,
               transition: "opacity .18s ease",
             } as CSSProperties,
           },
-          createElement(LiquidTextGL, { getEl, controls, onActive, onRevealDone: handleRevealDone, instant: inst })
+          createElement(LiquidTextGL, { getEl, controls, status, onRevealDone: handleRevealDone, instant: inst })
         )
       : null
   );

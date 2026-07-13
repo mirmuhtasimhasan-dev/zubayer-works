@@ -7,7 +7,7 @@ const LINKS: [string, string][] = [
   ["Gallery", "/gallery"],
   ["Ventures", "/#ventures"],
   ["Writing", "/#writing"],
-  ["Services", "/#services"],
+  ["Engagements", "/#services"],
   ["About", "/about"],
   ["Contact", "/#contact"],
 ];
