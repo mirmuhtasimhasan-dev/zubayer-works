@@ -23,6 +23,12 @@ function workKind(w: any, group?: string): "video" | "photo" {
 
 const LIGHTBOX_IMG = { widths: [1024, 1600, 2000, 2600], sizes: "92vw" };
 
+// The Eye's section head. The kicker links out to the YouTube channel.
+const CHANNEL_LABEL = "Loadshedding.mov";
+const CHANNEL_URL = "https://www.youtube.com/@Loadsheddingbd";
+const INTRO =
+  "Films, photographs, and story-based advertisements. Each one made because something needed to be seen differently.";
+
 export default function Work({ featured, categories, eyebrow = "The Eye" }: { featured: any[]; categories?: any[]; eyebrow?: string }) {
   const [lightbox, setLightbox] = useState<{ img?: any; video?: string; videoFile?: string } | null>(null);
 
@@ -60,7 +66,16 @@ export default function Work({ featured, categories, eyebrow = "The Eye" }: { fe
 
   return (
     <section className="section eye" id="work">
-      <Reveal><p className="eyebrow">{eyebrow}</p></Reveal>
+      {/* Section head: the channel it lives on, the title, and what it is. */}
+      <div className="eye-head">
+        <Reveal>
+          <a className="eyebrow eye-channel" href={CHANNEL_URL} target="_blank" rel="noopener noreferrer">
+            {CHANNEL_LABEL}
+          </a>
+        </Reveal>
+        <Reveal><h2 className="eye-title">{eyebrow}</h2></Reveal>
+        <Reveal><p className="eye-intro">{INTRO}</p></Reveal>
+      </div>
 
       {items.map((f: any, i: number) => {
         const src = srcOf(f);

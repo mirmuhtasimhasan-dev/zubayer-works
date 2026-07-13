@@ -3,11 +3,16 @@ import Reveal from "./Reveal";
 import LiquidHover from "./LiquidHover";
 import { sanityImage } from "@/sanity/lib/image";
 
+const KICKER = "Thoughts in motion";
+
 export default function Ventures({ ventures }: { ventures: any[] }) {
   if (!ventures?.length) return null;
   return (
     <section className="section" id="ventures">
-      <Reveal><p className="eyebrow">The Ventures</p></Reveal>
+      <div className="ven-head">
+        <Reveal><p className="eyebrow">{KICKER}</p></Reveal>
+        <Reveal><h2 className="ven-title">The Ventures</h2></Reveal>
+      </div>
       <div className="ventures-grid">
         {ventures.map((v) => (
           <Reveal key={v.id} className="venture-cell">

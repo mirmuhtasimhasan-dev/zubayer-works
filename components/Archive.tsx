@@ -3,10 +3,9 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import Reveal from "./Reveal";
 import { sanityImage } from "@/sanity/lib/image";
+import BehanceBadge from "./BehanceBadge";
 
 const CARD_IMG = { widths: [220, 320, 440, 560], sizes: "(max-width: 600px) 52vw, 200px" };
-// 52x66 display box -> retina-crisp candidates (the browser picks by DPR).
-const PEEK_IMG = { widths: [52, 104, 156, 208], sizes: "52px" };
 
 export default function Archive({ albums, behanceUrl }: { albums: any[]; behanceUrl?: string }) {
   const rowRef = useRef<HTMLDivElement>(null);
@@ -17,9 +16,6 @@ export default function Archive({ albums, behanceUrl }: { albums: any[]; behance
 
   // Set/change in Studio (Archive Settings → Behance URL); falls back to this.
   const bh = behanceUrl || "https://www.behance.net/zubayerahmed23";
-
-  // The four photos that peek out of the Behance link — real archive covers.
-  const peeks = albums.filter((a: any) => a?.image).slice(0, 4).map((a: any) => a.image);
 
   const nudge = (dir: number) => {
     const el = rowRef.current;
@@ -111,23 +107,10 @@ export default function Archive({ albums, behanceUrl }: { albums: any[]; behance
         </div>
       </div>
 
-      {/* PEEK STRIP — a calm editorial row at rest; on hover the first four real
-          archive photos slide in from the right, as if the archive were peeking
-          out from behind the link. */}
+      {/* Closing mark for the archive: a badge whose text spins around the ring,
+          the Behance mark at its centre, the disc flooding with ink on hover. */}
       <div className="arch-foot">
-        <a className="peek" href={bh} target="_blank" rel="noopener noreferrer">
-          <span className="peek-label">See the full archive on Behance</span>
-          <span className="peek-right">
-            <span className="peek-strip" aria-hidden>
-              {peeks.map((img: any, i: number) => (
-                <span className="peek-thumb" key={i} style={{ ["--i" as string]: i } as React.CSSProperties}>
-                  <img {...sanityImage(img, PEEK_IMG)} alt="" loading="lazy" draggable={false} />
-                </span>
-              ))}
-            </span>
-            <span className="peek-arrow" aria-hidden>&#8599;</span>
-          </span>
-        </a>
+        <BehanceBadge href={bh} />
       </div>
     </section>
   );
