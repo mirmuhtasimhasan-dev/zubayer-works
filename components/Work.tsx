@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { imgProxy } from "@/lib/imgProxy";
 import Link from "next/link";
 import Reveal from "./Reveal";
 import { sanityImage } from "@/sanity/lib/image";
@@ -54,7 +55,7 @@ export default function Work({ featured, categories, eyebrow = "The Eye" }: { fe
       : f.image
       ? sanityImage(f.image, { widths: [1600], sizes: "80vw" }).src
       : f.autoThumb
-      ? `/api/img?url=${encodeURIComponent(f.autoThumb)}`
+      ? imgProxy(f.autoThumb)
       : "";
 
   return (

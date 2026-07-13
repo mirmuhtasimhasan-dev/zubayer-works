@@ -331,18 +331,22 @@ export default function LiquidHover({ children, className, style, contentClassNa
       <div ref={contentRef} className={contentClassName} style={{ opacity: rippling ? 0 : 1 }}>
         {children}
       </div>
-      <canvas
-        ref={canvasRef}
-        aria-hidden
-        style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          pointerEvents: "none",
-          opacity: rippling ? 1 : 0,
-        }}
-      />
+      {/* Touch / no-WebGL: don't even render the overlay — the plain card stands
+          on its own (it gets a pressed state on tap instead of a ripple). */}
+      {capable && (
+        <canvas
+          ref={canvasRef}
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            pointerEvents: "none",
+            opacity: rippling ? 1 : 0,
+          }}
+        />
+      )}
     </div>
   );
 }

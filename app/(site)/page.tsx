@@ -6,7 +6,7 @@ import Ventures from "@/components/Ventures";
 import Writing from "@/components/Writing";
 import Services from "@/components/Services";
 import Contact from "@/components/Contact";
-import { getFeaturedWork, getWorkCategories, getGallery, getArchiveSettings, getVentures, getQuotes } from "@/sanity/lib/queries";
+import { getFeaturedWork, getWorkCategories, getGallery, getArchiveSettings, getVentures, getQuotes, getEngagements } from "@/sanity/lib/queries";
 import { getSubstackPosts } from "@/lib/substack";
 
 export const revalidate = 30;
@@ -35,8 +35,8 @@ const DEFAULT_QUOTES = [
 ];
 
 export default async function Home() {
-  const [featuredWork, workCategories, gallery, archiveSettings, ventures, writing, quotes] = await Promise.all([
-    getFeaturedWork(), getWorkCategories(), getGallery(), getArchiveSettings(), getVentures(), getSubstackPosts(3), getQuotes(),
+  const [featuredWork, workCategories, gallery, archiveSettings, ventures, writing, quotes, engagements] = await Promise.all([
+    getFeaturedWork(), getWorkCategories(), getGallery(), getArchiveSettings(), getVentures(), getSubstackPosts(3), getQuotes(), getEngagements(),
   ]);
   return (
     <main>
@@ -46,7 +46,7 @@ export default async function Home() {
       <Archive albums={gallery} behanceUrl={archiveSettings?.behanceUrl} />
       <Ventures ventures={ventures} />
       <Writing posts={writing} quotes={quotes?.length ? quotes : DEFAULT_QUOTES} />
-      <Services />
+      <Services items={engagements} />
       <Contact settings={FOOTER} />
     </main>
   );

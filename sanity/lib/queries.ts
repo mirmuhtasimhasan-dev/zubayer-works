@@ -92,6 +92,13 @@ export async function getAlbumSlugs() {
   return client.fetch(`*[_type == "galleryImage" && defined(slug.current)].slug.current`);
 }
 
+// Engagements (the service cards + their detail pages) — fully Studio-managed.
+export async function getEngagements() {
+  return client.fetch(`*[_type == "engagement"] | order(order asc, title asc){
+    "id": _id, title, "slug": slug.current, blurb, icon, description, cta
+  }`);
+}
+
 export async function getArchiveSettings() {
   return client.fetch(`*[_type == "archiveSettings"][0]{ behanceUrl }`);
 }
