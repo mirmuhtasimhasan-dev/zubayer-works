@@ -6,7 +6,7 @@
  * position:relative box; it's pointer-events:none so it never blocks clicks or the
  * existing liquid ripple hover.
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 /* ─────────────── Tunable (edit these) ─────────────── */
 const SIZE = 46; // fish length (px)
@@ -118,13 +118,6 @@ function drawFish(ctx: CanvasRenderingContext2D, f: Fish) {
 
 export default function InteractiveFish({ className }: { className?: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
-  const [hidden, setHidden] = useState(false);
-
-  // Small touch screens: drop the canvas entirely (it is purely ambient).
-  useEffect(() => {
-    const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-    if (!fine && window.innerWidth < 480) setHidden(true);
-  }, []);
 
   useEffect(() => {
     const canvas = ref.current;
@@ -135,12 +128,6 @@ export default function InteractiveFish({ className }: { className?: string }) {
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const calm = reduce ? 0.5 : 1;
-
-    // Touch has no cursor to chase — the fish just keep wandering (no pointer
-    // follow, no grow-on-hover). On very small screens we skip them entirely so a
-    // phone isn't running a canvas loop per card for a purely ambient effect.
-    const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-    if (!fine && window.innerWidth < 480) return;
 
     let W = 0;
     let H = 0;
@@ -166,15 +153,16 @@ export default function InteractiveFish({ className }: { className?: string }) {
       const r = host.getBoundingClientRect();
       mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top; mouse.active = true;
     };
+    // Mouse OR finger: the fish chase the pointer wherever it is inside the card.
+    // On touch that means dragging a finger over the card pulls them along; lifting
+    // it lets them drift back to wandering. Listeners are passive, so a tap still
+    // navigates and the page still scrolls normally.
     const onLeave = () => { mouse.active = false; };
-    // Chase only on a real cursor; on touch the fish wander, undisturbed by taps.
-    if (fine) {
-      host.addEventListener("pointermove", onMove, { passive: true });
-      host.addEventListener("pointerdown", onMove, { passive: true });
-      host.addEventListener("pointerleave", onLeave);
-      host.addEventListener("pointerup", onLeave);
-      host.addEventListener("pointercancel", onLeave);
-    }
+    host.addEventListener("pointermove", onMove, { passive: true });
+    host.addEventListener("pointerdown", onMove, { passive: true });
+    host.addEventListener("pointerleave", onLeave);
+    host.addEventListener("pointerup", onLeave);
+    host.addEventListener("pointercancel", onLeave);
 
     const ro = "ResizeObserver" in window ? new ResizeObserver(resize) : null;
     ro?.observe(host);
@@ -246,8 +234,6 @@ export default function InteractiveFish({ className }: { className?: string }) {
       window.removeEventListener("resize", resize);
     };
   }, []);
-
-  if (hidden) return null;
 
   return (
     <canvas
