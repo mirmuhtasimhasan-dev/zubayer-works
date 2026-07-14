@@ -19,14 +19,10 @@ export default function Ventures({ ventures }: { ventures: any[] }) {
             <Link href={`/ventures/${v.slug || v.id}`} className="venture-card">
               {/* Whole-box liquid ripple on hover, same as the service cards. */}
               <LiquidHover className="venture-card-liquid" contentClassName="venture-box">
+                {/* The logo lives on the venture's own page now, shown large. */}
                 <div className="venture-head">
-                  <span className="venture-logo">
-                    {v.logo ? (
-                      <img {...sanityImage(v.logo, { widths: [120, 240], sizes: "56px" })} alt={v.name} />
-                    ) : (
-                      <span className="venture-logo-ph" aria-hidden>{v.name?.[0] ?? "•"}</span>
-                    )}
-                  </span>
+                  {/* Studio-managed (Ventures -> "Small line above the name"). */}
+                  {v.kicker && <span className="venture-card-kicker">{v.kicker}</span>}
                   <h3 className="venture-card-name">{v.name}</h3>
                 </div>
                 {v.tagline && <p className="venture-card-tag">{v.tagline}</p>}

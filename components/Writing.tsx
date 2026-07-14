@@ -6,6 +6,12 @@ import { SUBSTACK_URL, type SubstackPost } from "@/lib/substack";
 // Change the button's wording here.
 const CTA_LABEL = "Read everything on Substack";
 
+// Section head, same rhythm as The Eye and The Ventures.
+const KICKER = "Scrappy Scribbles";
+const TITLE = "A Shoebox Under the Bed";
+const INTRO =
+  "Not a blog. Just things written down because they kept circling. Discovered, not displayed.";
+
 function fmtDate(d?: string | null) {
   if (!d) return "";
   const dt = new Date(d);
@@ -28,7 +34,11 @@ export default function Writing({
   return (
     <section className="section" id="writing">
       {quotes?.length ? <QuoteRotator quotes={quotes} /> : null}
-      <Reveal><p className="eyebrow">A Shoebox Under the Bed</p></Reveal>
+      <div className="wr-head">
+        <Reveal><p className="eyebrow">{KICKER}</p></Reveal>
+        <Reveal><h2 className="wr-title">{TITLE}</h2></Reveal>
+        <Reveal><p className="wr-intro">{INTRO}</p></Reveal>
+      </div>
       {posts?.length ? (
       <>
       <div className="writing-list">

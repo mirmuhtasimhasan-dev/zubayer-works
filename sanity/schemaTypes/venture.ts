@@ -21,6 +21,12 @@ export default defineType({
       options: { hotspot: true },
       description: "Shown on the venture card (a transparent PNG works best).",
     }),
+    defineField({
+      name: "kicker",
+      title: "Small line above the name (card)",
+      description: 'The little uppercase label at the top of the card, e.g. "Studio" or "2021 - now". Leave empty to hide it.',
+      type: "string",
+    }),
     defineField({ name: "tagline", title: "Tagline", type: "string" }),
     defineField({ name: "description", title: "Short description (card)", type: "text", rows: 3 }),
     defineField({
