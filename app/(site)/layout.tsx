@@ -1,4 +1,4 @@
-import { Cormorant_Garamond, Inter, Source_Serif_4 } from "next/font/google";
+import { Cinzel, Cormorant_Garamond, Spectral, Source_Serif_4 } from "next/font/google";
 import CursorDot from "@/components/CursorDot";
 import MusicProvider from "@/components/MusicProvider";
 import { SoundCorner, SoundPill } from "@/components/SoundControls";
@@ -21,7 +21,17 @@ const hero = Cormorant_Garamond({
   display: "swap",
 });
 
-const body = Inter({
+// The rotating pull-quotes only. Cinzel is a TITLING face — its character lives in
+// the capitals, so the quote is set in caps (see .quote-text).
+const quote = Cinzel({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-quote",
+  display: "swap",
+});
+
+// Body copy: Spectral (a text serif) in place of the old sans.
+const body = Spectral({
   subsets: ["latin"],
   weight: ["300", "400", "500"],
   variable: "--font-body",
@@ -30,7 +40,7 @@ const body = Inter({
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`${display.variable} ${hero.variable} ${body.variable} site`}>
+    <div className={`${display.variable} ${hero.variable} ${body.variable} ${quote.variable} site`}>
       <MusicProvider>
         {children}
         <CursorDot />

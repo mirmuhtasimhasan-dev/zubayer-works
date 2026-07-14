@@ -9,7 +9,7 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
 body{background:var(--paper);}
-.site{color:var(--ink);font-family:var(--font-body);font-weight:300;line-height:1.6;-webkit-font-smoothing:antialiased;}
+.site{color:var(--ink);font-family:var(--font-body),serif;font-weight:300;line-height:1.6;-webkit-font-smoothing:antialiased;}
 img{display:block;max-width:100%;}
 a{color:inherit;text-decoration:none;}
 button{font-family:inherit;cursor:pointer;}
@@ -21,16 +21,16 @@ button{font-family:inherit;cursor:pointer;}
 .section-page{padding-top:150px;}
 
 /* NAV */
-.nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:32px var(--side);border-bottom:1px solid transparent;background:rgba(247,244,238,.8);backdrop-filter:blur(8px);transition:padding .3s ease,border-color .3s ease;}
-.nav.scrolled{padding:18px var(--side);border-bottom:1px solid var(--divider);}
-.nav-logo{font-family:var(--font-display),serif;font-size:23px;font-weight:500;letter-spacing:.02em;color:var(--ink);display:inline-flex;align-items:center;gap:12px;min-width:0;}
+.nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:40px var(--side);border-bottom:1px solid transparent;background:rgba(247,244,238,.8);backdrop-filter:blur(8px);transition:padding .3s ease,border-color .3s ease;}
+.nav.scrolled{padding:24px var(--side);border-bottom:1px solid var(--divider);}
+.nav-logo{font-family:var(--font-display),serif;font-size:23px;font-weight:500;letter-spacing:.02em;color:var(--ink);display:inline-flex;align-items:center;gap:22px;min-width:0;}
 /* multiply blends the logo's white background into the cream nav (white → nav
    colour), leaving just the black mark — no white box. */
-.nav-logo-img{height:34px;width:auto;display:block;}
+.nav-logo-img{height:44px;width:auto;display:block;}
 /* The client's signature, beside the mark. Transparent ink PNG, so it sits on the
    cream nav with no box. Hidden on the narrowest screens, where the nav is tight. */
-.nav-sign{height:44px;width:auto;display:block;}
-@media (max-width:600px){.nav-logo-img{height:26px;}.nav-sign{height:32px;}.nav-logo{gap:9px;}}
+.nav-sign{height:60px;width:auto;display:block;}
+@media (max-width:600px){.nav-logo-img{height:32px;}.nav-sign{height:42px;}.nav-logo{gap:14px;}.nav{padding:26px var(--side);}}
 .nav-links{display:flex;gap:28px;}
 .nav-links a{font-family:var(--font-display),serif;font-size:13px;letter-spacing:.04em;color:var(--ash);transition:color .3s;}
 .nav-links a:hover{color:var(--ink);}
@@ -194,13 +194,32 @@ button{font-family:inherit;cursor:pointer;}
 .eye-work:hover .eye-work-media > img{transform:scale(1.05);filter:saturate(1);}
 .eye-work-media > div img{width:100%;height:100%;object-fit:cover;}
 .eye-work:hover .eye-work-play{transform:scale(1.08);}
-.eye-work-title{display:block;font-family:var(--font-display),serif;font-size:17px;margin-top:12px;}
+.eye-work-title{display:block;font-family:var(--font-display),serif;font-size:17px;font-weight:300;margin-top:12px;}
 .eye-empty{color:var(--ash);font-size:15px;padding:18px 0;}
 
 /* Video modal */
-.eye-videobox{width:min(92vw,1120px);aspect-ratio:16/9;background:#000;object-fit:contain;}
+/* LIGHTBOX — restored: a bad slice while adding the Behance badge took these out,
+   so the video overlay lost position:fixed (it never appeared) and album photos
+   lost their max-width/height (they rendered at full size). */
+/* Not a black-out: a frosted PAPER veil, so the site stays visible behind the
+   player instead of the page going dark. The blur is what keeps the video
+   readable against it; the veil alone is deliberately light. */
+.lightbox{position:fixed;inset:0;z-index:100;background:rgba(247,244,238,.72);backdrop-filter:blur(18px) saturate(1.05);-webkit-backdrop-filter:blur(18px) saturate(1.05);display:flex;align-items:center;justify-content:center;}
+/* Album lightbox: no shade at all — the photo just floats over the page. */
+.lightbox-light{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;}
+.lightbox-light .lb-figure img{box-shadow:none;}
+.lightbox img{max-width:88vw;max-height:88vh;object-fit:contain;box-shadow:0 40px 90px -50px rgba(26,24,20,.55);}
+/* Ink, not white — the veil is light now. */
+.lb-arrow{position:absolute;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--ink);font-size:46px;opacity:.55;padding:20px;cursor:pointer;z-index:2;}
+.lb-arrow:hover{opacity:1;}.lb-arrow.left{left:2vw;}.lb-arrow.right{right:2vw;}
+.lb-figure{margin:0;max-width:88vw;max-height:88vh;display:flex;flex-direction:column;align-items:center;gap:12px;}
+.lb-figure img{max-width:88vw;max-height:82vh;object-fit:contain;}
+.lb-figure figcaption{color:var(--ash);font-size:13px;letter-spacing:.03em;}
+
+/* The player is the one dark object on the light veil — the shadow lifts it off. */
+.eye-videobox{width:min(92vw,1120px);aspect-ratio:16/9;background:#000;object-fit:contain;box-shadow:0 50px 110px -55px rgba(26,24,20,.6);}
 .eye-videobox iframe{width:100%;height:100%;border:0;display:block;}
-.lb-close{position:absolute;top:22px;right:26px;background:none;border:0;color:#fff;font-size:24px;line-height:1;cursor:pointer;opacity:.8;z-index:2;padding:6px;}
+.lb-close{position:absolute;top:22px;right:26px;background:none;border:0;color:var(--ink);font-size:24px;line-height:1;cursor:pointer;opacity:.65;z-index:2;padding:6px;}
 .lb-close:hover{opacity:1;}
 
 @media (max-width:1000px){.eye-grid{grid-template-columns:repeat(2,1fr);}}
@@ -220,10 +239,21 @@ button{font-family:inherit;cursor:pointer;}
 /* THE ARCHIVE — a single draggable diary row */
 .archive{padding:110px 0 90px;}
 .archive-head{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:0 var(--side);}
+/* Heading + the small Behance badge, side by side. */
+.arch-headline{display:flex;align-items:center;gap:18px;}
+.arch-headline .eyebrow{margin-bottom:0;}
+/* Doubled class: .bhb sets --bhb-size and is declared later, so a single class
+   here would lose the cascade and the badge would stay full size. */
+.bhb.bhb-inline{--bhb-size:64px;}
+.bhb.bhb-inline .bhb-ring-text{font-size:6.5px;letter-spacing:.1em;}
+.bhb.bhb-inline .bhb-mark{width:14px;height:14px;}
 .arch-nav{display:flex;gap:12px;}
 .arch-rowwrap{position:relative;margin-top:28px;}
 /* generous top padding so the hover pop-up (grows upward) is never clipped */
-.arch-row{display:flex;gap:20px;justify-content:safe center;overflow-x:auto;overflow-y:visible;scroll-snap-type:x proximity;padding:78px var(--side) 24px;scrollbar-width:none;-webkit-overflow-scrolling:touch;cursor:grab;}
+/* NOT var(--side) here: that is 22vw (~317px a side), which alone made the row
+   overflow — so `safe center` fell back to start-aligned and the arrows appeared
+   even for a handful of albums. A modest gutter lets a small set fit and centre. */
+.arch-row{display:flex;gap:20px;justify-content:safe center;overflow-x:auto;overflow-y:visible;scroll-snap-type:x proximity;padding:78px clamp(20px,4vw,60px) 24px;scrollbar-width:none;-webkit-overflow-scrolling:touch;cursor:grab;}
 .arch-row::-webkit-scrollbar{display:none;}
 .arch-row.dragging{cursor:grabbing;scroll-snap-type:none;}
 .arch-card{position:relative;flex:0 0 auto;width:clamp(140px,15vw,200px);scroll-snap-align:start;display:block;color:var(--ink);text-decoration:none;-webkit-tap-highlight-color:transparent;}
@@ -258,6 +288,13 @@ button{font-family:inherit;cursor:pointer;}
    Text spinning around a ring, the Behance mark at the centre, and an inner disc
    that floods with ink on hover (the mark inverting to paper against it). */
 .arch-foot{margin-top:52px;padding:0 var(--side);display:flex;justify-content:center;}
+/* Gallery / Still Photos: a smaller sign-off, tucked to the right of the grid. */
+/* No side padding here: the section already pads, so keeping it would inset the
+   badge ~300px from the grid instead of sitting on its right edge. */
+.arch-foot-end{justify-content:flex-end;margin-top:34px;padding:0;}
+.arch-foot-end .bhb{--bhb-size:96px;}
+.arch-foot-end .bhb .bhb-ring-text{font-size:9px;letter-spacing:.14em;}
+.arch-foot-end .bhb .bhb-mark{width:19px;height:19px;}
 .bhb{--bhb-size:132px;--bhb-accent:#E8E3D9;position:relative;display:grid;place-items:center;width:var(--bhb-size);height:var(--bhb-size);border-radius:50%;color:var(--ink);flex:none;}
 .bhb:focus-visible{outline:1px solid var(--ink);outline-offset:6px;}
 .bhb-ring{position:absolute;inset:0;width:100%;height:100%;animation:bhbSpin var(--bhb-spin) linear infinite;transform-origin:50% 50%;}
@@ -295,13 +332,26 @@ button{font-family:inherit;cursor:pointer;}
   .bhb-disc-fill,.bhb-mark{transition:none;}
 }
 
+
+/* ALBUM PAGE (an Archive item opens here with all its photos) */
+.album{max-width:1180px;margin:0 auto;padding:150px clamp(24px,6vw,60px) 120px;}
+.album-title{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(30px,5vw,52px);line-height:1.05;margin:20px 0 6px;}
+.album-place{color:var(--ash);font-size:14px;letter-spacing:.04em;margin-bottom:44px;}
+/* Even grid: every cell is the SAME fixed size, so the album reads as one tidy
+   set. The photo is cover-cropped to fill it; clicking opens the lightbox, which
+   shows the full uncropped image. */
+.album-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+/* White print border around every photo, so the album reads as a set of prints. */
+.album-cell{position:relative;display:block;width:100%;aspect-ratio:4/5;margin:0;padding:0;border:12px solid #fff;background:var(--divider);cursor:pointer;overflow:hidden;box-shadow:0 8px 24px -16px rgba(26,24,20,.35);}
+@media (max-width:1000px){.album-grid{grid-template-columns:repeat(2,1fr);}}
+
 /* GALLERY PAGE — Still Photos: album covers that open each album. */
 .gallery-albums{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-top:36px;}
 .gallery-album{display:block;color:inherit;text-decoration:none;}
 .gallery-album-media{position:relative;aspect-ratio:4/5;overflow:hidden;background:linear-gradient(155deg,#ece7dd 0%,#e0d9cc 100%);}
 .gallery-album-media img{width:100%;height:100%;object-fit:cover;filter:saturate(.8);transition:transform .6s cubic-bezier(.2,.7,.2,1),filter .6s ease;}
 @media (hover:hover){.gallery-album:hover .gallery-album-media img{transform:scale(1.04);filter:saturate(1);}}
-.gallery-album-name{display:block;font-family:var(--font-display),serif;font-size:18px;margin-top:12px;}
+.gallery-album-name{display:block;font-family:var(--font-display),serif;font-size:17px;font-weight:300;margin-top:12px;}
 .gallery-album-place{display:block;font-size:12px;letter-spacing:.05em;color:var(--ash);margin-top:3px;}
 @media (max-width:1000px){.gallery-albums{grid-template-columns:repeat(3,1fr);}}
 @media (max-width:700px){.gallery-albums{grid-template-columns:repeat(2,1fr);gap:14px;}}
@@ -329,12 +379,14 @@ button{font-family:inherit;cursor:pointer;}
 .venture-box{position:relative;overflow:hidden;flex:1;display:flex;flex-direction:column;padding:40px 34px 32px;background:var(--divider);}
 /* Section head: kicker + title, same rhythm as The Eye. */
 .ven-head{margin-bottom:52px;}
-.ven-title{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(34px,4.4vw,52px);line-height:1.08;}
+.ven-title{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(26px,3.2vw,38px);line-height:1.12;}
 @media (max-width:600px){.ven-head{margin-bottom:34px;}}
 
 /* Logo chip + title side by side */
 .venture-head{margin-bottom:22px;}
-.venture-card-kicker{display:block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:10px;}
+/* Neither --faint nor --ash held up: at 11px in caps, on the card's beige (not on
+   paper), both sat under the readable line. A darker brown-ink at weight 500 does. */
+.venture-card-kicker{display:block;font-size:11px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:#5C4F41;margin-bottom:10px;}
 /* Bare logo — no chip/box behind it. The fixed slot keeps the row aligned, and
    multiply melts any white baked into the logo file into the card. */
 .venture-logo{flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:82px;height:82px;}
@@ -464,14 +516,50 @@ button{font-family:inherit;cursor:pointer;}
 .quote-rot{opacity:0;filter:blur(14px);transform:translateY(6px);transition:opacity .75s ease,filter .75s ease,transform .75s ease;}
 .quote-rot.is-shown{opacity:1;filter:blur(0);transform:none;}
 /* Centred; the full quote wraps freely. <LiquidText> gives it the hero's ripple. */
-.quote-text{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(20px,2.4vw,27px);line-height:1.4;color:var(--ink);max-width:44ch;margin-left:auto;margin-right:auto;}
+/* THE PULL-QUOTE — Cinzel, set in CAPS.
+   Cinzel is a titling face: its character is in the capitals, and its lowercase
+   reads as a plain generic serif. Caps + a little tracking + extra leading keeps
+   it monumental AND readable. Tunables are right here. */
+.quote-text{
+  font-family:var(--font-quote),serif;
+  text-transform:uppercase;
+  font-weight:500;
+  font-size:clamp(20px,2.4vw,26px);
+  letter-spacing:.055em;
+  line-height:1.6;
+  color:var(--ash);
+  max-width:44ch;margin-left:auto;margin-right:auto;
+}
+
+/* ATTRIBUTION — Option B (in use): Cinzel caps, tracked, no leading dash.
+   Smaller and muted, so it never competes with the quote. */
+.quote-src{
+  font-family:var(--font-quote),serif;
+  text-transform:uppercase;
+  font-weight:400;
+  font-size:clamp(10px,1.2vw,13px); /* ~0.5x the quote — em would resolve against the wrapper */
+  letter-spacing:.16em;
+  line-height:1.6;
+  color:#AE9E8B;
+  margin-top:16px;
+}
+/* Option A (the other approved look) — Cormorant italic, not caps, dash kept:
+.quote-src{
+  font-family:var(--font-hero),serif;
+  font-style:italic;font-weight:400;
+  text-transform:none;
+  font-size:.72em;letter-spacing:0;
+  color:#AE9E8B;margin-top:12px;
+}
+.quote-src::before{content:"— ";}
+*/
 @media (prefers-reduced-motion:reduce){
   .quote-rot{filter:none!important;transform:none!important;transition:opacity .3s ease;}
 }
-@media (max-width:600px){.quote-block{margin-bottom:56px;}.quote-text{font-size:21px;}}
+@media (max-width:600px){.quote-block{margin-bottom:56px;}}
 
 /* Section head: kicker, title, intro — same rhythm as The Eye / The Ventures. */
-.wr-head{margin-bottom:52px;}
+.wr-head{margin-bottom:34px;}
 .wr-title{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(34px,4.4vw,52px);line-height:1.08;margin-bottom:20px;}
 .wr-intro{max-width:52ch;color:var(--ash);font-size:15px;line-height:1.65;}
 @media (max-width:600px){.wr-head{margin-bottom:34px;}.wr-intro{font-size:14px;}}
@@ -764,5 +852,157 @@ button{font-family:inherit;cursor:pointer;}
    display headings run a step lighter. */
 .eye-title,.ven-title,.wr-title,.eye-cat-title,.about-title,.venture-detail-title,
 .service-title,.post-title,.album-title,.bk-title,.venture-card-name,.writing-t,
-.quote-text,.service-box h3,.post-body h2,.post-body h3{font-weight:300;}
+.eye-group-title,.service-box h3,.post-body h2,.post-body h3{font-weight:300;}
 .eyebrow,.eye-featured-title,.eye-watch-more{font-weight:400;}
+
+
+/* ===== SHOEBOX REVEAL (Scrappy Scribbles) =====
+   A closed kraft cover sits on top of the real, server-rendered content. The
+   cover is inset:0 of a relative wrapper, so the section is EXACTLY as tall open
+   as closed (zero layout shift), and it unmounts after opening so it can never
+   block the post links or the magnetic button. transform + opacity only. */
+/* The box has its OWN height while closed (set in ShoeboxReveal: BOX_HEIGHT /
+   BOX_HEIGHT_PHONE). The content is clipped behind it; on open the box grows to
+   the content's real height and then releases to `auto`, so "Show more" can still
+   expand the section afterwards. */
+.sbx{position:relative;overflow:hidden;max-width:var(--sbx-w);margin-left:auto;margin-right:auto;transition:height var(--sbx-dur) cubic-bezier(.55,0,.15,1);}
+/* Once the cover is gone the box stops constraining anything. */
+.sbx.is-done{overflow:visible;height:auto!important;transition:none;}
+.sbx-content{position:relative;z-index:1;}
+
+/* Armed on mount, while the opaque cover is already hiding it -> no flash. */
+.sbx.armed .sbx-i{opacity:0;transform:translateY(16px);filter:blur(6px);}
+.sbx.armed.is-open .sbx-i{
+  opacity:1;transform:none;filter:blur(0);
+  transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1),filter .7s cubic-bezier(.2,.7,.2,1);
+}
+/* Head: kicker, heading, subtitle. */
+.sbx.armed.is-open .sbx-i{transition-delay:calc(500ms + var(--i,0) * 60ms);}
+/* Posts step 120ms apart, the magnetic button lands last (~1.16s for 3 posts). */
+.sbx.armed.is-open .writing-item.sbx-i{transition-delay:calc(740ms + (var(--i) - 3) * 120ms);}
+.sbx.armed.is-open .writing-foot.sbx-i{transition-delay:calc(740ms + (var(--i) - 3) * 120ms + 60ms);}
+
+/* THE COVER — a real <button>, so tap / click / Enter / Space all open it. */
+.sbx-cover{
+  position:absolute;inset:0;z-index:2;width:100%;padding:0;border:0;background:none;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+  transition:transform .45s cubic-bezier(.55,0,.15,1);
+}
+.sbx-cover:focus-visible{outline:2px solid var(--ink);outline-offset:4px;}
+.sbx.is-open .sbx-cover{pointer-events:none;}
+@media (hover:hover) and (pointer:fine){
+  .sbx:not(.is-open) .sbx-cover:hover{transform:translateY(-3px);}
+  .sbx:not(.is-open) .sbx-cover:hover .sbx-half{box-shadow:0 26px 60px -28px rgba(60,45,20,.55);}
+}
+
+/* Two kraft halves meeting at the seam. */
+.sbx-half{
+  position:absolute;left:0;right:0;overflow:hidden;
+  background:linear-gradient(160deg,var(--sbx-kraft-from),var(--sbx-kraft-to));
+  box-shadow:0 18px 44px -26px rgba(60,45,20,.45);
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  will-change:transform,opacity;
+  transition:transform var(--sbx-dur) cubic-bezier(.55,0,.15,1) .3s,
+             opacity .45s cubic-bezier(.55,0,.15,1) .55s,
+             box-shadow .45s ease;
+}
+.sbx-half::after{content:"";position:absolute;inset:7px;border:1px solid rgba(90,70,45,.28);border-radius:3px;pointer-events:none;}
+.sbx-top{top:0;height:var(--sbx-seam);border-radius:6px 6px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
+.sbx-bottom{top:var(--sbx-seam);bottom:0;border-radius:0 0 6px 6px;display:flex;align-items:center;justify-content:center;}
+.sbx.is-open .sbx-top{transform:translateY(-118%) rotate(-1.3deg);opacity:0;}
+.sbx.is-open .sbx-bottom{transform:translateY(122%) rotate(1.3deg);opacity:0;}
+
+.sbx-grain{position:absolute;inset:0;background-image:var(--sbx-grain);opacity:.05;pointer-events:none;}
+
+/* The date stamped on the lower half of the lid. Same kraft ink, faded like print. */
+.sbx-since{
+  position:relative;font-family:var(--font-display),serif;font-size:12px;font-weight:500;
+  letter-spacing:.26em;text-transform:uppercase;color:var(--sbx-ink);opacity:.5;
+  pointer-events:none;
+}
+
+/* The cover mirrors the real heading below it. */
+.sbx-label{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:0 24px;pointer-events:none;}
+.sbx-label-k{
+  font-family:var(--font-display),serif;font-weight:500;font-size:clamp(26px,4vw,40px);line-height:1.1;
+  color:var(--sbx-ink);text-shadow:0 1px 0 rgba(255,255,255,.45),0 -1px 0 rgba(0,0,0,.10);
+}
+.sbx-label-t{
+  font-family:var(--font-body),serif;font-style:italic;font-weight:500;font-size:clamp(14px,1.7vw,18px);
+  color:var(--sbx-ink);opacity:.72;
+}
+.sbx-hint{
+  position:relative;display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--font-body),serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--sbx-ink);opacity:.55;pointer-events:none;
+}
+.sbx-dot{display:block;width:5px;height:5px;border-radius:50%;background:var(--sbx-ink);animation:sbxPulse 1.6s ease-in-out infinite;}
+@keyframes sbxPulse{0%,100%{transform:scale(1);opacity:.55;}50%{transform:scale(1.6);opacity:1;}}
+
+/* Perforated seam: punched paper-coloured holes. */
+.sbx-perf{
+  position:absolute;left:0;right:0;top:var(--sbx-seam);height:calc(var(--sbx-hole-r) * 2);
+  transform:translateY(-50%);pointer-events:none;
+  background-image:radial-gradient(circle at center, var(--paper) var(--sbx-hole-r), rgba(247,244,238,0) calc(var(--sbx-hole-r) + .6px));
+  background-size:var(--sbx-hole-gap) 100%;background-repeat:repeat-x;
+  transition:opacity .3s cubic-bezier(.55,0,.15,1);
+}
+.sbx.is-open .sbx-perf{opacity:0;}
+
+/* The pull-thread and its knot are gone: the drawn line read as a hard black bar
+   across the lid, and the knot as a stray dot. The perforated seam carries the
+   "tear me open" cue on its own. */
+
+@media (max-width:600px){
+  .sbx-half{box-shadow:0 12px 30px -20px rgba(60,45,20,.45);}
+  .sbx-top{gap:10px;}
+}
+
+/* Reduced motion: the component renders no cover at all and never arms — this is
+   just a belt-and-braces guard so nothing can sit hidden. */
+@media (prefers-reduced-motion:reduce){
+  .sbx-cover{display:none!important;}
+  .sbx .sbx-i{opacity:1!important;transform:none!important;filter:none!important;transition:none!important;}
+  .sbx-dot{animation:none;}
+}
+
+/* ===== WRITING: card grid (image on top, words underneath) ===== */
+.wr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px 22px;}
+.wr-card{display:flex;flex-direction:column;color:inherit;}
+.wr-card-media{display:block;position:relative;aspect-ratio:16/10;overflow:hidden;background:var(--divider);border-radius:3px;}
+.wr-card-media img{width:100%;height:100%;object-fit:cover;filter:saturate(.85);transition:transform .6s cubic-bezier(.2,.7,.2,1),filter .6s ease;}
+.wr-card-ph{position:absolute;inset:0;background:linear-gradient(155deg,#ece7dd 0%,#e0d9cc 100%);}
+@media (hover:hover) and (pointer:fine){
+  .wr-card:hover .wr-card-media img{transform:scale(1.05);filter:saturate(1);}
+  .wr-card:hover .wr-card-t{color:var(--ash);}
+}
+.wr-card-body{display:flex;flex-direction:column;gap:5px;padding-top:11px;}
+.wr-card-t{font-family:var(--font-display),serif;font-weight:300;font-size:18px;line-height:1.25;color:var(--ink);transition:color .3s ease;}
+.wr-card-ex{font-size:13px;line-height:1.55;color:var(--ash);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.wr-card-date{font-size:11px;letter-spacing:.06em;color:var(--faint);margin-top:2px;}
+
+/* Rows past the first are held back until "Show more". */
+.wr-card-extra{display:none;}
+.wr-grid.is-expanded .wr-card-extra{display:flex;}
+
+.wr-more{display:flex;justify-content:center;margin-top:24px;}
+.wr-more-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:999px;border:.5px solid var(--divider);background:none;color:var(--ash);font-family:var(--font-display),serif;font-size:13px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:color .3s ease,border-color .3s ease,gap .3s ease;}
+.wr-more-btn:hover{color:var(--ink);border-color:var(--ink);gap:12px;}
+.wr-more-btn:focus-visible{outline:1px solid var(--ink);outline-offset:3px;}
+
+@media (max-width:900px){.wr-grid{grid-template-columns:repeat(2,1fr);gap:28px 20px;}}
+@media (max-width:600px){
+  /* One column here, so three stacked cards made the closed box enormous. Show a
+     single card until "Show more" — the rest are one tap away. */
+  .wr-grid{grid-template-columns:1fr;gap:22px;}
+  .wr-grid:not(.is-expanded) .wr-card:nth-child(n+2){display:none;}
+  .wr-card-media{aspect-ratio:16/9;}
+  .wr-card-t{font-size:17px;}
+  .wr-card-ex{-webkit-line-clamp:2;}
+  .wr-head{margin-bottom:22px;}
+  .wr-more{margin-top:18px;}
+  .wr-more-btn{min-height:44px;}
+  /* The cover shrinks with the content; tighten its own furniture to match. */
+  .sbx-label-k{font-size:26px;}
+  .sbx-top{gap:8px;}
+}

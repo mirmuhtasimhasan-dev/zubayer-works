@@ -40,8 +40,11 @@ export async function getCategoryBySlug(slug: string) {
   const cat = await client.fetch(
     `*[_type == "category" && (slug.current == $slug || _id == $slug)][0]{
       "id": _id, name, group, "slug": slug.current,
-      "works": *[_type == "workItem" && references(^._id)] | order(order asc, _createdAt asc){
-        "id": _id, title, kind, cover, image, videoEmbed, "videoFile": videoFile.asset->url
+      "works": *[(_type == "workItem" || _type == "galleryVideo") && references(^._id)] | order(order asc, _createdAt asc){
+        "id": _id, title, cover, image,
+        "kind": select(_type == "galleryVideo" => "video", kind),
+        "videoEmbed": select(_type == "galleryVideo" => videoUrl, videoEmbed),
+        "videoFile": videoFile.asset->url
       }
     }`,
     { slug }
@@ -58,9 +61,12 @@ export async function getCategorySlugs() {
 export async function getWorkCategories() {
   const cats = await client.fetch(`*[_type == "category"] | order(order asc, name asc){
     "id": _id, name, group, cover, "slug": slug.current,
-    "works": *[_type == "workItem" && references(^._id)] | order(order asc, _createdAt asc){
-      "id": _id, title, kind, cover, image, videoEmbed, "videoFile": videoFile.asset->url
-    }
+    "works": *[(_type == "workItem" || _type == "galleryVideo") && references(^._id)] | order(order asc, _createdAt asc){
+        "id": _id, title, cover, image,
+        "kind": select(_type == "galleryVideo" => "video", kind),
+        "videoEmbed": select(_type == "galleryVideo" => videoUrl, videoEmbed),
+        "videoFile": videoFile.asset->url
+      }
   }`);
   await Promise.all((cats || []).flatMap((c: any) => (c.works || []).map(withAutoThumb)));
   return cats;
@@ -148,20 +154,5 @@ export async function getQuotes() {
   return client.fetch(`*[_type == "quote" && defined(text)] | order(order asc, _createdAt asc).text`);
 }
 
-export async function getWriting() {
-  return client.fetch(`*[_type == "writingPiece"] | order(date desc){
-    "id": _id, "slug": slug.current, title, category, date, excerpt,
-    "cover": cover.asset->url, body
-  }`);
-}
 
-export async function getWritingBySlug(slug: string) {
-  return client.fetch(`*[_type == "writingPiece" && slug.current == $slug][0]{
-    "id": _id, "slug": slug.current, title, category, date, excerpt,
-    "cover": cover.asset->url, body
-  }`, { slug });
-}
 
-export async function getAllWritingSlugs() {
-  return client.fetch(`*[_type == "writingPiece" && defined(slug.current)]{"slug": slug.current}`);
-}

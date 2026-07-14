@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Reveal from "./Reveal";
 import { sanityImage } from "@/sanity/lib/image";
@@ -11,6 +11,22 @@ export default function Archive({ albums, behanceUrl }: { albums: any[]; behance
   const rowRef = useRef<HTMLDivElement>(null);
   const drag = useRef({ down: false, moved: false, startX: 0, scroll: 0 });
   const [dragging, setDragging] = useState(false);
+  // The arrows only earn their place once the row actually overflows. With a
+  // handful of albums the row fits (and is centred), so scrolling controls would
+  // be pointing at nothing.
+  const [scrollable, setScrollable] = useState(false);
+
+  useEffect(() => {
+    const el = rowRef.current;
+    if (!el) return;
+    const measure = () => setScrollable(el.scrollWidth - el.clientWidth > 4);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    // Card images load late and can widen the row.
+    window.addEventListener("load", measure);
+    return () => { ro.disconnect(); window.removeEventListener("load", measure); };
+  }, [albums?.length]);
 
   if (!albums?.length) return null;
 
@@ -54,11 +70,17 @@ export default function Archive({ albums, behanceUrl }: { albums: any[]; behance
   return (
     <section className="archive" id="gallery">
       <div className="archive-head">
-        <Reveal><p className="eyebrow">The Archive</p></Reveal>
-        <div className="arch-nav">
-          <button className="arch-arrow" aria-label="Scroll left" onClick={() => nudge(-1)}>&#8249;</button>
-          <button className="arch-arrow" aria-label="Scroll right" onClick={() => nudge(1)}>&#8250;</button>
-        </div>
+        {/* The badge sits beside the heading, small — the full set lives on Behance. */}
+        <Reveal className="arch-headline">
+          <p className="eyebrow">Still Photos</p>
+          <BehanceBadge href={bh} className="bhb-inline" />
+        </Reveal>
+        {scrollable && (
+          <div className="arch-nav">
+            <button className="arch-arrow" aria-label="Scroll left" onClick={() => nudge(-1)}>&#8249;</button>
+            <button className="arch-arrow" aria-label="Scroll right" onClick={() => nudge(1)}>&#8250;</button>
+          </div>
+        )}
       </div>
 
       <div className="arch-rowwrap">
@@ -93,12 +115,6 @@ export default function Archive({ albums, behanceUrl }: { albums: any[]; behance
           ))}
 
         </div>
-      </div>
-
-      {/* Closing mark for the archive: a badge whose text spins around the ring,
-          the Behance mark at its centre, the disc flooding with ink on hover. */}
-      <div className="arch-foot">
-        <BehanceBadge href={bh} />
       </div>
     </section>
   );

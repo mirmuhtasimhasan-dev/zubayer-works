@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { imgProxy } from "@/lib/imgProxy";
 import Link from "next/link";
 import MotionHover from "./MotionHover";
+import BehanceBadge from "./BehanceBadge";
 import { sanityImage } from "@/sanity/lib/image";
 
 // Normalize a YouTube/Vimeo URL to an embeddable one.
@@ -48,7 +49,7 @@ function groupByCategory(videos: any[]) {
 const THUMB = { widths: [400, 600, 800, 1000], sizes: "(max-width:600px) 100vw, (max-width:1000px) 50vw, 33vw" };
 const ALBUM_IMG = { widths: [400, 600, 800], sizes: "(max-width:600px) 48vw, (max-width:1000px) 32vw, 24vw" };
 
-export default function GalleryTabs({ videos, albums }: { videos: any[]; albums: any[] }) {
+export default function GalleryTabs({ videos, albums, behanceUrl }: { videos: any[]; albums: any[]; behanceUrl?: string }) {
   const [tab, setTab] = useState<"video" | "photos">("video");
   const [lb, setLb] = useState<string | null>(null); // embed url of the playing video
 
@@ -118,6 +119,7 @@ export default function GalleryTabs({ videos, albums }: { videos: any[]; albums:
           <p className="eye-empty">No videos yet — add YouTube/Vimeo links in the Studio.</p>
         )
       ) : albums?.length ? (
+        <>
         <div className="gallery-albums">
           {albums.map((a) => (
             <Link key={a.id} href={`/archive/${a.slug || a.id}`} className="gallery-album">
@@ -135,6 +137,12 @@ export default function GalleryTabs({ videos, albums }: { videos: any[]; albums:
             </Link>
           ))}
         </div>
+          {/* Same rotating badge as The Archive — the full set lives on Behance.
+              Here it is a smaller, right-aligned sign-off under the album grid. */}
+          <div className="arch-foot arch-foot-end">
+            <BehanceBadge href={behanceUrl || "https://www.behance.net/zubayerahmed23"} />
+          </div>
+        </>
       ) : (
         <p className="eye-empty">No albums yet.</p>
       )}

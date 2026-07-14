@@ -36,7 +36,7 @@ const DEFAULT_QUOTES = [
 
 export default async function Home() {
   const [featuredWork, workCategories, gallery, archiveSettings, ventures, writing, quotes, engagements, writingSettings] = await Promise.all([
-    getFeaturedWork(), getWorkCategories(), getGallery(), getArchiveSettings(), getVentures(), getSubstackPosts(3), getQuotes(), getEngagements(), getWritingSettings(),
+    getFeaturedWork(), getWorkCategories(), getGallery(), getArchiveSettings(), getVentures(), getSubstackPosts(9), getQuotes(), getEngagements(), getWritingSettings(),
   ]);
   return (
     <main>
