@@ -3,7 +3,9 @@ import Reveal from "./Reveal";
 import LiquidHover from "./LiquidHover";
 import { sanityImage } from "@/sanity/lib/image";
 
-const KICKER = "Thoughts in motion";
+// "The Ventures" is the small kicker; the headline is the line that carries the idea.
+const KICKER = "The Ventures";
+const TITLE = "Thoughts in Motion";
 
 export default function Ventures({ ventures }: { ventures: any[] }) {
   if (!ventures?.length) return null;
@@ -11,7 +13,7 @@ export default function Ventures({ ventures }: { ventures: any[] }) {
     <section className="section" id="ventures">
       <div className="ven-head">
         <Reveal><p className="eyebrow">{KICKER}</p></Reveal>
-        <Reveal><h2 className="ven-title">The Ventures</h2></Reveal>
+        <Reveal><h2 className="ven-title">{TITLE}</h2></Reveal>
       </div>
       <div className="ventures-grid">
         {ventures.map((v) => (

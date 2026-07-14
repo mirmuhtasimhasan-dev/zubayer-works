@@ -2,15 +2,25 @@
 /**
  * <QuoteRotator> — one pull-quote at a time above the Writing section. Each quote
  * materializes with a blur-to-sharp fade, holds, blurs out, and the next comes in
- * (looping). On hover the current quote ripples with the SAME liquid effect as the
- * hero headline — it reuses <LiquidText> in `instant` mode. Reduced-motion swaps
- * without the blur. Fallback + cross-browser behaviour come from LiquidText.
+ * (looping). Reduced-motion swaps without the blur. The quote is plain text: no
+ * liquid/WebGL hover, it read as noise on a quote.
  */
 import { useEffect, useRef, useState } from "react";
-import LiquidText from "./LiquidText";
 
-const HOLD = 20000; // ms a quote stays sharp (20s each)
-const FADE = 750; // ms of the blur-in / blur-out
+const HOLD = 7000; // ms a quote stays sharp (20s each)
+const FADE = 700;// ms of the blur-in / blur-out
+
+/**
+ * The attribution is not its own Sanity field — it lives inside the quote string
+ * after an em-dash ("… — The Definition of Success"). Split it off so it can be
+ * styled separately. Option B (chosen): Cinzel caps, no leading dash.
+ */
+function splitQuote(raw: string) {
+  const s = (raw || "").trim();
+  const at = s.lastIndexOf("—");
+  if (at < 0) return { text: s, source: "" };
+  return { text: s.slice(0, at).trim(), source: s.slice(at + 1).trim() };
+}
 
 export default function QuoteRotator({ quotes }: { quotes: string[] }) {
   const [index, setIndex] = useState(0);
@@ -40,20 +50,15 @@ export default function QuoteRotator({ quotes }: { quotes: string[] }) {
 
   if (!quotes?.length) return null;
 
+  const { text, source } = splitQuote(quotes[index] || "");
+
   return (
     <div className="quote-block" aria-live="polite">
       <div className={`quote-rot ${shown ? "is-shown" : ""}`}>
-        {/* Exactly the hero headline's liquid hover — same <LiquidText>/WebGL, so
-            it behaves identically. The quote is shown exactly as written in the
-            Studio (no wrapping quote marks are added). */}
-        <LiquidText
-          key={index}
-          as="div"
-          className="quote-text"
-          text={(quotes[index] || "").trim()}
-          instant
-          hoverTarget=".quote-rot"
-        />
+        {/* Set in Cinzel CAPS (see .quote-text): Cinzel is a titling face and its
+            lowercase loses the carved-Roman look. */}
+        <div className="quote-text">{text}</div>
+        {source && <div className="quote-src">{source}</div>}
       </div>
     </div>
   );
