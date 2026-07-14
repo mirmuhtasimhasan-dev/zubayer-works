@@ -63,10 +63,11 @@ export default async function VenturePage({ params }: { params: Promise<{ slug: 
       <Nav />
       <article className="venture-detail">
         <Link href="/#ventures" className="post-back">← The Ventures</Link>
+        {/* The logo is the page's opening statement: large, centred, alone. */}
         <header className="venture-detail-head">
           {v.logo && (
             <span className="venture-detail-logo">
-              <img {...sanityImage(v.logo, { widths: [160, 320], sizes: "80px" })} alt={v.name} />
+              <img {...sanityImage(v.logo, { widths: [320, 480, 640], sizes: "200px" })} alt={v.name} />
             </span>
           )}
           <h1 className="venture-detail-title">{v.name}</h1>

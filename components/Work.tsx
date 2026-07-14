@@ -80,21 +80,14 @@ export default function Work({ featured, categories, eyebrow = "The Eye" }: { fe
       {items.map((f: any, i: number) => {
         const src = srcOf(f);
         const kind = workKind(f, f.categoryGroup);
-        // First featured → the full Eye (every category); the rest → their own category.
+        // Every featured card goes straight into ITS OWN category — no detour via
+        // the category index. Only a card with no category at all falls back to it.
         const catId = f.categorySlug || f.categoryId;
-        const toEyeIndex = i === 0 || !catId;
-        const watchHref = toEyeIndex ? "/eye" : `/eye/${catId}`;
-        // First card -> the whole Eye, counted in CATEGORIES ("Watch more works (3)").
-        // The others -> one category, counted in WORKS ("Watch more (5)").
+        const watchHref = catId ? `/eye/${catId}` : "/eye";
         const catWorks =
           (categories || []).find((c: any) => c?.id === f.categoryId)?.works?.length ?? 0;
-        const watchLabel = toEyeIndex
-          ? eyeCats.length
-            ? `Watch more works (${eyeCats.length})`
-            : "Watch more works"
-          : catWorks
-          ? `Watch more (${catWorks})`
-          : "Watch more";
+        const count = catId ? catWorks : eyeCats.length;
+        const watchLabel = count ? `More Works (${count})` : "More Works";
         return (
           <Reveal key={f.id}>
             <div className={`eye-featured${i > 0 ? " eye-featured-sub" : ""}`}>

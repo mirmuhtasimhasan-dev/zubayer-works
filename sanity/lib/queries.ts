@@ -110,7 +110,10 @@ export async function getArchiveSettings() {
 // Gallery page → "Videography" tab: video links whose thumbnails come from the URL.
 export async function getGalleryVideos() {
   const vids = await client.fetch(`*[_type == "galleryVideo"] | order(order asc){
-    "id": _id, title, videoUrl, cover
+    "id": _id, title, videoUrl, cover,
+    "categoryId": category->_id,
+    "categoryName": category->name,
+    "categoryOrder": category->order
   }`);
   await Promise.all(
     (vids || []).map(async (v: any) => {
@@ -122,7 +125,7 @@ export async function getGalleryVideos() {
 
 export async function getVentures() {
   return client.fetch(`*[_type == "venture"] | order(order asc){
-    "id": _id, name, tagline, description, "slug": slug.current, logo
+    "id": _id, name, kicker, tagline, description, "slug": slug.current, logo
   }`);
 }
 

@@ -72,7 +72,7 @@ export default function BehanceBadge({ href }: { href: string }) {
       aria-label="See the full archive on Behance"
       style={
         {
-          "--bhb-size": `${S}px`,
+          // The rendered size lives in CSS (.bhb) so it can shrink on phones.
           "--bhb-spin": `${SPIN_DURATION}s`,
           "--bhb-spin-hover": `${SPIN_DURATION_HOVER}s`,
         } as React.CSSProperties

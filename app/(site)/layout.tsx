@@ -1,12 +1,23 @@
-import { Cormorant_Garamond, Inter } from "next/font/google";
+import { Cormorant_Garamond, Inter, Source_Serif_4 } from "next/font/google";
 import CursorDot from "@/components/CursorDot";
 import MusicProvider from "@/components/MusicProvider";
 import { SoundCorner, SoundPill } from "@/components/SoundControls";
 
-const display = Cormorant_Garamond({
+// Source Serif 4 is the face across the whole site…
+const display = Source_Serif_4({
+  subsets: ["latin"],
+  weight: ["200", "300", "400", "600"],
+  variable: "--font-display",
+  // "optional" instead of "swap": a late swap re-wraps headings and shifts the
+  // cards after they have already painted.
+  display: "optional",
+});
+
+// …except the hero headline and the nav, which keep Cormorant Garamond.
+const hero = Cormorant_Garamond({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
-  variable: "--font-display",
+  variable: "--font-hero",
   display: "swap",
 });
 
@@ -19,7 +30,7 @@ const body = Inter({
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`${display.variable} ${body.variable} site`}>
+    <div className={`${display.variable} ${hero.variable} ${body.variable} site`}>
       <MusicProvider>
         {children}
         <CursorDot />

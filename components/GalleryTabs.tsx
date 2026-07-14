@@ -24,6 +24,27 @@ function VideoIcon() {
   );
 }
 
+// Videos stack down the page grouped by category, each group under its own
+// heading (category order first, then the video's own order — both from the
+// Studio). Anything without a category falls into one unlabelled block at the end,
+// so an unsorted library still looks like the old flat grid.
+function groupByCategory(videos: any[]) {
+  const groups = new Map<string, { id: string; name: string; order: number; videos: any[] }>();
+  for (const v of videos) {
+    const id = v.categoryId || "__none";
+    if (!groups.has(id)) {
+      groups.set(id, {
+        id,
+        name: v.categoryId ? v.categoryName || "" : "",
+        order: v.categoryId ? (typeof v.categoryOrder === "number" ? v.categoryOrder : 9998) : 9999,
+        videos: [],
+      });
+    }
+    groups.get(id)!.videos.push(v);
+  }
+  return [...groups.values()].sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
+}
+
 const THUMB = { widths: [400, 600, 800, 1000], sizes: "(max-width:600px) 100vw, (max-width:1000px) 50vw, 33vw" };
 const ALBUM_IMG = { widths: [400, 600, 800], sizes: "(max-width:600px) 48vw, (max-width:1000px) 32vw, 24vw" };
 
@@ -52,38 +73,46 @@ export default function GalleryTabs({ videos, albums }: { videos: any[]; albums:
 
       {tab === "video" ? (
         videos?.length ? (
-          <div className="eye-grid">
-            {videos.map((v) => {
-              // Sanity images are CORS-ok; the YouTube thumb is routed through
-              // /api/img so it can be used as a WebGL texture for the ripple.
-              const src = v.cover
-                ? sanityImage(v.cover, THUMB).src
-                : v.autoThumb
-                ? imgProxy(v.autoThumb)
-                : "";
-              return (
-                <button key={v.id} className="eye-work" onClick={() => setLb(embedUrl(v.videoUrl))}>
-                  <div className="eye-work-media">
-                    {src ? (
-                      // Same ripple feel as the featured Eye tiles (default params);
-                      // holdBase + activateOnHover only so the many gallery tiles do
-                      // not exhaust the browser's WebGL contexts. No zoom/swell.
-                      <MotionHover
-                        type="image"
-                        src={src}
-                        holdBase
-                        activateOnHover
-                        style={{ position: "absolute", inset: 0 }}
-                      />
-                    ) : (
-                      <span className="eye-tile-placeholder"><VideoIcon /></span>
-                    )}
-                    <span className="eye-work-play" aria-hidden />
-                  </div>
-                  {v.title && <span className="eye-work-title">{v.title}</span>}
-                </button>
-              );
-            })}
+          // One block per category, stacked down the page, each under its heading.
+          <div className="eye-groups">
+            {groupByCategory(videos).map((g) => (
+              <section className="eye-group" key={g.id}>
+                {g.name && <h3 className="eye-group-title">{g.name}</h3>}
+                <div className="eye-grid">
+                  {g.videos.map((v: any) => {
+                    // Sanity images are CORS-ok; the YouTube thumb goes through the
+                    // proxy so it can be a WebGL texture for the ripple.
+                    const src = v.cover
+                      ? sanityImage(v.cover, THUMB).src
+                      : v.autoThumb
+                      ? imgProxy(v.autoThumb)
+                      : "";
+                    return (
+                      <button key={v.id} className="eye-work" onClick={() => setLb(embedUrl(v.videoUrl))}>
+                        <div className="eye-work-media">
+                          {src ? (
+                            // Same ripple feel as the featured Eye tiles; holdBase +
+                            // activateOnHover so many tiles never exhaust the WebGL
+                            // contexts. No zoom/swell.
+                            <MotionHover
+                              type="image"
+                              src={src}
+                              holdBase
+                              activateOnHover
+                              style={{ position: "absolute", inset: 0 }}
+                            />
+                          ) : (
+                            <span className="eye-tile-placeholder"><VideoIcon /></span>
+                          )}
+                          <span className="eye-work-play" aria-hidden />
+                        </div>
+                        {v.title && <span className="eye-work-title">{v.title}</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
           </div>
         ) : (
           <p className="eye-empty">No videos yet — add YouTube/Vimeo links in the Studio.</p>

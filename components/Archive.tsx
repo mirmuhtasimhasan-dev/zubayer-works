@@ -92,18 +92,6 @@ export default function Archive({ albums, behanceUrl }: { albums: any[]; behance
             </Link>
           ))}
 
-          <div className="arch-card arch-end">
-            <a
-              href={bh}
-              target="_blank"
-              rel="noopener noreferrer"
-              // A drag that moved should not trigger the link.
-              onClick={(e) => { if (drag.current.moved) e.preventDefault(); }}
-            >
-              <span className="arch-end-arrow" aria-hidden>&#8599;</span>
-              <span className="arch-end-text">See the full archive on Behance</span>
-            </a>
-          </div>
         </div>
       </div>
 
