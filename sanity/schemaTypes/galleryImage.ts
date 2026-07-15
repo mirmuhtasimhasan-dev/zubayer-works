@@ -18,6 +18,13 @@ export default defineType({
     }),
     defineField({ name: "place", title: "Place / date", type: "string", description: 'e.g. "Rangamati" or a date' }),
     defineField({
+      name: "description",
+      title: "Short description",
+      type: "text",
+      rows: 3,
+      description: "Shown beside a photo in the lightbox when that photo has no caption of its own.",
+    }),
+    defineField({
       name: "image",
       title: "Cover image",
       type: "image",

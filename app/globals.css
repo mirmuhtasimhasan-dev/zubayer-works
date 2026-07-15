@@ -31,9 +31,51 @@ button{font-family:inherit;cursor:pointer;}
    cream nav with no box. Hidden on the narrowest screens, where the nav is tight. */
 .nav-sign{height:60px;width:auto;display:block;}
 @media (max-width:600px){.nav-logo-img{height:32px;}.nav-sign{height:42px;}.nav-logo{gap:14px;}.nav{padding:26px var(--side);}}
-.nav-links{display:flex;gap:28px;}
+.nav-links{display:flex;gap:28px;align-items:center;}
 .nav-links a{font-family:var(--font-display),serif;font-size:13px;letter-spacing:.04em;color:var(--ash);transition:color .3s;}
 .nav-links a:hover{color:var(--ink);}
+
+/* Engagements carries a hover dropdown (Affiliates). The gap between trigger and
+   panel is bridged by the panel's top padding so the cursor never crosses a dead
+   zone and the menu stays open on the way down. */
+.nav-item-has-sub{position:relative;}
+.nav-sub{
+  position:absolute;top:100%;left:50%;transform:translateX(-50%) translateY(2px);
+  min-width:184px;padding:16px 0 0;display:flex;flex-direction:column;
+  opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .32s ease,transform .4s cubic-bezier(.2,.7,.2,1);
+  z-index:60;
+}
+/* The card: no hard border, just a barely-there warm hairline and a soft, deep
+   shadow with an inner top highlight so it reads like a lifted paper chip. */
+.nav-sub::before{
+  content:"";position:absolute;top:16px;left:0;right:0;bottom:0;
+  background:rgba(250,248,243,.94);-webkit-backdrop-filter:blur(16px) saturate(1.05);backdrop-filter:blur(16px) saturate(1.05);
+  border:.5px solid rgba(120,100,75,.14);border-radius:13px;
+  box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 22px 48px -26px rgba(45,33,16,.5),0 4px 12px -8px rgba(45,33,16,.25);
+}
+/* A little pointer connecting the card to Engagements. */
+.nav-sub::after{
+  content:"";position:absolute;top:11px;left:50%;transform:translateX(-50%) rotate(45deg);
+  width:10px;height:10px;background:rgba(250,248,243,.94);
+  border-left:.5px solid rgba(120,100,75,.14);border-top:.5px solid rgba(120,100,75,.14);
+}
+.nav-item-has-sub:hover .nav-sub,.nav-item-has-sub:focus-within .nav-sub{
+  opacity:1;visibility:visible;pointer-events:auto;transform:translateX(-50%) translateY(0);
+}
+/* Items read as small editorial kickers; on hover a hairline grows in from the
+   left and the label steps in to meet it. */
+.nav-sub a{
+  position:relative;padding:11px 26px;font-family:var(--font-display),serif;
+  font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ash);
+  white-space:nowrap;transition:color .3s ease,padding .35s cubic-bezier(.2,.7,.2,1);
+}
+.nav-sub a::before{
+  content:"";position:absolute;left:26px;top:50%;width:0;height:1px;
+  background:var(--ink);opacity:.55;transform:translateY(-50%);transition:width .35s cubic-bezier(.2,.7,.2,1);
+}
+.nav-sub a:hover{color:var(--ink);padding-left:42px;}
+.nav-sub a:hover::before{width:10px;}
 .nav-burger-btn{display:none;flex-direction:column;justify-content:center;gap:6px;width:28px;height:20px;background:none;border:0;padding:0;cursor:pointer;}
 .nav-burger-btn span{display:block;width:100%;height:1.5px;background:var(--ink);}
 
@@ -46,6 +88,8 @@ button{font-family:inherit;cursor:pointer;}
 .mobile-menu-links a{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(34px,9vw,54px);line-height:1.28;color:var(--ink);opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s ease,color .25s;}
 .mobile-menu.open .mobile-menu-links a{opacity:1;transform:none;}
 .mobile-menu-links a:active{color:var(--ash);}
+/* Sub-item (Affiliates): smaller and indented so it reads as a child of Engagements. */
+.mobile-menu-links a.mobile-sub{font-size:clamp(20px,5.5vw,30px);color:var(--ash);padding-left:26px;line-height:1.5;}
 @media (min-width:821px){.mobile-menu{display:none!important;}}
 
 /* OPENING */
@@ -205,9 +249,12 @@ button{font-family:inherit;cursor:pointer;}
    player instead of the page going dark. The blur is what keeps the video
    readable against it; the veil alone is deliberately light. */
 .lightbox{position:fixed;inset:0;z-index:100;background:rgba(247,244,238,.72);backdrop-filter:blur(18px) saturate(1.05);-webkit-backdrop-filter:blur(18px) saturate(1.05);display:flex;align-items:center;justify-content:center;}
-/* Album lightbox: no shade at all — the photo just floats over the page. */
-.lightbox-light{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;}
-.lightbox-light .lb-figure img{box-shadow:none;}
+/* Album lightbox: same frosted PAPER veil as the video one, so the open photo
+   sits on the site's own colour instead of floating over the raw page. */
+/* Album veil is denser than the video one: the grid behind is busy, so a heavier
+   paper wash + blur keeps focus on the open photo. */
+.lightbox-light{background:rgba(247,244,238,.94);backdrop-filter:blur(22px) saturate(1.05);-webkit-backdrop-filter:blur(22px) saturate(1.05);}
+.lightbox-light .lb-figure img{box-shadow:0 40px 90px -50px rgba(26,24,20,.55);}
 .lightbox img{max-width:88vw;max-height:88vh;object-fit:contain;box-shadow:0 40px 90px -50px rgba(26,24,20,.55);}
 /* Ink, not white — the veil is light now. */
 .lb-arrow{position:absolute;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--ink);font-size:46px;opacity:.55;padding:20px;cursor:pointer;z-index:2;}
@@ -215,6 +262,28 @@ button{font-family:inherit;cursor:pointer;}
 .lb-figure{margin:0;max-width:88vw;max-height:88vh;display:flex;flex-direction:column;align-items:center;gap:12px;}
 .lb-figure img{max-width:88vw;max-height:82vh;object-fit:contain;}
 .lb-figure figcaption{color:var(--ash);font-size:13px;letter-spacing:.03em;}
+
+/* Album lightbox: image on the left, a text panel to its RIGHT (caption, or the
+   album name + short description). Stacks under the photo on narrow screens. */
+.lb-figure-row{flex-direction:row;align-items:center;gap:clamp(20px,3vw,44px);max-width:92vw;}
+.lb-figure-row img{max-width:min(66vw,900px);}
+.lb-meta{flex:0 1 300px;max-width:300px;text-align:left;align-self:center;}
+/* Light, warm, and italic — a name reads as an editorial caption, not a headline.
+   No black, no bold. */
+.lb-meta-title{font-family:var(--font-display),serif;font-weight:300;font-style:italic;font-size:clamp(20px,2.2vw,27px);line-height:1.2;letter-spacing:.01em;color:#6B5D4E;margin:0 0 14px;}
+.lb-meta-desc{font-family:var(--font-body),serif;font-weight:300;font-size:14.5px;line-height:1.7;color:var(--ash);margin:0;}
+.lb-meta-caption{font-family:var(--font-body),serif;font-weight:300;font-size:15px;line-height:1.7;color:#5A5044;margin:0;}
+/* Premium reveal: the panel is hidden until the cursor is over the photo, then it
+   drifts in. Touch has no hover, so it stays visible there (media query below). */
+@media (hover:hover) and (pointer:fine){
+  .lb-meta{opacity:0;transform:translateX(-10px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1);}
+  .lb-figure-row:hover .lb-meta{opacity:1;transform:none;}
+}
+@media (max-width:760px){
+  .lb-figure-row{flex-direction:column;align-items:center;gap:16px;}
+  .lb-figure-row img{max-width:88vw;max-height:70vh;}
+  .lb-meta{flex:none;max-width:88vw;text-align:center;}
+}
 
 /* The player is the one dark object on the light veil — the shadow lifts it off. */
 .eye-videobox{width:min(92vw,1120px);aspect-ratio:16/9;background:#000;object-fit:contain;box-shadow:0 50px 110px -55px rgba(26,24,20,.6);}
@@ -289,9 +358,8 @@ button{font-family:inherit;cursor:pointer;}
    that floods with ink on hover (the mark inverting to paper against it). */
 .arch-foot{margin-top:52px;padding:0 var(--side);display:flex;justify-content:center;}
 /* Gallery / Still Photos: a smaller sign-off, tucked to the right of the grid. */
-/* No side padding here: the section already pads, so keeping it would inset the
-   badge ~300px from the grid instead of sitting on its right edge. */
-.arch-foot-end{justify-content:flex-end;margin-top:34px;padding:0;}
+/* Centred under the album grid, just smaller than the home Archive badge. */
+.arch-foot-end{justify-content:center;margin-top:34px;}
 .arch-foot-end .bhb{--bhb-size:96px;}
 .arch-foot-end .bhb .bhb-ring-text{font-size:9px;letter-spacing:.14em;}
 .arch-foot-end .bhb .bhb-mark{width:19px;height:19px;}
@@ -407,6 +475,9 @@ button{font-family:inherit;cursor:pointer;}
 /* Body: text + images + videos, in any order */
 .venture-detail-body{margin-top:18px;}
 .v-media{margin:44px 0;}
+/* Body images sit narrower than the text column and centred, so a single graphic
+   (like the Jadughor plate) does not dominate the read. Video keeps full width. */
+.v-media:not(:has(.v-video)){max-width:460px;margin-left:auto;margin-right:auto;}
 .v-media img{width:100%;display:block;}
 .v-media .v-video{position:relative;aspect-ratio:16/9;background:var(--divider);overflow:hidden;}
 .v-media .v-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;}

@@ -86,7 +86,7 @@ export async function getGallery() {
 export async function getAlbum(slug: string) {
   return client.fetch(
     `*[_type == "galleryImage" && (slug.current == $slug || _id == $slug)][0]{
-      "id": _id, title, place, "slug": slug.current,
+      "id": _id, title, place, description, "slug": slug.current,
       "photos": photos[defined(asset)]{ ..., "ar": asset->metadata.dimensions.aspectRatio }
     }`,
     { slug }

@@ -5,7 +5,15 @@ import { sanityImage, urlFor } from "@/sanity/lib/image";
 
 const GRID_IMG = { widths: [400, 600, 800, 1000], sizes: "(max-width:600px) 48vw, (max-width:1000px) 45vw, 30vw" };
 
-export default function AlbumGallery({ photos }: { photos: any[] }) {
+export default function AlbumGallery({
+  photos,
+  albumTitle,
+  albumDescription,
+}: {
+  photos: any[];
+  albumTitle?: string;
+  albumDescription?: string;
+}) {
   const [lb, setLb] = useState<number | null>(null);
 
   const close = useCallback(() => setLb(null), []);
@@ -71,9 +79,20 @@ export default function AlbumGallery({ photos }: { photos: any[] }) {
               <button className="lb-arrow right" aria-label="Next" onClick={(e) => { e.stopPropagation(); step(1); }}>&#8250;</button>
             </>
           )}
-          <figure className="lb-figure" onClick={(e) => e.stopPropagation()}>
+          <figure className="lb-figure lb-figure-row" onClick={(e) => e.stopPropagation()}>
             <img src={urlFor(photos[lb]).width(2000).fit("max").auto("format").url()} alt={photos[lb]?.caption || ""} />
-            {photos[lb]?.caption && <figcaption>{photos[lb].caption}</figcaption>}
+            {/* The photo's own caption wins; with none, the album name + its short
+                description stand in, so the panel is never empty. */}
+            {photos[lb]?.caption ? (
+              <figcaption className="lb-meta">
+                <p className="lb-meta-caption">{photos[lb].caption}</p>
+              </figcaption>
+            ) : (albumTitle || albumDescription) ? (
+              <figcaption className="lb-meta">
+                {albumTitle && <h2 className="lb-meta-title">{albumTitle}</h2>}
+                {albumDescription && <p className="lb-meta-desc">{albumDescription}</p>}
+              </figcaption>
+            ) : null}
           </figure>
         </div>
       )}

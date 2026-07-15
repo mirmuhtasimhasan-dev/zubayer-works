@@ -31,7 +31,7 @@ export default async function AlbumPage({ params }: { params: Promise<{ slug: st
           <Link href="/#gallery" className="post-back">← The Archive</Link>
           <h1 className="album-title">{album.title}</h1>
           {album.place && <p className="album-place">{album.place}</p>}
-          <AlbumGallery photos={album.photos || []} />
+          <AlbumGallery photos={album.photos || []} albumTitle={album.title} albumDescription={album.description} />
         </div>
       </article>
     </main>
