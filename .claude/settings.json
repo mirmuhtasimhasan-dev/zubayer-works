@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(NODE_PATH='c:/Users/samiul niloy/zubayer-works/node_modules' node -e ' *)",
+      "Bash(node -e ' *)",
+      "Bash(NODE_PATH=\"c:/Users/samiul niloy/zubayer-works/node_modules\" node \"C:/Users/SAMIUL~1/AppData/Local/Temp/claude/c--Users-samiul-niloy-zubayer-works/ace0fa36-84fc-45b8-9c51-e6be6fcd91dd/scratchpad/font-check.js\")",
+      "Bash(NODE_PATH=\"c:/Users/samiul niloy/zubayer-works/node_modules\" node /tmp/fc.js)",
+      "Bash(NODE_PATH=\"c:/Users/samiul niloy/zubayer-works/node_modules\" node /tmp/a.js)",
+      "Bash(git commit -q -m '@ *)",
+      "Bash(git commit *)",
+      "Bash(NODE_PATH=\"c:/Users/samiul niloy/zubayer-works/node_modules\" node /tmp/al.js)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\samiul niloy\\.claude\\projects\\c--Users-samiul-niloy-zubayer-works\\memory"
+    ]
+  }
+}
