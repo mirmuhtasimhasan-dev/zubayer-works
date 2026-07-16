@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Reveal from "./Reveal";
 import LiquidHover from "./LiquidHover";
-export default function Contact({ settings }: { settings: any }) {
+export default function Contact() {
   return (
     <>
       <section className="section" id="contact">
@@ -11,9 +11,10 @@ export default function Contact({ settings }: { settings: any }) {
           <Link className="contact-email" href="/book">Book a session</Link>
         </Reveal>
       </section>
+      {/* Rule on top, copyright left, the build credit right. */}
       <footer className="footer">
-        <span>Zubayer Ahmed · {settings?.locationLabel || "Dhaka, Bangladesh"}</span>
-        <span>{settings?.footerLine}</span>
+        <span>&copy; {new Date().getFullYear()} Zubayer Ahmed</span>
+        <span className="footer-credit">Made By Agent Wise X</span>
       </footer>
       <div className="back-to-top-wrap">
         <a href="#top" className="back-to-top" aria-label="Back to top">
