@@ -9,12 +9,12 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
 body{background:var(--paper);}
-.site{color:var(--ink);font-family:var(--font-body),serif;font-weight:300;line-height:1.6;-webkit-font-smoothing:antialiased;}
+.site{color:var(--ink);font-family:var(--font-schibsted),sans-serif;font-weight:400;line-height:1.6;-webkit-font-smoothing:antialiased;}
 img{display:block;max-width:100%;}
 a{color:inherit;text-decoration:none;}
 button{font-family:inherit;cursor:pointer;}
 
-.eyebrow{font-family:var(--font-display),serif;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ash);margin-bottom:28px;}
+.eyebrow{font-family:var(--font-schibsted),sans-serif;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ash);margin-bottom:28px;}
 .section{padding:120px var(--side);}
 /* A section that is the FIRST thing on a standalone page has to clear the fixed
    nav itself (on the home page the full-height hero does that). */
@@ -23,7 +23,7 @@ button{font-family:inherit;cursor:pointer;}
 /* NAV */
 .nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:40px var(--side);border-bottom:1px solid transparent;background:rgba(247,244,238,.8);backdrop-filter:blur(8px);transition:padding .3s ease,border-color .3s ease;}
 .nav.scrolled{padding:24px var(--side);border-bottom:1px solid var(--divider);}
-.nav-logo{font-family:var(--font-display),serif;font-size:23px;font-weight:500;letter-spacing:.02em;color:var(--ink);display:inline-flex;align-items:center;gap:22px;min-width:0;}
+.nav-logo{font-family:var(--font-nav),serif;font-size:23px;font-weight:500;letter-spacing:.02em;color:var(--ink);display:inline-flex;align-items:center;gap:22px;min-width:0;}
 /* multiply blends the logo's white background into the cream nav (white → nav
    colour), leaving just the black mark — no white box. */
 .nav-logo-img{height:44px;width:auto;display:block;}
@@ -32,50 +32,59 @@ button{font-family:inherit;cursor:pointer;}
 .nav-sign{height:60px;width:auto;display:block;}
 @media (max-width:600px){.nav-logo-img{height:32px;}.nav-sign{height:42px;}.nav-logo{gap:14px;}.nav{padding:26px var(--side);}}
 .nav-links{display:flex;gap:28px;align-items:center;}
-.nav-links a{font-family:var(--font-display),serif;font-size:13px;letter-spacing:.04em;color:var(--ash);transition:color .3s;}
+.nav-links a{font-family:var(--font-nav),serif;font-size:13px;letter-spacing:.04em;color:var(--ash);transition:color .3s;}
 .nav-links a:hover{color:var(--ink);}
 
-/* Engagements carries a hover dropdown (Affiliates). The gap between trigger and
-   panel is bridged by the panel's top padding so the cursor never crosses a dead
-   zone and the menu stays open on the way down. */
-.nav-item-has-sub{position:relative;}
-.nav-sub{
-  position:absolute;top:100%;left:50%;transform:translateX(-50%) translateY(2px);
-  min-width:184px;padding:16px 0 0;display:flex;flex-direction:column;
-  opacity:0;visibility:hidden;pointer-events:none;
-  transition:opacity .32s ease,transform .4s cubic-bezier(.2,.7,.2,1);
-  z-index:60;
+/* ENGAGEMENTS DROPDOWN — "wide arrow panel". The trigger is a real link with a
+   caret; the panel drops centred below it. A transparent bridge (the panel
+   wrapper's padding-top) fills the gap so the cursor never crosses a dead zone. */
+.nde{position:relative;display:inline-flex;}
+.nde-trigger{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-nav),serif;font-size:13px;letter-spacing:.04em;color:var(--ash);transition:color .3s ease;}
+.nde:hover .nde-trigger,.nde:focus-within .nde-trigger{color:var(--ink);}
+/* ~7px chevron after the label; flips up when open. */
+.nde-caret{width:7px;height:7px;border-right:1.4px solid currentColor;border-bottom:1.4px solid currentColor;transform:translateY(-2px) rotate(45deg);transition:transform .25s ease;}
+.nde:hover .nde-caret,.nde:focus-within .nde-caret{transform:translateY(1px) rotate(-135deg);}
+
+.nde-panel{
+  position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  padding-top:10px; /* transparent bridge = the visible gap, keeps :hover alive */
+  z-index:60;opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .22s ease,visibility 0s .22s;
 }
-/* The card: no hard border, just a barely-there warm hairline and a soft, deep
-   shadow with an inner top highlight so it reads like a lifted paper chip. */
-.nav-sub::before{
-  content:"";position:absolute;top:16px;left:0;right:0;bottom:0;
-  background:rgba(250,248,243,.94);-webkit-backdrop-filter:blur(16px) saturate(1.05);backdrop-filter:blur(16px) saturate(1.05);
-  border:.5px solid rgba(120,100,75,.14);border-radius:13px;
-  box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 22px 48px -26px rgba(45,33,16,.5),0 4px 12px -8px rgba(45,33,16,.25);
+.nde-card{
+  list-style:none;margin:0;min-width:196px;padding:3px;
+  background:var(--paper);border:1px solid var(--divider);border-radius:6px;
+  box-shadow:0 22px 50px -18px rgba(0,0,0,.22);
+  transform:translateY(6px);transition:transform .22s ease;
 }
-/* A little pointer connecting the card to Engagements. */
-.nav-sub::after{
-  content:"";position:absolute;top:11px;left:50%;transform:translateX(-50%) rotate(45deg);
-  width:10px;height:10px;background:rgba(250,248,243,.94);
-  border-left:.5px solid rgba(120,100,75,.14);border-top:.5px solid rgba(120,100,75,.14);
+/* Open/close is pure CSS — :hover stays true over the panel child + bridge, so it
+   never flickers. */
+.nde:hover .nde-panel,.nde:focus-within .nde-panel{opacity:1;visibility:visible;pointer-events:auto;transition:opacity .22s ease;}
+.nde:hover .nde-card,.nde:focus-within .nde-card{transform:translateY(0);}
+/* Escape closes it even while the cursor is still on it (cleared on next enter).
+   Placed AFTER the hover rules so it wins at equal specificity. */
+.nde.is-suppressed .nde-panel{opacity:0;visibility:hidden;pointer-events:none;}
+.nde.is-suppressed .nde-card{transform:translateY(6px);}
+.nde.is-suppressed .nde-caret{transform:translateY(-2px) rotate(45deg);}
+/* Item row: whole row is the link; name left, hairline arrow right. */
+/* .nde-card prefix so it beats `.nav-links a` (which would force 13px). */
+.nde-card .nde-item{
+  display:flex;align-items:center;justify-content:space-between;gap:18px;
+  padding:9px 13px;border-radius:5px;text-decoration:none;
+  font-family:var(--font-nav),serif;font-size:16px;line-height:1;color:var(--ink);
+  transition:background .22s ease;
 }
-.nav-item-has-sub:hover .nav-sub,.nav-item-has-sub:focus-within .nav-sub{
-  opacity:1;visibility:visible;pointer-events:auto;transform:translateX(-50%) translateY(0);
+.nde-item:hover,.nde-item:focus-visible{background:var(--divider);outline:none;}
+.nde-item:focus-visible{box-shadow:inset 0 0 0 1px var(--ink);}
+.nde-arrow{font-size:17px;color:var(--ash);transition:transform .22s ease,color .22s ease;}
+.nde-item:hover .nde-arrow,.nde-item:focus-visible .nde-arrow{transform:translateX(5px);color:var(--ink);}
+.nde-trigger:focus-visible{outline:1px solid var(--ink);outline-offset:4px;}
+/* Reduced motion: no transform, instant show/hide. */
+@media (prefers-reduced-motion:reduce){
+  .nde-caret,.nde-card,.nde-arrow{transition:none;}
+  .nde-card{transform:none;}
+  .nde-panel{transition:opacity 0s,visibility 0s;}
 }
-/* Items read as small editorial kickers; on hover a hairline grows in from the
-   left and the label steps in to meet it. */
-.nav-sub a{
-  position:relative;padding:11px 26px;font-family:var(--font-display),serif;
-  font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ash);
-  white-space:nowrap;transition:color .3s ease,padding .35s cubic-bezier(.2,.7,.2,1);
-}
-.nav-sub a::before{
-  content:"";position:absolute;left:26px;top:50%;width:0;height:1px;
-  background:var(--ink);opacity:.55;transform:translateY(-50%);transition:width .35s cubic-bezier(.2,.7,.2,1);
-}
-.nav-sub a:hover{color:var(--ink);padding-left:42px;}
-.nav-sub a:hover::before{width:10px;}
 .nav-burger-btn{display:none;flex-direction:column;justify-content:center;gap:6px;width:28px;height:20px;background:none;border:0;padding:0;cursor:pointer;}
 .nav-burger-btn span{display:block;width:100%;height:1.5px;background:var(--ink);}
 
@@ -85,11 +94,34 @@ button{font-family:inherit;cursor:pointer;}
 .mobile-menu-top{display:flex;justify-content:space-between;align-items:center;padding:30px var(--side);}
 .mobile-close{background:none;border:0;font-size:26px;line-height:1;color:var(--ink);cursor:pointer;padding:4px 6px;}
 .mobile-menu-links{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:0 var(--side) 12vh;}
-.mobile-menu-links a{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(34px,9vw,54px);line-height:1.28;color:var(--ink);opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s ease,color .25s;}
+.mobile-menu-links a{font-family:var(--font-nav),serif;font-weight:400;font-size:clamp(26px,7vw,44px);line-height:1.3;color:var(--ink);opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s ease,color .25s;}
 .mobile-menu.open .mobile-menu-links a{opacity:1;transform:none;}
 .mobile-menu-links a:active{color:var(--ash);}
-/* Sub-item (Affiliates): smaller and indented so it reads as a child of Engagements. */
-.mobile-menu-links a.mobile-sub{font-size:clamp(20px,5.5vw,30px);color:var(--ash);padding-left:26px;line-height:1.5;}
+
+/* Mobile accordion (Engagements → Affiliates). Tapping the chevron expands the
+   nested sub-items; NOT the desktop hover panel (that is gated behind hover). */
+.mm-acc{display:flex;flex-direction:column;opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s ease;}
+.mobile-menu.open .mm-acc{opacity:1;transform:none;}
+.mm-acc-head{display:flex;align-items:center;gap:10px;}
+.mm-acc-head a{opacity:1!important;transform:none!important;transition:color .25s;}
+.mm-acc-toggle{background:none;border:0;padding:14px 10px;cursor:pointer;color:var(--ink);display:inline-flex;align-items:center;}
+.mm-chevron{width:13px;height:13px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-2px) rotate(45deg);transition:transform .3s ease;}
+.mm-chevron.up{transform:translateY(2px) rotate(-135deg);}
+.mm-acc-panel{overflow:hidden;max-height:0;transition:max-height .35s ease;}
+.mm-acc-panel.open{max-height:40vh;}
+/* Sub-item: a small uppercase kicker with a leading rule, indented as a child. */
+.mobile-menu-links a.mm-sub{
+  display:flex;align-items:center;gap:12px;
+  font-size:15px;font-weight:400;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--ash);line-height:1;margin:6px 0 12px 8px;padding:6px 0;
+  opacity:1;transform:none;
+}
+.mobile-menu-links a.mm-sub::before{
+  content:"";width:22px;height:1px;background:var(--faint);flex:none;
+}
+@media (prefers-reduced-motion:reduce){
+  .mm-acc,.mm-chevron,.mm-acc-panel{transition:none;}
+}
 @media (min-width:821px){.mobile-menu{display:none!important;}}
 
 /* OPENING */
@@ -97,14 +129,21 @@ button{font-family:inherit;cursor:pointer;}
 .orb{position:absolute;top:28%;left:26%;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(140,123,107,.28),rgba(247,244,238,0) 70%);filter:blur(20px);z-index:0;animation:orbFloat 15s ease-in-out infinite;will-change:transform;}
 @keyframes orbFloat{0%,100%{transform:translate(0,0);}50%{transform:translate(44px,-32px);}}
 .opening>*:not(.orb){position:relative;z-index:1;}
-.op-loc{font-family:var(--font-body);font-size:13px;letter-spacing:.1em;color:var(--ash);margin-bottom:42px;}
+/* Entrance is ALL CSS, off first paint — same delays the JS used (.6s / 1.45s),
+   so desktop is unchanged, but the phone no longer waits for hydration (which
+   made the kicker/subtitle stagger in seconds late, looking like a second play). */
+.op-loc{font-family:var(--font-body);font-size:13px;letter-spacing:.1em;color:var(--ash);margin-bottom:42px;animation:opFadeIn .9s ease .6s both;}
+@keyframes opFadeIn{from{opacity:0;}to{opacity:1;}}
 /* The DOM text is always visible (LiquidText keeps it as the reliable base); the
    entrance is a pure CSS blur-in on filter/transform, so it can never be blank. */
 .op-head{font-family:var(--font-hero),serif;font-weight:400;font-size:clamp(42px,7.2vw,96px);line-height:1.04;letter-spacing:-.01em;width:100%;max-width:16ch;animation:opHeadIn 1.1s cubic-bezier(.2,.7,.2,1) .25s both;}
 @keyframes opHeadIn{from{filter:blur(14px);transform:translateY(12px);}to{filter:blur(0);transform:none;}}
-@media (prefers-reduced-motion:reduce){.op-head{animation:none;}}
+/* Reduced motion: show the final hero instantly (still only once). */
+@media (prefers-reduced-motion:reduce){.op-head,.op-loc,.op-sub{animation:none;opacity:1;filter:none;transform:none;}}
 /* opacity is JS-driven (Opening reveals it after the headline finishes). */
-.op-sub{font-family:var(--font-body);width:100%;max-width:46ch;color:var(--ash);font-size:17px;margin-top:38px;}
+.op-sub{font-family:var(--font-body);width:100%;max-width:46ch;color:var(--ash);font-size:17px;margin-top:38px;animation:opFadeIn 1s ease 1.45s both;}
+/* Already played this page load (a remount): pin the final hero, no replay. */
+.opening.intro-done .op-head,.opening.intro-done .op-loc,.opening.intro-done .op-sub{animation:none;opacity:1;filter:none;transform:none;}
 .scroll-hint{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);opacity:0;animation:fadeIn 1s ease 3.3s forwards;z-index:1;}
 @keyframes fadeIn{to{opacity:1;}}
 
@@ -113,7 +152,10 @@ button{font-family:inherit;cursor:pointer;}
 .reveal.in{opacity:1;transform:none;}
 
 /* THE EYE — featured + group toggle + category slider + drill-down */
-.eye-play,.eye-work-play{position:absolute;inset:0;margin:auto;border-radius:50%;background:rgba(247,244,238,.9);display:flex;align-items:center;justify-content:center;transition:transform .4s;z-index:2;}
+/* pointer-events:none — the play badge is decorative (aria-hidden) and the tile
+   itself handles the click; without this it swallows the pointer at the tile's
+   centre and the ripple never activates there. */
+.eye-play,.eye-work-play{position:absolute;inset:0;margin:auto;border-radius:50%;background:rgba(247,244,238,.9);display:flex;align-items:center;justify-content:center;transition:transform .4s;z-index:2;pointer-events:none;}
 .eye-play{width:64px;height:64px;}
 .eye-work-play{width:48px;height:48px;}
 .eye-play::after,.eye-work-play::after{content:"";border-top:9px solid transparent;border-bottom:9px solid transparent;}
@@ -124,9 +166,12 @@ button{font-family:inherit;cursor:pointer;}
 .eye-head{margin-bottom:52px;}
 .eye-channel{display:inline-block;margin-bottom:18px;color:var(--ash);transition:color .3s ease;}
 .eye-channel:hover{color:var(--ink);}
-.eye-title{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(34px,4.4vw,52px);line-height:1.08;margin-bottom:20px;}
+/* Writing kicker as an external link: a small arrow that lifts on hover. */
+.wr-channel-arrow{display:inline-block;font-size:.85em;margin-left:2px;transition:transform .3s cubic-bezier(.2,.7,.2,1);}
+.wr-channel:hover .wr-channel-arrow{transform:translate(2px,-2px);}
+.eye-title{font-family:var(--font-schibsted),sans-serif;font-weight:400;font-size:clamp(26px,3.2vw,38px);line-height:1.1;margin-bottom:20px;}
 .eye-intro{max-width:52ch;color:var(--ash);font-size:15px;line-height:1.65;}
-@media (max-width:600px){.eye-head{margin-bottom:34px;}.eye-intro{font-size:14px;}}
+@media (max-width:600px){.eye-head{margin-bottom:34px;}.eye-intro{font-size:12.5px;}.eye-title{font-size:26px;}}
 
 /* Featured */
 .eye-featured{display:block;width:100%;text-align:left;background:none;border:0;padding:0;margin:8px 0 52px;cursor:pointer;}
@@ -135,24 +180,26 @@ button{font-family:inherit;cursor:pointer;}
 @media (max-width:600px){.eye-featured-sub{max-width:100%;}}
 .eye-featured-media{position:relative;aspect-ratio:16/7;overflow:hidden;background:var(--divider);}
 .eye-featured-video{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;pointer-events:none;}
-.eye-featured-media img{width:100%;height:100%;object-fit:cover;filter:saturate(.7);transition:transform .9s cubic-bezier(.2,.7,.2,1),filter .9s ease;}
-.eye-featured:hover .eye-featured-media img{transform:scale(1.04);filter:saturate(1);}
+.eye-featured-media img{width:100%;height:100%;object-fit:cover;filter:saturate(.7);transition:filter .9s ease;}
+/* No scale here: the featured tile should only RIPPLE on hover, exactly like the
+   gallery Videography tiles — the old transform:scale(1.04) was the zoom. */
+.eye-featured:hover .eye-featured-media img{filter:saturate(1);}
 .eye-featured:hover .eye-play{transform:scale(1.08);}
 .eye-featured-meta{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:baseline;gap:20px;margin-top:16px;}
 /* Same treatment as the "Watch more works" link, so the row reads as one line. */
-.eye-featured-title{font-family:var(--font-display),serif;font-size:15px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);}
+.eye-featured-title{font-family:var(--font-schibsted),sans-serif;font-weight:300;font-size:15px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);}
 .eye-featured-cat{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ash);white-space:nowrap;}
 /* "Watch more →" on the featured card → opens the category's own page. */
 .eye-watch-more{display:inline-flex;align-items:center;gap:7px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ash);white-space:nowrap;transition:color .3s ease,gap .3s ease;}
 .eye-watch-more:hover{color:var(--ink);gap:11px;}
 /* Gallery > Videography: one block per category, stacked down the page. */
 .eye-groups{display:flex;flex-direction:column;gap:64px;}
-.eye-group-title{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(22px,2.4vw,28px);line-height:1.15;margin-bottom:22px;padding-bottom:14px;border-bottom:1px solid var(--divider);}
-@media (max-width:600px){.eye-groups{gap:44px;}.eye-group-title{margin-bottom:16px;}}
+.eye-group-title{font-family:var(--font-schibsted),sans-serif;font-weight:400;font-size:clamp(22px,2.4vw,28px);line-height:1.15;margin-bottom:22px;padding-bottom:14px;border-bottom:1px solid var(--divider);}
+@media (max-width:600px){.eye-groups{gap:44px;}.eye-group-title{margin-bottom:16px;font-size:16px;}.eye-cat-title{font-size:22px;}}
 
 /* Category page (/eye/<slug>) */
 .eye-cat{max-width:1180px;margin:0 auto;padding:150px clamp(24px,6vw,60px) 120px;}
-.eye-cat-title{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(30px,5vw,52px);line-height:1.05;margin:20px 0 40px;}
+.eye-cat-title{font-family:var(--font-schibsted),sans-serif;font-weight:400;font-size:clamp(22px,2.8vw,32px);line-height:1.12;margin:16px 0 40px;}
 /* Phones: smaller featured label + title. */
 @media (max-width:600px){
   .eye-featured{margin:6px 0 34px;}
@@ -176,7 +223,7 @@ button{font-family:inherit;cursor:pointer;}
 
 /* Group toggle (outlined pills) */
 .eye-toggle{display:flex;gap:12px;margin-bottom:34px;}
-.eye-pill{font-family:var(--font-display),serif;font-size:17px;padding:10px 24px;border-radius:999px;background:transparent;border:0.5px solid var(--divider);color:var(--ash);cursor:pointer;transition:color .25s ease,border-color .25s ease;}
+.eye-pill{font-family:var(--font-schibsted),sans-serif;font-size:17px;padding:10px 24px;border-radius:999px;background:transparent;border:0.5px solid var(--divider);color:var(--ash);cursor:pointer;transition:color .25s ease,border-color .25s ease;}
 .eye-pill.active{border-color:var(--ink);color:var(--ink);}
 
 /* Category slider */
@@ -200,7 +247,7 @@ button{font-family:inherit;cursor:pointer;}
 }
 .eye-tile-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--faint);}
 .eye-tile-placeholder svg{width:40px;height:40px;}
-.eye-tile-name{display:block;font-family:var(--font-display),serif;font-size:19px;margin-top:14px;}
+.eye-tile-name{display:block;font-family:var(--font-schibsted),sans-serif;font-size:19px;margin-top:14px;}
 .eye-tile-count{display:block;font-size:12px;letter-spacing:.05em;color:var(--ash);margin-top:4px;}
 @media (max-width:1000px){.eye-tile{flex-basis:calc((100% - 22px) / 2);}}
 /* Phones: same slider as desktop, just scaled down & refined — smaller tiles
@@ -224,7 +271,7 @@ button{font-family:inherit;cursor:pointer;}
 /* Drill-down grid */
 .eye-back{background:none;border:0;padding:0;font-size:14px;color:var(--ash);cursor:pointer;transition:color .3s;}
 .eye-back:hover{color:var(--ink);}
-.eye-drill-title{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(24px,3vw,34px);margin:10px 0 28px;}
+.eye-drill-title{font-family:var(--font-schibsted),sans-serif;font-weight:400;font-size:clamp(24px,3vw,34px);margin:10px 0 28px;}
 .eye-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
 .eye-work{background:none;border:0;padding:0;text-align:left;cursor:pointer;}
 /* Drill slider (works > 3): tiles slide 3-up like the category slider. */
@@ -238,7 +285,7 @@ button{font-family:inherit;cursor:pointer;}
 .eye-work:hover .eye-work-media > img{transform:scale(1.05);filter:saturate(1);}
 .eye-work-media > div img{width:100%;height:100%;object-fit:cover;}
 .eye-work:hover .eye-work-play{transform:scale(1.08);}
-.eye-work-title{display:block;font-family:var(--font-display),serif;font-size:17px;font-weight:300;margin-top:12px;}
+.eye-work-title{display:block;font-family:var(--font-schibsted),sans-serif;font-size:17px;font-weight:300;margin-top:12px;}
 .eye-empty{color:var(--ash);font-size:15px;padding:18px 0;}
 
 /* Video modal */
@@ -249,6 +296,8 @@ button{font-family:inherit;cursor:pointer;}
    player instead of the page going dark. The blur is what keeps the video
    readable against it; the veil alone is deliberately light. */
 .lightbox{position:fixed;inset:0;z-index:100;background:rgba(247,244,238,.72);backdrop-filter:blur(18px) saturate(1.05);-webkit-backdrop-filter:blur(18px) saturate(1.05);display:flex;align-items:center;justify-content:center;}
+/* Phone: backdrop-blur is unreliable, so lean on a near-opaque paper veil. */
+@media (max-width:600px){.lightbox{background:rgba(247,244,238,.97);}.lightbox-light{background:rgba(247,244,238,.98);}}
 /* Album lightbox: same frosted PAPER veil as the video one, so the open photo
    sits on the site's own colour instead of floating over the raw page. */
 /* Album veil is denser than the video one: the grid behind is busy, so a heavier
@@ -270,9 +319,9 @@ button{font-family:inherit;cursor:pointer;}
 .lb-meta{flex:0 1 300px;max-width:300px;text-align:left;align-self:center;}
 /* Light, warm, and italic — a name reads as an editorial caption, not a headline.
    No black, no bold. */
-.lb-meta-title{font-family:var(--font-display),serif;font-weight:300;font-style:italic;font-size:clamp(20px,2.2vw,27px);line-height:1.2;letter-spacing:.01em;color:#6B5D4E;margin:0 0 14px;}
-.lb-meta-desc{font-family:var(--font-body),serif;font-weight:300;font-size:14.5px;line-height:1.7;color:var(--ash);margin:0;}
-.lb-meta-caption{font-family:var(--font-body),serif;font-weight:300;font-size:15px;line-height:1.7;color:#5A5044;margin:0;}
+.lb-meta-title{font-family:var(--font-schibsted),sans-serif;font-weight:300;font-style:italic;font-size:clamp(20px,2.2vw,27px);line-height:1.2;letter-spacing:.01em;color:#6B5D4E;margin:0 0 14px;}
+.lb-meta-desc{font-family:var(--font-schibsted),sans-serif;font-weight:300;font-size:14.5px;line-height:1.7;color:var(--ash);margin:0;}
+.lb-meta-caption{font-family:var(--font-schibsted),sans-serif;font-weight:300;font-size:15px;line-height:1.7;color:#5A5044;margin:0;}
 /* Premium reveal: the panel is hidden until the cursor is over the photo, then it
    drifts in. Touch has no hover, so it stays visible there (media query below). */
 @media (hover:hover) and (pointer:fine){
@@ -308,14 +357,13 @@ button{font-family:inherit;cursor:pointer;}
 /* THE ARCHIVE — a single draggable diary row */
 .archive{padding:110px 0 90px;}
 .archive-head{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:0 var(--side);}
-/* Heading + the small Behance badge, side by side. */
-.arch-headline{display:flex;align-items:center;gap:18px;}
-.arch-headline .eyebrow{margin-bottom:0;}
-/* Doubled class: .bhb sets --bhb-size and is declared later, so a single class
-   here would lose the cascade and the badge would stay full size. */
-.bhb.bhb-inline{--bhb-size:64px;}
-.bhb.bhb-inline .bhb-ring-text{font-size:6.5px;letter-spacing:.1em;}
-.bhb.bhb-inline .bhb-mark{width:14px;height:14px;}
+.archive-head .eyebrow{margin-bottom:0;}
+/* Heading on the left, the Behance link (and arrows if any) on the right. */
+.arch-head-right{display:flex;align-items:center;gap:18px;margin-left:auto;}
+@media (max-width:600px){
+  .archive-head{gap:12px;}
+  .archive-head .eyebrow{white-space:nowrap;}
+}
 .arch-nav{display:flex;gap:12px;}
 .arch-rowwrap{position:relative;margin-top:28px;}
 /* generous top padding so the hover pop-up (grows upward) is never clipped */
@@ -329,7 +377,7 @@ button{font-family:inherit;cursor:pointer;}
 .arch-card-media{position:relative;aspect-ratio:1/1;overflow:hidden;background:var(--divider);transform-origin:center bottom;transition:transform .45s cubic-bezier(.2,.7,.2,1),box-shadow .45s ease;will-change:transform;}
 .arch-card-media img{width:100%;height:100%;object-fit:cover;filter:saturate(.72);transition:filter .5s ease;display:block;user-select:none;-webkit-user-drag:none;pointer-events:none;}
 .arch-card-meta{margin-top:14px;}
-.arch-card-title{display:block;font-family:var(--font-display),serif;font-size:17px;line-height:1.2;}
+.arch-card-title{display:block;font-family:var(--font-schibsted),sans-serif;font-size:17px;line-height:1.2;}
 .arch-card-place{display:block;font-size:12px;letter-spacing:.06em;color:var(--ash);margin-top:3px;}
 
 /* hover pop-up (zoom preview) — fine pointers only, and not while dragging */
@@ -352,85 +400,136 @@ button{font-family:inherit;cursor:pointer;}
 @media (hover:none){.arch-nav{display:none;}}
 
 /* end card → Behance */
-
-/* ===== BEHANCE BADGE =====
-   Text spinning around a ring, the Behance mark at the centre, and an inner disc
-   that floods with ink on hover (the mark inverting to paper against it). */
 .arch-foot{margin-top:52px;padding:0 var(--side);display:flex;justify-content:center;}
-/* Gallery / Still Photos: a smaller sign-off, tucked to the right of the grid. */
-/* Centred under the album grid, just smaller than the home Archive badge. */
+/* Gallery / Still Photos: a centred sign-off under the album grid. */
 .arch-foot-end{justify-content:center;margin-top:34px;}
-.arch-foot-end .bhb{--bhb-size:96px;}
-.arch-foot-end .bhb .bhb-ring-text{font-size:9px;letter-spacing:.14em;}
-.arch-foot-end .bhb .bhb-mark{width:19px;height:19px;}
-.bhb{--bhb-size:132px;--bhb-accent:#E8E3D9;position:relative;display:grid;place-items:center;width:var(--bhb-size);height:var(--bhb-size);border-radius:50%;color:var(--ink);flex:none;}
-.bhb:focus-visible{outline:1px solid var(--ink);outline-offset:6px;}
-.bhb-ring{position:absolute;inset:0;width:100%;height:100%;animation:bhbSpin var(--bhb-spin) linear infinite;transform-origin:50% 50%;}
-.bhb:hover .bhb-ring{animation-duration:var(--bhb-spin-hover);}
-.bhb-ring-text{font-family:var(--font-display),serif;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;fill:var(--ash);}
-@keyframes bhbSpin{to{transform:rotate(360deg);}}
-.bhb-disc{position:absolute;inset:0;width:100%;height:100%;overflow:visible;}
-.bhb-disc-ring{fill:none;stroke:var(--ink);stroke-width:.5;transition:stroke .4s ease;}
-.bhb:hover .bhb-disc-ring{stroke:var(--bhb-accent);}
-.bhb-disc-fill{fill:var(--bhb-accent);transform:scale(0);transform-origin:50% 50%;transition:transform .4s cubic-bezier(.7,0,.2,1);}
-.bhb:hover .bhb-disc-fill{transform:scale(1);}
-.bhb-mark{position:relative;width:26px;height:26px;color:var(--ink);transition:color .35s ease,transform .4s cubic-bezier(.7,0,.2,1);}
-.bhb:hover .bhb-mark{color:var(--ink);transform:scale(1.08);}
-@media (hover:none),(pointer:coarse){
-  /* No hover: the disc stays outlined and the ring keeps turning, with a firm
-     pressed state and a comfortable tap target. */
-  .bhb{-webkit-tap-highlight-color:transparent;}
-  .bhb-disc-ring{stroke:var(--ash);}
-  .bhb:active .bhb-disc-fill{transform:scale(1);}
-  .bhb:active .bhb-disc-ring{stroke:var(--bhb-accent);}
-  .bhb:active .bhb-mark{color:var(--ink);transform:scale(.96);}
+
+/* ===== BEHANCE LINK — expanding circle =====
+   A small OUTLINED circle with the Behance logo at rest; on hover / focus it fills
+   WARM ash (never black) and expands into a pill revealing the label. Its own flex
+   item, so the width growth never reflows neighbours. Colours are tunable here. */
+.bhl{
+  --behance-fill:var(--divider); /* hover fill = the ventures-card tone (#E8E3D9) */
+  --behance-rest:#8C7B6B;        /* rest: outline + logo colour (warm ash) */
+  --behance-open-text:var(--ink);/* text + logo once filled (dark on the card tone) */
+  --bhl-speed:.9s;               /* ← how long the pill takes to open/close */
+  --bhl-fade:.45s;               /* ← how long the colour/label fade takes */
+  display:inline-flex;align-items:center;flex:none;height:42px;max-width:42px;
+  border-radius:999px;border:1px solid var(--behance-rest);background:transparent;
+  color:var(--behance-rest);text-decoration:none;overflow:hidden;
+  font-family:var(--font-schibsted),sans-serif;font-size:12px;letter-spacing:.06em;white-space:nowrap;
+  transition:max-width var(--bhl-speed) cubic-bezier(.2,.7,.2,1),background var(--bhl-fade) ease,border-color var(--bhl-fade) ease,color var(--bhl-fade) ease;
+}
+/* A fixed slot that reserves the expanded width and keeps the resting circle at
+   its LEFT edge — so on hover the logo stays put and the label slides out to the
+   RIGHT into reserved space. No reflow (slot width is fixed), and the cursor over
+   the logo never loses the hover (the logo doesn't move). */
+.bhl-slot{display:inline-flex;justify-content:flex-start;min-width:210px;}
+.bhl-icon{flex:none;width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;}
+.bhl-icon svg{width:19px;height:19px;display:block;}
+.bhl-label{overflow:hidden;max-width:0;opacity:0;padding-right:0;
+  transition:max-width var(--bhl-speed) cubic-bezier(.2,.7,.2,1),opacity var(--bhl-fade) ease,padding var(--bhl-speed) ease;}
+.bhl-label span{margin-left:3px;}
+.bhl:focus-visible{outline:2px solid var(--behance-fill);outline-offset:3px;}
+
+/* Collapsed to a circle by default EVERYWHERE. It opens on:
+   - desktop: hover / keyboard focus;
+   - touch: `.is-open`, set by the first tap (the component swallows that tap, so
+     the second tap follows the link) — same reveal as PC, just tap-driven. */
+.bhl.is-open{max-width:320px;background:var(--behance-fill);border-color:var(--behance-fill);color:var(--behance-open-text);}
+.bhl.is-open .bhl-label{max-width:240px;opacity:1;padding-right:18px;}
+@media (hover:hover) and (pointer:fine){
+  .bhl:hover,.bhl:focus-visible,.bhl:focus-within{max-width:320px;background:var(--behance-fill);border-color:var(--behance-fill);color:var(--behance-open-text);}
+  .bhl:hover .bhl-label,.bhl:focus-visible .bhl-label,.bhl:focus-within .bhl-label{max-width:240px;opacity:1;padding-right:18px;}
+}
+/* Reduced motion: it still opens, just with no sliding. */
+@media (prefers-reduced-motion:reduce){
+  .bhl,.bhl-label{transition:background .3s ease,border-color .3s ease,color .3s ease;}
+}
+/* Phone — MUST come after the .bhl base rules above (a media query adds no
+   specificity, so an earlier block would just lose the cascade). The reserved
+   slot only exists to give desktop hover room to grow into; on touch the pill
+   grows on tap instead, so drop it and let the circle sit hard right. */
+@media (max-width:600px){
+  .bhl-slot{min-width:0;justify-content:flex-end;}
+  .bhl{font-size:11px;height:38px;}
+  .bhl-icon{width:34px;height:34px;}
+  .bhl-icon svg{width:17px;height:17px;}
+  .bhl.is-open .bhl-label{padding-right:14px;}
 }
 @media (max-width:600px){
-  /* Phones: a smaller mark, with less air around it. */
-  .bhb{--bhb-size:96px;}
-  .bhb-mark{width:20px;height:20px;}
   /* No hover here, so the row needs none of the headroom the pop-up wants. */
   .archive{padding:56px 0 48px;}
   .arch-rowwrap{margin-top:14px;}
   .arch-row{padding:16px var(--side) 14px;}
   .arch-foot{margin-top:18px;}
 }
-@media (prefers-reduced-motion:reduce){
-  .bhb-ring{animation:none;}
-  .bhb-disc-fill,.bhb-mark{transition:none;}
-}
 
 
 /* ALBUM PAGE (an Archive item opens here with all its photos) */
 .album{max-width:1180px;margin:0 auto;padding:150px clamp(24px,6vw,60px) 120px;}
-.album-title{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(30px,5vw,52px);line-height:1.05;margin:20px 0 6px;}
-.album-place{color:var(--ash);font-size:14px;letter-spacing:.04em;margin-bottom:44px;}
+.album-title{font-family:var(--font-schibsted),sans-serif;font-weight:400;font-size:clamp(22px,2.8vw,32px);line-height:1.12;margin:20px 0 6px;}
+.album-place{color:var(--ash);font-size:14px;letter-spacing:.04em;margin-bottom:0;}
 /* Even grid: every cell is the SAME fixed size, so the album reads as one tidy
    set. The photo is cover-cropped to fill it; clicking opens the lightbox, which
    shows the full uncropped image. */
-.album-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+/* Always a clear gap above the grid, whether or not a place line is present. */
+.album-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:44px;}
 /* White print border around every photo, so the album reads as a set of prints. */
-.album-cell{position:relative;display:block;width:100%;aspect-ratio:4/5;margin:0;padding:0;border:12px solid #fff;background:var(--divider);cursor:pointer;overflow:hidden;box-shadow:0 8px 24px -16px rgba(26,24,20,.35);}
+.album-cell{position:relative;display:block;width:100%;aspect-ratio:4/5;margin:0;padding:0;border:12px solid #fff;background:var(--divider);cursor:pointer;overflow:hidden;box-shadow:0 8px 24px -16px rgba(26,24,20,.35);transform-origin:center;transition:transform .45s cubic-bezier(.2,.7,.2,1),box-shadow .45s ease;will-change:transform;}
+.album-cell img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.9);transition:filter .5s ease;}
+/* No ripple: the framed print grows with a soft shadow on hover. */
+@media (hover:hover) and (pointer:fine){
+  .album-cell:hover{transform:scale(1.07);box-shadow:0 34px 64px -26px rgba(26,24,20,.42);z-index:5;}
+  .album-cell:hover img{filter:saturate(1);}
+}
+@media (prefers-reduced-motion:reduce){.album-cell{transition:box-shadow .3s ease;}.album-cell:hover{transform:none;}}
 @media (max-width:1000px){.album-grid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:600px){.album-cell{border-width:5px;}.album-grid{gap:10px;}}
 
 /* GALLERY PAGE — Still Photos: album covers that open each album. */
 .gallery-albums{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-top:36px;}
-.gallery-album{display:block;color:inherit;text-decoration:none;}
-.gallery-album-media{position:relative;aspect-ratio:4/5;overflow:hidden;background:linear-gradient(155deg,#ece7dd 0%,#e0d9cc 100%);}
-.gallery-album-media img{width:100%;height:100%;object-fit:cover;filter:saturate(.8);transition:transform .6s cubic-bezier(.2,.7,.2,1),filter .6s ease;}
-@media (hover:hover){.gallery-album:hover .gallery-album-media img{transform:scale(1.04);filter:saturate(1);}}
-.gallery-album-name{display:block;font-family:var(--font-display),serif;font-size:17px;font-weight:300;margin-top:12px;}
+.gallery-album{position:relative;display:block;color:inherit;text-decoration:none;}
+.gallery-album-media{position:relative;aspect-ratio:1/1;overflow:hidden;background:linear-gradient(155deg,#ece7dd 0%,#e0d9cc 100%);transform-origin:center;transition:transform .45s cubic-bezier(.2,.7,.2,1),box-shadow .45s ease;will-change:transform;}
+.gallery-album-media img{width:100%;height:100%;object-fit:cover;filter:saturate(.85);transition:filter .5s ease;}
+/* Pop forward on hover — the cover scales up with a soft shadow, like the album grid. */
+@media (hover:hover) and (pointer:fine){
+  .gallery-album:hover{z-index:5;}
+  .gallery-album:hover .gallery-album-media{transform:scale(1.06);box-shadow:0 32px 60px -26px rgba(26,24,20,.42);}
+  .gallery-album:hover .gallery-album-media img{filter:saturate(1);}
+}
+@media (prefers-reduced-motion:reduce){.gallery-album-media{transition:box-shadow .3s ease;}.gallery-album:hover .gallery-album-media{transform:none;}}
+.gallery-album-name{display:block;font-family:var(--font-schibsted),sans-serif;font-size:17px;font-weight:300;margin-top:12px;}
 .gallery-album-place{display:block;font-size:12px;letter-spacing:.05em;color:var(--ash);margin-top:3px;}
 @media (max-width:1000px){.gallery-albums{grid-template-columns:repeat(3,1fr);}}
 @media (max-width:700px){.gallery-albums{grid-template-columns:repeat(2,1fr);gap:14px;}}
 
 /* ABOUT */
 .about{display:grid;grid-template-columns:1fr 1.2fr;gap:80px;align-items:start;}
-.about-portrait{position:sticky;top:120px;overflow:hidden;}
+/* Sticky over a full-height column with the image centred inside, so as the long
+   text scrolls the portrait sits in the MIDDLE of the viewport, not pinned up top. */
+.about-portrait{position:sticky;top:0;height:100vh;display:flex;align-items:center;overflow:hidden;}
 .about-portrait img{width:100%;filter:saturate(.7);}
-.about-title{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(30px,4vw,50px);line-height:1.08;margin-bottom:32px;}
-.about-intro{font-family:var(--font-display),serif;font-size:25px;line-height:1.4;color:var(--ink);margin-bottom:42px;}
+.about-title{font-family:var(--font-schibsted),sans-serif;font-weight:400;font-size:clamp(30px,4vw,50px);line-height:1.08;margin-bottom:32px;}
+.about-intro{font-family:var(--font-schibsted),sans-serif;font-size:25px;line-height:1.4;color:var(--ink);margin-bottom:42px;}
 .about-text p{color:var(--ash);font-size:16px;margin-bottom:24px;max-width:54ch;}
+
+/* OFF THE CLOCK — interests row at the foot of the About column.
+   Sans stack (Inter if ever wired, else system geometric sans) for the clean
+   grotesque look of the mockup; the rest of the site stays serif. */
+.offclock{--oc-sans:var(--font-schibsted),sans-serif;}
+.oc-kick{font-family:var(--oc-sans);font-size:11px;font-weight:500;letter-spacing:.24em;text-transform:uppercase;color:var(--ash);margin:64px 0 20px;text-align:center;}
+/* Full width under the About columns: all seven on one centred line. */
+.oc-row{list-style:none;margin:0;padding:0;display:flex;flex-wrap:nowrap;justify-content:center;gap:clamp(20px,4vw,52px);}
+.oc-item{display:flex;flex-direction:column;align-items:center;gap:11px;}
+.oc-icon{color:var(--oc-ink);width:28px;height:28px;display:block;flex:none;}
+.oc-label{font-family:var(--oc-sans);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ash);line-height:1;}
+@media (max-width:640px){
+  /* Phone: too narrow for one line — let it wrap rather than overflow. */
+  .oc-row{flex-wrap:wrap;gap:22px 26px;}
+  .oc-icon{width:24px;height:24px;}
+  .oc-kick{margin-top:44px;}
+}
 .discipline{width:100%;margin-top:44px;border-collapse:collapse;}
 .discipline td{padding:16px 0;border-top:1px solid var(--divider);font-size:14px;color:var(--ash);}
 .discipline td:first-child{color:var(--ink);}
@@ -444,40 +543,60 @@ button{font-family:inherit;cursor:pointer;}
 .venture-card{position:relative;display:flex;width:100%;color:inherit;text-decoration:none;}
 .venture-card-liquid{flex:1;display:flex;flex-direction:column;}
 /* The ONLY hover is the liquid ripple (LiquidHover). No bg/lift/shadow/scale here. */
-.venture-box{position:relative;overflow:hidden;flex:1;display:flex;flex-direction:column;padding:40px 34px 32px;background:var(--divider);}
+/* The venture boxes use Manrope (not the site's Schibsted); everything inside
+   inherits it. The two children that pin their own family are switched below. */
+.venture-box{position:relative;overflow:hidden;flex:1;display:flex;flex-direction:column;padding:40px 34px 32px;background:var(--divider);font-family:var(--font-manrope),sans-serif;}
 /* Section head: kicker + title, same rhythm as The Eye. */
 .ven-head{margin-bottom:52px;}
-.ven-title{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(26px,3.2vw,38px);line-height:1.12;}
+.ven-title{font-family:var(--font-schibsted),sans-serif;font-weight:400;font-size:clamp(23px,2.8vw,32px);line-height:1.14;}
 @media (max-width:600px){.ven-head{margin-bottom:34px;}}
 
 /* Logo chip + title side by side */
 .venture-head{margin-bottom:22px;}
 /* Neither --faint nor --ash held up: at 11px in caps, on the card's beige (not on
    paper), both sat under the readable line. A darker brown-ink at weight 500 does. */
-.venture-card-kicker{display:block;font-size:11px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:#5C4F41;margin-bottom:10px;}
+.venture-card-kicker{display:block;font-size:11px;font-weight:400;letter-spacing:.16em;text-transform:uppercase;color:#5C4F41;margin-bottom:10px;}
 /* Bare logo — no chip/box behind it. The fixed slot keeps the row aligned, and
    multiply melts any white baked into the logo file into the card. */
 .venture-logo{flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:82px;height:82px;}
 .venture-logo img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block;mix-blend-mode:multiply;}
-.venture-logo-ph{font-family:var(--font-display),serif;font-size:24px;color:var(--ink);}
-.venture-card-name{font-family:var(--font-display),serif;font-weight:400;font-size:25px;line-height:1.12;}
+.venture-logo-ph{font-family:var(--font-schibsted),sans-serif;font-size:24px;color:var(--ink);}
+.venture-card-name{font-family:var(--font-manrope),sans-serif;font-weight:400;font-size:20px;line-height:1.18;}
 .venture-card-tag{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ash);margin-bottom:18px;}
 .venture-card-desc{color:var(--ash);font-size:14px;line-height:1.62;max-width:32ch;}
 .venture-more{margin-top:auto;padding-top:30px;display:inline-flex;align-items:center;gap:9px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink);}
+/* Link chips under the description (icon + site name); above the stretched
+   overlay so they click. Lifted paper pills so they read clearly off the card
+   beige; on hover they flood with ink and invert — the site's premium motif. */
+/* Pull the pill left by its inner padding so the icon lines up with the card's
+   content edge — the same left as "Learn more" below it. */
+.venture-links{position:relative;z-index:2;display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;margin-left:-13px;}
+.venture-ext{
+  display:inline-flex;align-items:center;gap:9px;padding:8px 16px 8px 12px;
+  border:.5px solid rgba(43,37,23,.32);border-radius:999px;
+  background:transparent;color:var(--ink);
+  font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  transition:color .4s ease,background .4s ease,border-color .4s ease,box-shadow .4s ease,transform .4s cubic-bezier(.2,.7,.2,1);
+}
+.venture-ext:hover{background:var(--ink);color:var(--paper);border-color:var(--ink);transform:translateY(-2px);box-shadow:0 14px 28px -14px rgba(26,24,20,.6);}
+.venture-ext svg{width:15px;height:15px;display:block;flex:none;}
+.venture-ext-label{font-size:10.5px;letter-spacing:.14em;white-space:nowrap;}
+/* Stretched link overlay: covers the card for page navigation, under the icons. */
+.venture-stretch{position:absolute;inset:0;z-index:1;}
 
 /* Venture detail page */
 .venture-detail{max-width:900px;margin:0 auto;padding:150px clamp(24px,6vw,60px) 120px;}
 .venture-detail-head{margin-bottom:8px;text-align:center;}
 .venture-detail-logo{display:flex;align-items:center;justify-content:center;margin:34px auto 28px;}
 .venture-detail-logo img{max-width:220px;max-height:170px;width:auto;height:auto;object-fit:contain;mix-blend-mode:multiply;}
-.venture-detail-title{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(30px,5vw,48px);line-height:1.05;}
+.venture-detail-title{font-family:var(--font-schibsted),sans-serif;font-weight:400;font-size:clamp(30px,5vw,48px);line-height:1.05;}
 .venture-detail-tag{color:var(--ash);font-size:15px;margin:8px 0 8px;}
 /* Body: text + images + videos, in any order */
 .venture-detail-body{margin-top:18px;}
 .v-media{margin:44px 0;}
-/* Body images sit narrower than the text column and centred, so a single graphic
-   (like the Jadughor plate) does not dominate the read. Video keeps full width. */
-.v-media:not(:has(.v-video)){max-width:460px;margin-left:auto;margin-right:auto;}
+/* Only the LAST body image is capped small and centred (the closing Jadughor
+   plate); every image above it keeps the full column width. Video is excluded. */
+.venture-detail-body .v-media:last-of-type:not(:has(.v-video)){max-width:460px;margin-left:auto;margin-right:auto;}
 .v-media img{width:100%;display:block;}
 .v-media .v-video{position:relative;aspect-ratio:16/9;background:var(--divider);overflow:hidden;}
 .v-media .v-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;}
@@ -488,26 +607,26 @@ button{font-family:inherit;cursor:pointer;}
 /* ===== BOOKING PAGE (/book) ===== */
 .bk{--bk-accent:#9c6b43;min-height:100vh;background:var(--paper);color:var(--ink);}
 .bk-bar{position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px clamp(20px,5vw,48px);border-bottom:1px solid var(--divider);background:rgba(247,244,238,.9);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);}
-.bk-wordmark{font-family:var(--font-display),serif;font-size:19px;font-weight:500;letter-spacing:.01em;}
+.bk-wordmark{font-family:var(--font-schibsted),sans-serif;font-size:19px;font-weight:500;letter-spacing:.01em;}
 .bk-back{font-size:13px;color:var(--ash);display:inline-flex;align-items:center;gap:7px;transition:color .3s,gap .3s;}
 .bk-back:hover{color:var(--ink);gap:11px;}
 .bk-main{max-width:660px;margin:0 auto;padding:clamp(44px,7vw,84px) clamp(20px,5vw,32px) 110px;}
 .bk-head{margin-bottom:6px;}
 .bk-kicker{display:flex;align-items:center;gap:12px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ash);margin-bottom:22px;}
 .bk-rule{width:28px;height:1px;background:var(--ash);display:inline-block;}
-.bk-title{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(32px,5.6vw,52px);line-height:1.08;letter-spacing:-.01em;}
+.bk-title{font-family:var(--font-schibsted),sans-serif;font-weight:400;font-size:clamp(32px,5.6vw,52px);line-height:1.08;letter-spacing:-.01em;}
 .bk-title em{font-style:italic;color:var(--bk-accent);}
 .bk-lede{color:var(--ash);font-size:16px;line-height:1.6;margin-top:18px;max-width:46ch;}
 .bk-sec{margin-top:44px;padding-top:36px;border-top:1px solid var(--divider);}
 .bk-sec-head{display:flex;align-items:baseline;gap:15px;margin-bottom:22px;}
-.bk-idx{font-family:var(--font-display),serif;font-style:italic;font-size:18px;color:var(--bk-accent);}
+.bk-idx{font-family:var(--font-schibsted),sans-serif;font-style:italic;font-size:18px;color:var(--bk-accent);}
 .bk-label{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ash);}
 .bk-subnote{margin-left:auto;font-size:12px;color:var(--ash);}
 /* options */
 .bk-options{display:flex;flex-direction:column;}
 .bk-opt{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 2px;border:0;border-top:1px solid var(--divider);background:none;text-align:left;color:inherit;cursor:pointer;}
 .bk-opt:first-child{border-top:0;}
-.bk-opt-title{display:block;font-family:var(--font-display),serif;font-size:21px;line-height:1.1;transition:color .3s;}
+.bk-opt-title{display:block;font-family:var(--font-schibsted),sans-serif;font-size:21px;line-height:1.1;transition:color .3s;}
 .bk-opt-desc{display:block;font-size:13px;color:var(--ash);margin-top:4px;}
 .bk-radio{flex:0 0 auto;width:26px;height:26px;border-radius:50%;border:1px solid var(--divider);display:flex;align-items:center;justify-content:center;color:transparent;transition:background .3s,border-color .3s,color .3s;}
 .bk-radio svg{width:14px;height:14px;}
@@ -515,7 +634,7 @@ button{font-family:inherit;cursor:pointer;}
 .bk-opt.is-on .bk-opt-title{color:var(--bk-accent);}
 /* calendar */
 .bk-cal-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.bk-cal-month{font-family:var(--font-display),serif;font-size:20px;}
+.bk-cal-month{font-family:var(--font-schibsted),sans-serif;font-size:20px;}
 .bk-cal-nav{width:34px;height:34px;border-radius:50%;border:1px solid var(--divider);background:none;color:var(--ink);cursor:pointer;font-size:18px;line-height:1;display:flex;align-items:center;justify-content:center;transition:border-color .3s,background .3s;}
 .bk-cal-nav:hover:not(:disabled){border-color:var(--ink);}
 .bk-cal-nav:disabled{opacity:.3;cursor:default;}
@@ -523,11 +642,14 @@ button{font-family:inherit;cursor:pointer;}
 .bk-cal-week span{text-align:center;font-size:11px;letter-spacing:.06em;color:var(--faint);}
 .bk-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
 .bk-cal-blank{aspect-ratio:1;}
-.bk-cal-day{position:relative;aspect-ratio:1;border:0;background:none;color:var(--ink);font-size:14px;border-radius:50%;cursor:pointer;transition:background .2s,color .2s;}
-.bk-cal-day:hover:not(:disabled):not(.is-on){background:var(--divider);}
+/* The cell keeps aspect-ratio:1 (tap target + row alignment), but the selected /
+   hover circle is a smaller centred disc drawn with a radial-gradient (~38px), not
+   the whole cell. */
+.bk-cal-day{position:relative;aspect-ratio:1;display:flex;align-items:center;justify-content:center;border:0;background:none;color:var(--ink);font-size:14px;cursor:pointer;transition:background .2s,color .2s;}
+.bk-cal-day:hover:not(:disabled):not(.is-on){background:radial-gradient(circle at center,var(--divider) 0 19px,transparent 19px);}
 .bk-cal-day:disabled{color:var(--faint);opacity:.5;cursor:default;}
-.bk-cal-day.is-on{background:var(--ink);color:var(--paper);}
-.bk-cal-day.is-today::after{content:"";position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--bk-accent);}
+.bk-cal-day.is-on{background:radial-gradient(circle at center,var(--ink) 0 19px,transparent 19px);color:var(--paper);}
+.bk-cal-day.is-today::after{content:"";position:absolute;top:calc(50% + 12px);left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--bk-accent);}
 .bk-cal-day.is-on.is-today::after{background:var(--paper);}
 /* slots */
 .bk-slots{display:flex;flex-wrap:wrap;gap:10px;}
@@ -541,7 +663,7 @@ button{font-family:inherit;cursor:pointer;}
 .bk-field-wide{grid-column:1 / -1;}
 .bk-field{position:relative;display:flex;flex-direction:column;}
 .bk-field-lab{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ash);margin-bottom:8px;}
-.bk-field input,.bk-field textarea{border:0;border-bottom:1px solid var(--divider);background:none;color:var(--ink);font-family:var(--font-display),serif,sans-serif;font-size:16px;padding:7px 0;outline:none;width:100%;resize:none;}
+.bk-field input,.bk-field textarea{border:0;border-bottom:1px solid var(--divider);background:none;color:var(--ink);font-family:var(--font-schibsted),sans-serif;font-size:16px;padding:7px 0;outline:none;width:100%;resize:none;}
 .bk-underline{position:absolute;left:0;bottom:0;height:1px;width:100%;background:var(--ink);transform:scaleX(0);transform-origin:center;transition:transform .4s cubic-bezier(.2,.7,.2,1);}
 .bk-field:focus-within .bk-underline{transform:scaleX(1);}
 /* confirm */
@@ -551,7 +673,7 @@ button{font-family:inherit;cursor:pointer;}
 .bk-btn:disabled{opacity:.55;cursor:default;}
 .bk-btn-arrow{transition:transform .35s cubic-bezier(.2,.7,.2,1);}
 .bk-btn:hover:not(:disabled) .bk-btn-arrow{transform:translateX(4px);}
-.bk-summary{font-family:var(--font-display),serif;font-style:italic;font-size:16px;color:var(--ash);}
+.bk-summary{font-family:var(--font-schibsted),sans-serif;font-style:italic;font-size:16px;color:var(--ash);}
 .bk-fine{display:flex;flex-wrap:wrap;gap:20px;margin-top:42px;font-size:12px;color:var(--ash);}
 .bk-fine-item{display:inline-flex;align-items:center;gap:8px;}
 .bk-fine-item i{width:4px;height:4px;border-radius:50%;background:var(--bk-accent);display:inline-block;}
@@ -563,7 +685,7 @@ button{font-family:inherit;cursor:pointer;}
 .bk-check-tick{stroke-dasharray:32;stroke-dashoffset:32;animation:bkTick .45s ease .55s forwards;}
 @keyframes bkRing{to{stroke-dashoffset:0;}}
 @keyframes bkTick{to{stroke-dashoffset:0;}}
-.bk-recap{font-family:var(--font-display),serif;font-size:20px;margin:16px 0 10px;}
+.bk-recap{font-family:var(--font-schibsted),sans-serif;font-size:20px;margin:16px 0 10px;}
 .bk-dot{color:var(--divider);margin:0 10px;}
 .bk-startover{margin-top:30px;font-size:13px;letter-spacing:.04em;color:var(--ink);background:none;border:0;border-bottom:1px solid var(--ink);padding:0 0 2px;cursor:pointer;}
 .bk-startover:hover{color:var(--ash);border-color:var(--ash);}
@@ -631,7 +753,7 @@ button{font-family:inherit;cursor:pointer;}
 
 /* Section head: kicker, title, intro — same rhythm as The Eye / The Ventures. */
 .wr-head{margin-bottom:34px;}
-.wr-title{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(34px,4.4vw,52px);line-height:1.08;margin-bottom:20px;}
+.wr-title{font-family:var(--font-schibsted),sans-serif;font-weight:400;font-size:clamp(26px,3.2vw,38px);line-height:1.1;margin-bottom:20px;}
 .wr-intro{max-width:52ch;color:var(--ash);font-size:15px;line-height:1.65;}
 @media (max-width:600px){.wr-head{margin-bottom:34px;}.wr-intro{font-size:14px;}}
 
@@ -642,7 +764,7 @@ button{font-family:inherit;cursor:pointer;}
 .writing-thumb img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.85);transition:transform .6s cubic-bezier(.2,.7,.2,1),filter .6s ease;}
 .writing-item a:hover .writing-thumb img{transform:scale(1.05);filter:saturate(1);}
 .writing-main{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:6px;}
-.writing-t{font-family:var(--font-display),serif;font-size:26px;line-height:1.18;}
+.writing-t{font-family:var(--font-schibsted),sans-serif;font-size:26px;line-height:1.18;}
 .writing-ex{font-size:13px;line-height:1.5;color:var(--ash);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .writing-date{flex:0 0 auto;font-size:12px;letter-spacing:.06em;color:var(--faint);white-space:nowrap;}
 .writing-item a:hover .writing-t{color:var(--ash);}
@@ -672,7 +794,7 @@ button{font-family:inherit;cursor:pointer;}
 @media (hover:hover) and (pointer:fine){
   .service-box:hover{background:#e4ddce;transform:translateY(-2px);box-shadow:0 12px 30px -18px rgba(26,24,20,.28);}
 }
-.service-box h3{font-family:var(--font-display),serif;font-weight:400;font-size:24px;margin-bottom:12px;}
+.service-box h3{font-family:var(--font-schibsted),sans-serif;font-weight:400;font-size:20px;line-height:1.22;margin-bottom:12px;}
 .service-box p{color:var(--ash);font-size:14px;}
 
 /* SERVICE DETAIL PAGE */
@@ -686,17 +808,19 @@ button{font-family:inherit;cursor:pointer;}
 .service-rail-list a:hover{color:var(--ink);}
 .service-rail-list li.is-active a{color:var(--ink);}
 .service-rail-list .idx{font-size:11px;letter-spacing:.1em;color:var(--faint);min-width:20px;}
-.service-rail-list .name{font-family:var(--font-display),serif;font-size:16px;line-height:1.22;}
+.service-rail-list .name{font-family:var(--font-schibsted),sans-serif;font-size:16px;line-height:1.22;}
 
 .service-main{max-width:680px;}
 .service-kicker{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ash);margin-bottom:22px;}
-.service-title{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(40px,5.6vw,74px);line-height:1.03;letter-spacing:-.01em;margin-bottom:36px;}
-.service-lead{font-family:var(--font-display),serif;font-size:clamp(21px,2.4vw,27px);line-height:1.45;color:var(--ink);margin-bottom:30px;max-width:26ch;}
-.service-body p{font-size:17px;line-height:1.75;color:var(--ash);margin-bottom:22px;max-width:58ch;}
+/* Manrope (not Schibsted) so it can run at weight 300 — Schibsted's lightest is
+   400 and read too heavy at this size. Also much smaller than before. */
+.service-title{font-family:var(--font-manrope),sans-serif;font-weight:300;font-size:clamp(24px,2.9vw,38px);line-height:1.1;letter-spacing:-.01em;margin-bottom:28px;}
+.service-lead{font-family:var(--font-schibsted),sans-serif;font-size:clamp(16px,1.7vw,20px);line-height:1.5;color:var(--ash);margin-bottom:26px;max-width:34ch;}
+.service-body p{font-size:14.5px;line-height:1.75;color:var(--ash);margin-bottom:20px;max-width:62ch;}
 .service-cta{margin-top:64px;}
 /* The CTA box itself (snapshotted + distorted) — the whole box ripples as one. */
 .service-cta-box{position:relative;overflow:hidden;padding:clamp(32px,4vw,52px);background:var(--divider);}
-.service-cta-text{font-family:var(--font-display),serif;font-size:clamp(24px,3vw,36px);line-height:1.22;color:var(--ink);max-width:20ch;margin-bottom:28px;}
+.service-cta-text{font-family:var(--font-schibsted),sans-serif;font-size:clamp(24px,3vw,36px);line-height:1.22;color:var(--ink);max-width:20ch;margin-bottom:28px;}
 .service-cta-email{display:inline-block;font-size:18px;border-bottom:1px solid var(--ink);padding-bottom:3px;transition:color .3s,border-color .3s;}
 .service-cta-email:hover{color:var(--ash);border-color:var(--ash);}
 
@@ -709,7 +833,7 @@ button{font-family:inherit;cursor:pointer;}
 }
 
 /* CONTACT */
-.contact-text{font-family:var(--font-display),serif;font-size:clamp(28px,4vw,44px);line-height:1.28;max-width:20ch;margin-bottom:34px;}
+.contact-text{font-family:var(--font-schibsted),sans-serif;font-size:clamp(28px,4vw,44px);line-height:1.28;max-width:20ch;margin-bottom:34px;}
 .contact-email{font-size:20px;border-bottom:1px solid var(--ink);padding-bottom:3px;transition:color .3s,border-color .3s;}
 .contact-email:hover{color:var(--ash);border-color:var(--ash);}
 .footer{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:40px var(--side);border-top:1px solid var(--divider);font-size:12px;color:var(--faint);}
@@ -728,22 +852,23 @@ button{font-family:inherit;cursor:pointer;}
 .post-back{font-size:13px;color:var(--ash);}
 .post-back:hover{color:var(--ink);}
 .post-cat{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:44px 0 14px;}
-.post-title{font-family:var(--font-display),serif;font-weight:400;font-size:clamp(32px,5vw,56px);line-height:1.04;margin-bottom:14px;}
+.post-title{font-family:var(--font-schibsted),sans-serif;font-weight:400;font-size:clamp(32px,5vw,56px);line-height:1.04;margin-bottom:14px;}
 .post-date{font-size:13px;color:var(--ash);margin-bottom:40px;}
 .post-cover{aspect-ratio:16/9;overflow:hidden;background:var(--divider);margin-bottom:40px;}
 .post-cover img{width:100%;height:100%;object-fit:cover;filter:saturate(.7);}
 .post-body p{font-size:17px;margin-bottom:24px;color:var(--ash);}
+@media (max-width:600px){.post-body p{font-size:15px;}.venture-detail-title{font-size:24px;}.wr-title{font-size:24px;}}
 
 /* ABOUT PAGE (Sanity-managed rich text) */
 .about-page-head{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-bottom:40px;}
 .about-page-head .post-back{display:inline-block;}
 .about-page-head .eyebrow{margin:0;}
 .about-portrait-img{display:block;width:100%;max-width:360px;margin:8px 0 44px;filter:saturate(.85);}
-.post-body h2{font-family:var(--font-display),serif;font-weight:400;font-size:30px;line-height:1.15;margin:40px 0 16px;}
-.post-body h3{font-family:var(--font-display),serif;font-weight:400;font-size:23px;line-height:1.2;margin:30px 0 12px;}
+.post-body h2{font-family:var(--font-schibsted),sans-serif;font-weight:400;font-size:30px;line-height:1.15;margin:40px 0 16px;}
+.post-body h3{font-family:var(--font-schibsted),sans-serif;font-weight:400;font-size:23px;line-height:1.2;margin:30px 0 12px;}
 .post-body ul,.post-body ol{margin:0 0 24px 22px;color:var(--ash);font-size:17px;}
 .post-body li{margin-bottom:8px;}
-.post-body blockquote{margin:28px 0;padding-left:20px;border-left:2px solid var(--divider);font-family:var(--font-display),serif;font-size:22px;color:var(--ash);}
+.post-body blockquote{margin:28px 0;padding-left:20px;border-left:2px solid var(--divider);font-family:var(--font-schibsted),sans-serif;font-size:22px;color:var(--ash);}
 .post-body a{border-bottom:1px solid var(--ink);transition:color .3s,border-color .3s;}
 .post-body a:hover{color:var(--ash);border-color:var(--ash);}
 .post-body strong{font-weight:600;}
@@ -772,7 +897,8 @@ button{font-family:inherit;cursor:pointer;}
   .eyebrow{margin-bottom:18px;}
   .back-to-top-wrap{padding:40px 0 36px;}
   .about,.services-grid,.ventures-grid{grid-template-columns:1fr;}
-  .about-portrait{position:static;}
+  /* One column: undo the full-height sticky centring so the image just sits inline. */
+  .about-portrait{position:static;height:auto;display:block;}
   .nav-links{display:none;}
   .nav-burger-btn{display:flex;}
   .work-grid{gap:14px;}
@@ -879,7 +1005,7 @@ button{font-family:inherit;cursor:pointer;}
 @keyframes sndBar{0%,100%{height:3px;}50%{height:12px;}}
 
 /* The permanent corner toggle — subtle, but never absent. */
-.snd-corner{position:fixed;left:max(18px,var(--side));bottom:18px;z-index:9000;display:inline-flex;align-items:center;gap:9px;padding:9px 14px;border-radius:999px;border:.5px solid var(--divider);background:rgba(247,244,238,.82);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:var(--ash);font-family:var(--font-display),serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:color .3s ease,border-color .3s ease,background .3s ease;}
+.snd-corner{position:fixed;left:max(18px,var(--side));bottom:18px;z-index:9000;display:inline-flex;align-items:center;gap:9px;padding:9px 14px;border-radius:999px;border:.5px solid var(--divider);background:rgba(247,244,238,.82);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:var(--ash);font-family:var(--font-schibsted),sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:color .3s ease,border-color .3s ease,background .3s ease;}
 .snd-corner:hover{color:var(--ink);border-color:var(--ink);}
 .snd-corner:focus-visible{outline:1px solid var(--ink);outline-offset:3px;}
 .snd-corner[aria-pressed="true"]{color:var(--ink);}
@@ -890,7 +1016,7 @@ button{font-family:inherit;cursor:pointer;}
 
 /* The cursor pill. Fixed at 0,0 and moved by transform (like the cursor dot), so
    it never causes layout or scrollbars. pointer-events only while it is shown. */
-.snd-pill{position:fixed;top:0;left:0;z-index:9500;display:inline-flex;align-items:center;gap:9px;padding:8px 14px;border-radius:999px;border:.5px solid var(--ink);background:var(--paper);color:var(--ink);font-family:var(--font-display),serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;cursor:pointer;box-shadow:0 10px 30px -18px rgba(26,24,20,.5);opacity:0;transform-origin:left center;scale:.9;pointer-events:none;transition:opacity .45s cubic-bezier(.2,.7,.2,1),scale .45s cubic-bezier(.2,.7,.2,1);will-change:transform,opacity;}
+.snd-pill{position:fixed;top:0;left:0;z-index:9500;display:inline-flex;align-items:center;gap:9px;padding:8px 14px;border-radius:999px;border:.5px solid var(--ink);background:var(--paper);color:var(--ink);font-family:var(--font-schibsted),sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;cursor:pointer;box-shadow:0 10px 30px -18px rgba(26,24,20,.5);opacity:0;transform-origin:left center;scale:.9;pointer-events:none;transition:opacity .45s cubic-bezier(.2,.7,.2,1),scale .45s cubic-bezier(.2,.7,.2,1);will-change:transform,opacity;}
 .snd-pill.is-shown{opacity:1;scale:1;pointer-events:auto;}
 .snd-pill:focus-visible{outline:1px solid var(--ink);outline-offset:3px;}
 
@@ -906,7 +1032,7 @@ button{font-family:inherit;cursor:pointer;}
 .mag-wrap{display:flex;justify-content:flex-start;padding:14px 0;}
 .mag-btn{display:inline-flex;align-items:center;border-radius:999px;background:var(--ink);color:var(--paper);padding:16px 30px;text-decoration:none;will-change:transform;transition:transform .12s ease-out,background .3s ease;}
 .mag-btn-inner{display:inline-flex;align-items:center;gap:12px;will-change:transform;}
-.mag-btn-label{font-family:var(--font-display),serif;font-weight:400;font-size:17px;line-height:1;letter-spacing:.01em;white-space:nowrap;}
+.mag-btn-label{font-family:var(--font-schibsted),sans-serif;font-weight:400;font-size:17px;line-height:1;letter-spacing:.01em;white-space:nowrap;}
 .mag-btn-arrow{font-size:15px;line-height:1;}
 .mag-btn:focus-visible{outline:2px solid var(--ink);outline-offset:4px;}
 @media (hover:none),(pointer:coarse){
@@ -919,12 +1045,13 @@ button{font-family:inherit;cursor:pointer;}
   .mag-btn,.mag-btn-inner{transform:none!important;transition:none;}
 }
 
-/* Source Serif renders heavier than the old face at the same weight, so the
-   display headings run a step lighter. */
+/* Schibsted Grotesk's lightest cut is 400 (it has no Light/300), and it reads
+   sturdier than the old serifs — so keep every heading at its lightest, 400, to
+   avoid the whole page looking heavy. */
 .eye-title,.ven-title,.wr-title,.eye-cat-title,.about-title,.venture-detail-title,
-.service-title,.post-title,.album-title,.bk-title,.venture-card-name,.writing-t,
-.eye-group-title,.service-box h3,.post-body h2,.post-body h3{font-weight:300;}
-.eyebrow,.eye-featured-title,.eye-watch-more{font-weight:400;}
+.post-title,.album-title,.bk-title,.writing-t,
+.eye-group-title,.service-box h3,.post-body h2,.post-body h3{font-weight:400;}
+.eyebrow,.eye-watch-more{font-weight:400;}
 
 
 /* ===== SHOEBOX REVEAL (Scrappy Scribbles) =====
@@ -987,7 +1114,7 @@ button{font-family:inherit;cursor:pointer;}
 
 /* The date stamped on the lower half of the lid. Same kraft ink, faded like print. */
 .sbx-since{
-  position:relative;font-family:var(--font-display),serif;font-size:12px;font-weight:500;
+  position:relative;font-family:var(--font-schibsted),sans-serif;font-size:12px;font-weight:500;
   letter-spacing:.26em;text-transform:uppercase;color:var(--sbx-ink);opacity:.5;
   pointer-events:none;
 }
@@ -995,16 +1122,16 @@ button{font-family:inherit;cursor:pointer;}
 /* The cover mirrors the real heading below it. */
 .sbx-label{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:0 24px;pointer-events:none;}
 .sbx-label-k{
-  font-family:var(--font-display),serif;font-weight:500;font-size:clamp(26px,4vw,40px);line-height:1.1;
+  font-family:var(--font-schibsted),sans-serif;font-weight:500;font-size:clamp(26px,4vw,40px);line-height:1.1;
   color:var(--sbx-ink);text-shadow:0 1px 0 rgba(255,255,255,.45),0 -1px 0 rgba(0,0,0,.10);
 }
 .sbx-label-t{
-  font-family:var(--font-body),serif;font-style:italic;font-weight:500;font-size:clamp(14px,1.7vw,18px);
+  font-family:var(--font-schibsted),sans-serif;font-style:italic;font-weight:500;font-size:clamp(14px,1.7vw,18px);
   color:var(--sbx-ink);opacity:.72;
 }
 .sbx-hint{
   position:relative;display:inline-flex;align-items:center;gap:8px;
-  font-family:var(--font-body),serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  font-family:var(--font-schibsted),sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;
   color:var(--sbx-ink);opacity:.55;pointer-events:none;
 }
 .sbx-dot{display:block;width:5px;height:5px;border-radius:50%;background:var(--sbx-ink);animation:sbxPulse 1.6s ease-in-out infinite;}
@@ -1048,7 +1175,7 @@ button{font-family:inherit;cursor:pointer;}
   .wr-card:hover .wr-card-t{color:var(--ash);}
 }
 .wr-card-body{display:flex;flex-direction:column;gap:5px;padding-top:11px;}
-.wr-card-t{font-family:var(--font-display),serif;font-weight:300;font-size:18px;line-height:1.25;color:var(--ink);transition:color .3s ease;}
+.wr-card-t{font-family:var(--font-schibsted),sans-serif;font-weight:300;font-size:18px;line-height:1.25;color:var(--ink);transition:color .3s ease;}
 .wr-card-ex{font-size:13px;line-height:1.55;color:var(--ash);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .wr-card-date{font-size:11px;letter-spacing:.06em;color:var(--faint);margin-top:2px;}
 
@@ -1057,7 +1184,7 @@ button{font-family:inherit;cursor:pointer;}
 .wr-grid.is-expanded .wr-card-extra{display:flex;}
 
 .wr-more{display:flex;justify-content:center;margin-top:24px;}
-.wr-more-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:999px;border:.5px solid var(--divider);background:none;color:var(--ash);font-family:var(--font-display),serif;font-size:13px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:color .3s ease,border-color .3s ease,gap .3s ease;}
+.wr-more-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:999px;border:.5px solid var(--divider);background:none;color:var(--ash);font-family:var(--font-schibsted),sans-serif;font-size:13px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:color .3s ease,border-color .3s ease,gap .3s ease;}
 .wr-more-btn:hover{color:var(--ink);border-color:var(--ink);gap:12px;}
 .wr-more-btn:focus-visible{outline:1px solid var(--ink);outline-offset:3px;}
 
@@ -1076,4 +1203,63 @@ button{font-family:inherit;cursor:pointer;}
   /* The cover shrinks with the content; tighten its own furniture to match. */
   .sbx-label-k{font-size:26px;}
   .sbx-top{gap:8px;}
+}
+
+/* ===== AFFILIATES PAGE (/engagements/affiliates) =====
+   Tunable tokens (accents/mono) live on .aff. Names are Cormorant serif; logos
+   are warm-monochrome at rest and return to real colour on hover (desktop). */
+.aff{
+  --gold:#5C4F41;        /* accent / focus outline */
+  --gold-deep:#5C4F41;   /* name colour on hover — the ventures-card warm brown */
+  --aff-body:#5a4f3f;    /* lead body text */
+  --mono:grayscale(1) sepia(0.12) opacity(0.9); /* logo rest look (warm mono) */
+  max-width:820px;margin:0 auto;padding:150px clamp(24px,6vw,60px) 120px;
+}
+.aff-head{margin-bottom:8px;}
+.aff-eyebrow{display:flex;align-items:center;gap:9px;font-family:var(--font-schibsted),sans-serif;font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--ash);margin-bottom:20px;}
+.aff-eyebrow .aff-mid{opacity:.7;}
+.aff-title{font-family:var(--font-schibsted),sans-serif;font-weight:600;font-size:clamp(34px,6vw,46px);letter-spacing:-.02em;line-height:1.04;color:var(--ink);margin:0;}
+.aff-lead{font-family:var(--font-schibsted),sans-serif;font-size:15.5px;line-height:1.6;color:var(--aff-body);max-width:540px;margin:22px 0 0;}
+.aff-lead-accent{font-family:var(--font-hero),serif;font-style:italic;font-size:18px;color:var(--ink);font-weight:500;}
+
+/* Section label: just the word — no rule line, no leading dot, no divider. */
+.aff-section-label{font-family:var(--font-schibsted),sans-serif;font-size:11.5px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--ink);margin:56px 0 6px;}
+.aff-list{list-style:none;margin:0;padding:0;}
+.aff-item{margin:0;}
+.aff-row{display:flex;align-items:center;gap:26px;padding:19px 10px;border-radius:9px;text-decoration:none;color:inherit;}
+.aff-logo{flex:none;width:52px;height:52px;display:flex;align-items:center;justify-content:center;}
+.aff-logo img{max-width:100%;max-height:100%;object-fit:contain;filter:var(--mono);transition:filter .35s ease;}
+.aff-text{min-width:0;}
+.aff-role{display:block;font-family:var(--font-schibsted),sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--ash);margin-bottom:5px;}
+/* Names intentionally use the Cormorant serif even though the site default is
+   Schibsted — pinned explicitly so the global default cannot strip it. */
+.aff-name{display:block;font-family:var(--font-hero),serif;font-weight:600;font-size:clamp(20px,3.4vw,27px);line-height:1.02;color:var(--ink);transition:color .3s ease;}
+
+/* Hover / focus is desktop-only, and animates ONLY transform / colour / filter
+   (compositor-friendly, no layout shift). */
+@media (hover:hover) and (pointer:fine){
+  .aff-row{transition:transform .3s ease;}
+  a.aff-row:hover,a.aff-row:focus-visible,
+  .aff-item:hover .aff-row{transform:translateX(8px);}
+  .aff-item:hover .aff-name,a.aff-row:focus-visible .aff-name{color:var(--gold-deep);}
+  .aff-item:hover .aff-logo img,a.aff-row:focus-visible .aff-logo img{filter:grayscale(0) opacity(1);}
+}
+a.aff-row:focus-visible{outline:2px solid var(--gold);outline-offset:3px;}
+
+@media (prefers-reduced-motion:reduce){
+  .aff-row,.aff-name,.aff-logo img{transition:none;}
+  .aff-item:hover .aff-row,a.aff-row:hover{transform:none;}
+}
+
+/* Phone */
+@media (max-width:640px){
+  .aff{padding:120px 24px 90px;}
+  .aff-title{font-size:26px;}
+  .aff-lead{max-width:none;font-size:13.5px;}
+  .aff-lead-accent{font-size:15px;}
+  .aff-section-label{margin-top:40px;}
+  .aff-row{gap:18px;padding:16px 6px;min-height:44px;}
+  .aff-logo{width:44px;height:44px;}
+  /* long role labels must wrap, never overflow */
+  .aff-role{white-space:normal;overflow-wrap:break-word;}
 }

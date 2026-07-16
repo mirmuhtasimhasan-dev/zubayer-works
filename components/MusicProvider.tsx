@@ -70,11 +70,9 @@ export default function MusicProvider({ children }: { children: ReactNode }) {
     a.addEventListener("error", failed);
     a.src = SOURCES[0];
 
-    try {
-      if (localStorage.getItem(STORAGE_KEY)) setDecided(true);
-    } catch {
-      /* private mode */
-    }
+    // NOTE: `decided` is SESSION-only — it starts false each visit so the cursor
+    // pill offers again, and only stops nagging once the visitor acts THIS visit.
+    // (The stored preference still drives audio resume below, separately.)
 
     return () => {
       cancelAnimationFrame(fadeRaf.current);

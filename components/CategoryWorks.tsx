@@ -89,7 +89,8 @@ export default function CategoryWorks({ works, group }: { works: any[]; group?: 
           )}
           {isVideo && <span className="eye-work-play" aria-hidden />}
         </div>
-        <span className="eye-work-title">{w.title}</span>
+        {/* No under-tile caption: the artwork already carries its title, and the
+            stray label here just duplicated the category name. */}
       </button>
     );
   };

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { imgProxy } from "@/lib/imgProxy";
 import Link from "next/link";
 import MotionHover from "./MotionHover";
-import BehanceBadge from "./BehanceBadge";
+import BehanceLink from "./BehanceLink";
 import { sanityImage } from "@/sanity/lib/image";
 
 // Normalize a YouTube/Vimeo URL to an embeddable one.
@@ -137,10 +137,9 @@ export default function GalleryTabs({ videos, albums, behanceUrl }: { videos: an
             </Link>
           ))}
         </div>
-          {/* Same rotating badge as The Archive — the full set lives on Behance.
-              Here it is a smaller, right-aligned sign-off under the album grid. */}
+          {/* Expanding-circle Behance link — the full set lives on Behance. */}
           <div className="arch-foot arch-foot-end">
-            <BehanceBadge href={behanceUrl || "https://www.behance.net/zubayerahmed23"} />
+            <BehanceLink href={behanceUrl || "https://www.behance.net/zubayerahmed23"} />
           </div>
         </>
       ) : (

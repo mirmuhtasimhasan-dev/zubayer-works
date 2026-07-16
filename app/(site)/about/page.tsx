@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PortableText } from "@portabletext/react";
 import Nav from "@/components/Nav";
+import OffClock from "@/components/OffClock";
 import { getAbout } from "@/sanity/lib/queries";
 
 export const revalidate = 30;
@@ -47,11 +48,14 @@ export default async function AboutPage() {
             </div>
             <div className="about-body">{body}</div>
           </div>
+          {/* Full width under both columns, so all seven sit centred on one line. */}
+          <OffClock />
         </section>
       ) : (
         <article className="post about-page">
           {head}
           {body}
+          <OffClock />
         </article>
       )}
     </main>
