@@ -1,14 +1,6 @@
 import { client } from "./client";
 import { getVideoThumbnail } from "./video";
 
-export async function getSettings() {
-  return client.fetch(`*[_type == "siteSettings"][0]{
-    locationLabel, headline, subText, aboutTitle, aboutIntro, aboutBody,
-    "portrait": portrait.asset->url,
-    disciplineTable, email, footerLine
-  }`);
-}
-
 export async function getAbout() {
   return client.fetch(`*[_type == "aboutPage"][0]{
     eyebrow, title, "portrait": portrait.asset->url, body

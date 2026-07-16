@@ -317,6 +317,35 @@ export default function LiquidHover({ children, className, style, contentClassNa
     return () => window.removeEventListener("resize", onResize);
   }, [capable]);
 
+  // THE GUARANTEE. The live content is hidden whenever `rippling` is true, so a
+  // canvas that stops painting would leave the card INVISIBLE. A browser only
+  // keeps ~16 WebGL contexts alive; this page has more, so hovering around gets
+  // an older card's context evicted — and without this it silently vanished.
+  // On context loss: restore the DOM at once and drop the GL state so the next
+  // hover rebuilds it from scratch.
+  useEffect(() => {
+    if (!capable) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const onLost = (e: Event) => {
+      e.preventDefault(); // makes the context restorable
+      gl.current = null;
+      prog.current = null;
+      tex.current = null;
+      snapSize.current = null;
+      busy.current = false;
+      stopLoop();
+      setRippling(false); // the card is never left hidden
+    };
+    const onRestored = () => { snapSize.current = null; };
+    canvas.addEventListener("webglcontextlost", onLost);
+    canvas.addEventListener("webglcontextrestored", onRestored);
+    return () => {
+      canvas.removeEventListener("webglcontextlost", onLost);
+      canvas.removeEventListener("webglcontextrestored", onRestored);
+    };
+  }, [capable, stopLoop]);
+
   useEffect(() => () => stopLoop(), [stopLoop]);
 
   return (

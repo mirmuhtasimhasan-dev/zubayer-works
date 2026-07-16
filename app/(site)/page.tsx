@@ -20,12 +20,6 @@ const HERO = {
 
 // The About section now lives on its own /about page, managed in Sanity.
 
-const FOOTER = {
-  email: "hello@zubayer.works",
-  locationLabel: "Dhaka, Bangladesh",
-  footerLine: "Mostly making things. Occasionally on time.",
-};
-
 // Shown only until the client adds their own "Quotes (Writing)" in the Studio —
 // any Sanity quotes replace these.
 const DEFAULT_QUOTES = [
@@ -51,7 +45,7 @@ export default async function Home() {
         substackUrl={writingSettings?.substackUrl}
       />
       <Services items={engagements} />
-      <Contact settings={FOOTER} />
+      <Contact />
     </main>
   );
 }
