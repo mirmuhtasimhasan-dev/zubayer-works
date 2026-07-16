@@ -113,6 +113,17 @@ export async function getArchiveSettings() {
   return client.fetch(`*[_type == "archiveSettings"][0]{ behanceUrl }`);
 }
 
+// The /engagements/affiliates page (singleton): header copy + affiliations list.
+export async function getAffiliatesPage() {
+  return client.fetch(`*[_type == "affiliatesPage"][0]{
+    eyebrow, title, lead,
+    "affiliations": affiliations[]{
+      category, institution, role, url,
+      "logo": logo{ ..., "alt": alt }
+    }
+  }`);
+}
+
 // Gallery page → "Videography" tab: video links whose thumbnails come from the URL.
 export async function getGalleryVideos() {
   const vids = await client.fetch(`*[_type == "galleryVideo"] | order(order asc){
@@ -131,7 +142,7 @@ export async function getGalleryVideos() {
 
 export async function getVentures() {
   return client.fetch(`*[_type == "venture"] | order(order asc){
-    "id": _id, name, kicker, tagline, description, "slug": slug.current, logo
+    "id": _id, name, kicker, tagline, description, "slug": slug.current, logo, websiteUrl, youtubeUrl
   }`);
 }
 

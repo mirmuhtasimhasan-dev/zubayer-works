@@ -11,6 +11,10 @@ export const structure: StructureResolver = (S) =>
         .id("aboutPage")
         .child(S.document().schemaType("aboutPage").documentId("aboutPage")),
       S.listItem()
+        .title("Affiliates Page")
+        .id("affiliatesPage")
+        .child(S.document().schemaType("affiliatesPage").documentId("affiliatesPage")),
+      S.listItem()
         .title("Archive Settings")
         .id("archiveSettings")
         .child(S.document().schemaType("archiveSettings").documentId("archiveSettings")),
@@ -24,6 +28,6 @@ export const structure: StructureResolver = (S) =>
         .child(S.document().schemaType("bookingSettings").documentId("bookingSettings")),
       S.divider(),
       ...S.documentTypeListItems().filter(
-        (li) => !["aboutPage", "archiveSettings", "bookingSettings", "writingSettings"].includes(li.getId() as string)
+        (li) => !["aboutPage", "affiliatesPage", "archiveSettings", "bookingSettings", "writingSettings"].includes(li.getId() as string)
       ),
     ]);

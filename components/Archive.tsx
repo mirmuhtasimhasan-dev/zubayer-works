@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Reveal from "./Reveal";
 import { sanityImage } from "@/sanity/lib/image";
-import BehanceBadge from "./BehanceBadge";
+import BehanceLink from "./BehanceLink";
 
 const CARD_IMG = { widths: [220, 320, 440, 560], sizes: "(max-width: 600px) 52vw, 200px" };
 
@@ -70,17 +70,18 @@ export default function Archive({ albums, behanceUrl }: { albums: any[]; behance
   return (
     <section className="archive" id="gallery">
       <div className="archive-head">
-        {/* The badge sits beside the heading, small — the full set lives on Behance. */}
-        <Reveal className="arch-headline">
-          <p className="eyebrow">Still Photos</p>
-          <BehanceBadge href={bh} className="bhb-inline" />
-        </Reveal>
-        {scrollable && (
-          <div className="arch-nav">
-            <button className="arch-arrow" aria-label="Scroll left" onClick={() => nudge(-1)}>&#8249;</button>
-            <button className="arch-arrow" aria-label="Scroll right" onClick={() => nudge(1)}>&#8250;</button>
-          </div>
-        )}
+        <Reveal><p className="eyebrow">Still Photos</p></Reveal>
+        {/* Right side: scroll arrows (only once the row overflows) + the Behance
+            link, which expands leftward into reserved space so nothing reflows. */}
+        <div className="arch-head-right">
+          {scrollable && (
+            <div className="arch-nav">
+              <button className="arch-arrow" aria-label="Scroll left" onClick={() => nudge(-1)}>&#8249;</button>
+              <button className="arch-arrow" aria-label="Scroll right" onClick={() => nudge(1)}>&#8250;</button>
+            </div>
+          )}
+          <span className="bhl-slot"><BehanceLink href={bh} /></span>
+        </div>
       </div>
 
       <div className="arch-rowwrap">

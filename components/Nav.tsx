@@ -1,23 +1,125 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+
+/* ─────────────── Tunable (the Engagements dropdown) ─────────────── */
+// Sub-items live in an array so more can be added later (Partnerships, Speaking…);
+// each stacks as another row in the same wide panel.
+const ENGAGEMENTS_SUBNAV: SubItem[] = [{ label: "Affiliates", href: "/engagements/affiliates" }];
+/* ────────────────────────────────────────────────────────────────── */
+
+type SubItem = { label: string; href: string };
+type NavItem = { label: string; href: string; sub?: SubItem[] };
 
 // About is its own page (/about); the rest are sections on the home page. Using
 // "/#section" (not "#section") so they also work from other pages like /about.
-// `children` turns an item into a group: a hover dropdown on desktop, indented
-// sub-links on mobile.
-type NavItem = { label: string; href: string; children?: { label: string; href: string }[] };
 const LINKS: NavItem[] = [
   { label: "Gallery", href: "/gallery" },
   { label: "Ventures", href: "/#ventures" },
   { label: "Writing", href: "/#writing" },
-  { label: "Engagements", href: "/#services", children: [{ label: "Affiliates", href: "/affiliates" }] },
+  { label: "Engagements", href: "/#services", sub: ENGAGEMENTS_SUBNAV },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/#contact" },
 ];
 
+/**
+ * Desktop-only disclosure: Engagements is a real link to its section AND reveals a
+ * wide arrow panel of sub-items on hover / focus.
+ *
+ * The VISUAL open/close is pure CSS — `.nde:hover` / `.nde:focus-within` — because
+ * the panel is a DOM child of the container (so `:hover` stays true over the panel
+ * and its transparent bridge). That is flicker-free: no JS timers or re-renders
+ * race the pointer. JS only handles the extras a11y needs: syncing aria-expanded,
+ * ArrowDown-to-first-item, and Escape (which force-hides via `is-suppressed` even
+ * while the cursor still hovers, cleared on the next mouse-enter).
+ */
+function NavDropdown({ item }: { item: NavItem }) {
+  const [expanded, setExpanded] = useState(false); // reflects aria-expanded only
+  const [suppressed, setSuppressed] = useState(false); // Escape closed it while hovering
+  const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLAnchorElement>(null);
+  const firstItemRef = useRef<HTMLAnchorElement>(null);
+  const pathname = usePathname();
+
+  // Close on route change.
+  useEffect(() => { setExpanded(false); setSuppressed(false); }, [pathname]);
+
+  // Escape force-closes and returns focus to the trigger.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (expanded || containerRef.current?.contains(document.activeElement)) {
+        setSuppressed(true);
+        setExpanded(false);
+        triggerRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [expanded]);
+
+  const onEnter = () => { setSuppressed(false); setExpanded(true); };
+  const onLeave = () => setExpanded(false);
+  const onFocus = () => { if (!suppressed) setExpanded(true); };
+  const onBlur = (e: React.FocusEvent) => {
+    if (!containerRef.current?.contains(e.relatedTarget as Node)) { setExpanded(false); setSuppressed(false); }
+  };
+  const onTriggerKey = (e: React.KeyboardEvent) => {
+    // ArrowDown / Space open the panel and move focus in; Enter follows the link.
+    if (e.key === "ArrowDown" || e.key === " ") {
+      e.preventDefault();
+      setSuppressed(false);
+      setExpanded(true);
+      requestAnimationFrame(() => firstItemRef.current?.focus());
+    }
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className={`nde ${suppressed ? "is-suppressed" : ""}`}
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+      onFocus={onFocus}
+      onBlur={onBlur}
+    >
+      <a
+        ref={triggerRef}
+        href={item.href}
+        className="nde-trigger"
+        aria-haspopup="true"
+        aria-expanded={expanded}
+        onKeyDown={onTriggerKey}
+      >
+        {item.label}
+        <span className="nde-caret" aria-hidden />
+      </a>
+      <div className="nde-panel">
+        <ul className="nde-card" role="menu" aria-label={item.label}>
+          {item.sub!.map((s, i) => (
+            <li key={s.href} role="none">
+              <a
+                ref={i === 0 ? firstItemRef : undefined}
+                role="menuitem"
+                href={s.href}
+                className="nde-item"
+                onClick={() => setExpanded(false)}
+              >
+                <span>{s.label}</span>
+                <span className="nde-arrow" aria-hidden>&#8594;</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [acc, setAcc] = useState<string | null>(null); // which mobile accordion is expanded
   const close = () => setOpen(false);
 
   useEffect(() => {
@@ -40,16 +142,8 @@ export default function Nav() {
 
         <div className="nav-links">
           {LINKS.map((item) =>
-            item.children ? (
-              // Hover to reveal the sub-items; the parent still links to its section.
-              <div key={item.href} className="nav-item-has-sub">
-                <a href={item.href}>{item.label}</a>
-                <div className="nav-sub" role="menu">
-                  {item.children.map((c) => (
-                    <a key={c.href} href={c.href} role="menuitem">{c.label}</a>
-                  ))}
-                </div>
-              </div>
+            item.sub ? (
+              <NavDropdown key={item.href} item={item} />
             ) : (
               <a key={item.href} href={item.href}>{item.label}</a>
             )
@@ -70,22 +164,37 @@ export default function Nav() {
           <button className="mobile-close" onClick={close} aria-label="Close menu">✕</button>
         </div>
         <div className="mobile-menu-links">
-          {/* Flatten parents + their children into one list so each anchor keeps
-              its own staggered reveal; sub-items just carry .mobile-sub. */}
-          {LINKS.flatMap((item) => [
-            { ...item, sub: false },
-            ...(item.children || []).map((c) => ({ ...c, sub: true })),
-          ]).map((item, i) => (
-            <a
-              key={item.href}
-              href={item.href}
-              onClick={close}
-              className={item.sub ? "mobile-sub" : ""}
-              style={{ transitionDelay: open ? `${i * 55 + 120}ms` : "0ms" }}
-            >
-              {item.label}
-            </a>
-          ))}
+          {LINKS.map((item, i) => {
+            const delay = { transitionDelay: open ? `${i * 55 + 120}ms` : "0ms" };
+            if (!item.sub) {
+              return (
+                <a key={item.href} href={item.href} onClick={close} style={delay}>{item.label}</a>
+              );
+            }
+            // Touch: an accordion, not the hover panel. Tapping the chevron expands
+            // the nested sub-items indented below Engagements.
+            const expanded = acc === item.href;
+            return (
+              <div key={item.href} className="mm-acc" style={delay}>
+                <div className="mm-acc-head">
+                  <a href={item.href} onClick={close}>{item.label}</a>
+                  <button
+                    className="mm-acc-toggle"
+                    aria-expanded={expanded}
+                    aria-label={expanded ? `Hide ${item.label} links` : `Show ${item.label} links`}
+                    onClick={() => setAcc(expanded ? null : item.href)}
+                  >
+                    <span className={`mm-chevron ${expanded ? "up" : ""}`} aria-hidden />
+                  </button>
+                </div>
+                <div className={`mm-acc-panel ${expanded ? "open" : ""}`}>
+                  {item.sub.map((s) => (
+                    <a key={s.href} href={s.href} onClick={close} className="mm-sub">{s.label}</a>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </>

@@ -31,7 +31,17 @@ export default function Writing({
           and the open state. */}
       <ShoeboxReveal kicker={KICKER} title={TITLE}>
         <div className="wr-head">
-          <p className="eyebrow sbx-i" style={{ ["--i" as string]: 0 }}>{KICKER}</p>
+          {/* The kicker doubles as the link out to the Substack, the way The Eye's
+              kicker opens the YouTube channel. */}
+          <a
+            className="eyebrow eye-channel wr-channel sbx-i"
+            style={{ ["--i" as string]: 0 }}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {KICKER} <span className="wr-channel-arrow" aria-hidden>&#8599;</span>
+          </a>
           <h2 className="wr-title sbx-i" tabIndex={-1} style={{ ["--i" as string]: 1 }}>{TITLE}</h2>
           <p className="wr-intro sbx-i" style={{ ["--i" as string]: 2 }}>{INTRO}</p>
         </div>

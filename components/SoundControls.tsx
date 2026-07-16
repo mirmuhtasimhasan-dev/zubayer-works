@@ -58,6 +58,9 @@ export function SoundPill() {
   const ref = useRef<HTMLButtonElement>(null);
   const [enabled, setEnabled] = useState(false);
   const [shown, setShown] = useState(false);
+  // Read the latest `shown` inside the rAF loop without re-subscribing it.
+  const shownRef = useRef(false);
+  useEffect(() => { shownRef.current = shown; }, [shown]);
 
   // Fine pointer + motion allowed, or this component simply does not exist.
   useEffect(() => {
@@ -73,25 +76,38 @@ export function SoundPill() {
     };
   }, []);
 
-  // Follow the cursor with the same soft lag as the dot.
+  // Follow the cursor while HIDDEN, then FREEZE the moment it appears — otherwise
+  // it forever drifts beside the cursor and you can never land a click on it (it
+  // dodges your pointer). Frozen beside where the cursor was, it's a still target.
   useEffect(() => {
     if (!enabled || !available) return;
     const el = ref.current;
     if (!el) return;
 
     let raf = 0;
-    let started = false;
-    const target = { x: -200, y: -200 };
+    let placed = false;
+    let wasShown = false;
+    const mouse = { x: -200, y: -200 };
     const pos = { x: -200, y: -200 };
 
     const onMove = (e: MouseEvent) => {
-      target.x = e.clientX + OFFSET_X;
-      target.y = e.clientY + OFFSET_Y;
-      if (!started) { started = true; pos.x = target.x; pos.y = target.y; } // no fly-in
+      mouse.x = e.clientX + OFFSET_X;
+      mouse.y = e.clientY + OFFSET_Y;
+      if (!placed) { placed = true; pos.x = mouse.x; pos.y = mouse.y; } // no fly-in
     };
     const tick = () => {
-      pos.x += (target.x - pos.x) * LAG;
-      pos.y += (target.y - pos.y) * LAG;
+      const isShown = shownRef.current;
+      if (!isShown) {
+        // Hidden: glide to sit beside the cursor, ready to appear there.
+        pos.x += (mouse.x - pos.x) * LAG;
+        pos.y += (mouse.y - pos.y) * LAG;
+      } else if (!wasShown) {
+        // The instant it appears, drop it neatly beside the cursor, then hold.
+        pos.x = mouse.x;
+        pos.y = mouse.y;
+      }
+      // While shown it does not move, so the pointer can reach and click it.
+      wasShown = isShown;
       el.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
       raf = requestAnimationFrame(tick);
     };

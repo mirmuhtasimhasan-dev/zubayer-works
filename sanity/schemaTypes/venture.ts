@@ -29,6 +29,10 @@ export default defineType({
     }),
     defineField({ name: "tagline", title: "Tagline", type: "string" }),
     defineField({ name: "description", title: "Short description (card)", type: "text", rows: 3 }),
+    // Small link icons under the card description. Use whichever fits: a website,
+    // or a YouTube channel/video (e.g. Loadshedding).
+    defineField({ name: "websiteUrl", title: "Website link (card)", type: "url", description: "Shows a globe icon under the description." }),
+    defineField({ name: "youtubeUrl", title: "YouTube link (card)", type: "url", description: "Shows a YouTube icon under the description." }),
     defineField({
       name: "body",
       title: "Page content (text, images & videos)",

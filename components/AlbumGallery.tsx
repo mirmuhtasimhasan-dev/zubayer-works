@@ -1,6 +1,5 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import MotionHover from "./MotionHover";
 import { sanityImage, urlFor } from "@/sanity/lib/image";
 
 const GRID_IMG = { widths: [400, 600, 800, 1000], sizes: "(max-width:600px) 48vw, (max-width:1000px) 45vw, 30vw" };
@@ -39,35 +38,17 @@ export default function AlbumGallery({
   return (
     <>
       <div className="album-grid">
-        {photos.map((p, i) => {
-          const src = sanityImage(p, GRID_IMG).src || "";
-          return (
-            <button
-              className="album-cell"
-              key={p._key || i}
-              onClick={() => setLb(i)}
-              aria-label={p.caption || `Photo ${i + 1}`}
-            >
-              {/* Featured-style liquid ripple on hover — canvas only mounts while
-                  hovered (activateOnHover) so a big album never runs out of WebGL. */}
-              <MotionHover
-                type="image"
-                src={src}
-                holdBase
-                activateOnHover
-                amplitude={0.05}
-                spill={0.06}
-                noiseScale={3}
-                mouseRadius={0.42}
-                motionGain={90}
-                motionDecay={0.2}
-                base={0.32}
-                pull={0.3}
-                style={{ position: "absolute", inset: 0 }}
-              />
-            </button>
-          );
-        })}
+        {photos.map((p, i) => (
+          // No ripple: a plain print that grows with a soft shadow on hover (CSS).
+          <button
+            className="album-cell"
+            key={p._key || i}
+            onClick={() => setLb(i)}
+            aria-label={p.caption || `Photo ${i + 1}`}
+          >
+            <img {...sanityImage(p, GRID_IMG)} alt={p.caption || ""} loading="lazy" draggable={false} />
+          </button>
+        ))}
       </div>
 
       {lb !== null && (

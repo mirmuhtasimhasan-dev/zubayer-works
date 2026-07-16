@@ -1,19 +1,36 @@
-import { Cinzel, Cormorant_Garamond, Spectral, Source_Serif_4 } from "next/font/google";
+import { Cinzel, Cormorant_Garamond, Manrope, Schibsted_Grotesk, Spectral, Source_Serif_4 } from "next/font/google";
 import CursorDot from "@/components/CursorDot";
 import MusicProvider from "@/components/MusicProvider";
 import { SoundCorner, SoundPill } from "@/components/SoundControls";
 
-// Source Serif 4 is the face across the whole site…
-const display = Source_Serif_4({
+// Schibsted Grotesk is now the face across the whole site (headings + body) —
+// everything EXCEPT the opening/hero and the navbar. next/font ships a
+// size-adjusted fallback, so there is no layout shift when it loads.
+const schibsted = Schibsted_Grotesk({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-schibsted",
+  display: "swap",
+});
+
+// Manrope — used only inside the venture ("Thoughts in Motion") boxes.
+const manrope = Manrope({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-manrope",
+  display: "swap",
+});
+
+// Source Serif 4 is kept ONLY for the navbar now (logo + links), pinned so it
+// does not change when the site default flips to Schibsted.
+const nav = Source_Serif_4({
   subsets: ["latin"],
   weight: ["200", "300", "400", "600"],
-  variable: "--font-display",
-  // "optional" instead of "swap": a late swap re-wraps headings and shifts the
-  // cards after they have already painted.
+  variable: "--font-nav",
   display: "optional",
 });
 
-// …except the hero headline and the nav, which keep Cormorant Garamond.
+// …the hero headline keeps Cormorant Garamond.
 const hero = Cormorant_Garamond({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
@@ -40,7 +57,7 @@ const body = Spectral({
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`${display.variable} ${hero.variable} ${body.variable} ${quote.variable} site`}>
+    <div className={`${schibsted.variable} ${manrope.variable} ${nav.variable} ${hero.variable} ${body.variable} ${quote.variable} site`}>
       <MusicProvider>
         {children}
         <CursorDot />
