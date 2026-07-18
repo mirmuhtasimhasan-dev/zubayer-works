@@ -71,20 +71,22 @@ export default function Archive({ albums, behanceUrl }: { albums: any[]; behance
     <section className="archive" id="gallery">
       <div className="archive-head">
         <Reveal><p className="eyebrow">Still Photos</p></Reveal>
-        {/* Right side: scroll arrows (only once the row overflows) + the Behance
-            link, which expands leftward into reserved space so nothing reflows. */}
+        {/* Heading left, Behance link right. The scroll arrows are NOT here —
+            they float over the image row, vertically centred (see below). */}
         <div className="arch-head-right">
-          {scrollable && (
-            <div className="arch-nav">
-              <button className="arch-arrow" aria-label="Scroll left" onClick={() => nudge(-1)}>&#8249;</button>
-              <button className="arch-arrow" aria-label="Scroll right" onClick={() => nudge(1)}>&#8250;</button>
-            </div>
-          )}
           <span className="bhl-slot"><BehanceLink href={bh} /></span>
         </div>
       </div>
 
       <div className="arch-rowwrap">
+        {/* Hidden until the row overflows; then a prev/next arrow floats at the
+            middle of the images on each side, like a slideshow. */}
+        {scrollable && (
+          <>
+            <button className="arch-arrow arch-arrow-mid left" aria-label="Scroll left" onClick={() => nudge(-1)}>&#8249;</button>
+            <button className="arch-arrow arch-arrow-mid right" aria-label="Scroll right" onClick={() => nudge(1)}>&#8250;</button>
+          </>
+        )}
         <div
           ref={rowRef}
           className={`arch-row ${dragging ? "dragging" : ""}`}

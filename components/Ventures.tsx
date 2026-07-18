@@ -1,6 +1,9 @@
+"use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Reveal from "./Reveal";
 import LiquidHover from "./LiquidHover";
+import MotionHover from "./MotionHover";
 import { sanityImage } from "@/sanity/lib/image";
 
 // "The Ventures" is the small kicker; the headline is the line that carries the idea.
@@ -37,6 +40,99 @@ function YouTubeIcon() {
   );
 }
 
+const BG_IMG = { widths: [560, 800, 1100], sizes: "(max-width:1000px) 100vw, 33vw" };
+
+// The website + YouTube link pills — their own anchors, clickable above the
+// stretched card link. `variant` styles them for the plain card or the dark scrim.
+function LinkPills({ v, variant }: { v: any; variant: "plain" | "photo" }) {
+  if (!v.websiteUrl && !v.youtubeUrl) return null;
+  const cls = variant === "photo" ? "vc-pill" : "venture-ext";
+  const lab = variant === "photo" ? "vc-pill-label" : "venture-ext-label";
+  // stopPropagation so a pill tap opens the link, not the card's own navigation.
+  const stop = (e: React.MouseEvent) => e.stopPropagation();
+  return (
+    <>
+      {v.websiteUrl && (
+        <a className={cls} href={v.websiteUrl} target="_blank" rel="noopener noreferrer" aria-label={`${v.name} website`} onClick={stop}>
+          <GlobeIcon />
+          <span className={lab}>{linkLabel(v.websiteUrl)}</span>
+        </a>
+      )}
+      {v.youtubeUrl && (
+        <a className={cls} href={v.youtubeUrl} target="_blank" rel="noopener noreferrer" aria-label={`${v.name} on YouTube`} onClick={stop}>
+          <YouTubeIcon />
+          <span className={lab}>{linkLabel(v.youtubeUrl)}</span>
+        </a>
+      )}
+    </>
+  );
+}
+
+// NEW: full-bleed photo + right scrim + right text (Montserrat). The background
+// photo RIPPLES on hover (MotionHover, the same liquid effect as the Eye/gallery
+// tiles). Navigation is a click on the card itself (not a stretched <a>) so the
+// ripple layer underneath receives the hover; the pills stopPropagation.
+function PhotoCard({ v }: { v: any }) {
+  const router = useRouter();
+  const href = `/ventures/${v.slug || v.id}`;
+  const src = sanityImage(v.backgroundImage, BG_IMG).src || "";
+  return (
+    <div
+      className="venture-card vc-photo"
+      role="link"
+      tabIndex={0}
+      aria-label={v.name}
+      // Match the card to the photo's own aspect ratio so the WHOLE image shows
+      // (no crop). Falls back to a wide banner if the ratio is unknown.
+      style={{ aspectRatio: v.backgroundImage?.aspect || 16 / 9 }}
+      onClick={() => router.push(href)}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push(href); } }}
+    >
+      <div className="vc-bg">
+        {src && <MotionHover type="image" src={src} holdBase activateOnHover style={{ position: "absolute", inset: 0 }} />}
+      </div>
+      <div className="vc-scrim" aria-hidden />
+      <div className="vc-content">
+        {v.kicker && <span className="vc-kicker">{v.kicker}</span>}
+        <h3 className="vc-title">{v.name}</h3>
+        {v.shortText && <p className="vc-short">{v.shortText}</p>}
+        {v.description && <p className="vc-desc">{v.description}</p>}
+        <div className="vc-controls">
+          <LinkPills v={v} variant="photo" />
+          <span className="vc-arrow" aria-hidden>&#8594;</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// EXISTING plain card (fallback for ventures with no background photo) — the same
+// LiquidHover ripple and layout as before.
+function PlainCard({ v }: { v: any }) {
+  return (
+    <div className="venture-card">
+      <LiquidHover className="venture-card-liquid" contentClassName="venture-box">
+        <div className="venture-head">
+          {v.kicker && <span className="venture-card-kicker">{v.kicker}</span>}
+          <h3 className="venture-card-name">{v.name}</h3>
+        </div>
+        {v.tagline && <p className="venture-card-tag">{v.tagline}</p>}
+        {v.description && <p className="venture-card-desc">{v.description}</p>}
+        {(v.websiteUrl || v.youtubeUrl) && (
+          <div className="venture-links">
+            <LinkPills v={v} variant="plain" />
+          </div>
+        )}
+        <span className="venture-more">
+          <span className="vm-text">Learn more</span>
+          <span className="vm-arrow" aria-hidden>&#8594;</span>
+        </span>
+        <Link href={`/ventures/${v.slug || v.id}`} className="venture-stretch" aria-label={v.name} />
+      </LiquidHover>
+    </div>
+  );
+}
+
 export default function Ventures({ ventures }: { ventures: any[] }) {
   if (!ventures?.length) return null;
   return (
@@ -46,65 +142,17 @@ export default function Ventures({ ventures }: { ventures: any[] }) {
         <Reveal><h2 className="ven-title">{TITLE}</h2></Reveal>
       </div>
       <div className="ventures-grid">
-        {ventures.map((v) => (
-          <Reveal key={v.id} className="venture-cell">
-            {/* Not an <a> wrapper: the icon links below must be their own anchors,
-                so the card uses a stretched-link overlay for the page navigation. */}
-            <div className="venture-card">
-              {/* Whole-box liquid ripple on hover, same as the service cards. */}
-              <LiquidHover className="venture-card-liquid" contentClassName="venture-box">
-                {/* The logo lives on the venture's own page now, shown large. */}
-                <div className="venture-head">
-                  {/* Studio-managed (Ventures -> "Small line above the name"). */}
-                  {v.kicker && <span className="venture-card-kicker">{v.kicker}</span>}
-                  <h3 className="venture-card-name">{v.name}</h3>
-                </div>
-                {v.tagline && <p className="venture-card-tag">{v.tagline}</p>}
-                {v.description && <p className="venture-card-desc">{v.description}</p>}
-
-                {/* Link icons under the description (website / YouTube). These sit
-                    above the stretched link so they stay independently clickable. */}
-                {(v.websiteUrl || v.youtubeUrl) && (
-                  <div className="venture-links">
-                    {v.websiteUrl && (
-                      <a
-                        className="venture-ext"
-                        href={v.websiteUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`${v.name} website`}
-                      >
-                        <GlobeIcon />
-                        <span className="venture-ext-label">{linkLabel(v.websiteUrl)}</span>
-                      </a>
-                    )}
-                    {v.youtubeUrl && (
-                      <a
-                        className="venture-ext"
-                        href={v.youtubeUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`${v.name} on YouTube`}
-                      >
-                        <YouTubeIcon />
-                        <span className="venture-ext-label">{linkLabel(v.youtubeUrl)}</span>
-                      </a>
-                    )}
-                  </div>
-                )}
-
-                <span className="venture-more">
-                  <span className="vm-text">Learn more</span>
-                  <span className="vm-arrow" aria-hidden>&#8594;</span>
-                </span>
-
-                {/* Stretched link: whole card opens the venture page, as an overlay
-                    beneath the icon links above. */}
-                <Link href={`/ventures/${v.slug || v.id}`} className="venture-stretch" aria-label={v.name} />
-              </LiquidHover>
-            </div>
-          </Reveal>
-        ))}
+        {ventures.map((v) =>
+          v.backgroundImage?.asset ? (
+            <Reveal key={v.id} className="venture-cell">
+              <PhotoCard v={v} />
+            </Reveal>
+          ) : (
+            <Reveal key={v.id} className="venture-cell">
+              <PlainCard v={v} />
+            </Reveal>
+          )
+        )}
       </div>
     </section>
   );
