@@ -118,8 +118,18 @@ export async function getAffiliatesPage() {
 
 // Gallery page → "Videography" tab: video links whose thumbnails come from the URL.
 export async function getGalleryVideos() {
-  const vids = await client.fetch(`*[_type == "galleryVideo"] | order(order asc){
-    "id": _id, title, videoUrl, cover,
+  // galleryVideo docs PLUS the featured video work items (shown on The Eye) — so
+  // a featured video also appears under Videography. Both types are normalised to
+  // the same shape (videoUrl from either videoUrl/videoEmbed; videoFile for
+  // uploads; cover falling back to a work item's image).
+  const vids = await client.fetch(`*[
+    _type == "galleryVideo" ||
+    (_type == "workItem" && featured == true && kind == "video")
+  ] | order(order asc, _createdAt asc){
+    "id": _id, title,
+    "cover": coalesce(cover, image),
+    "videoUrl": select(_type == "galleryVideo" => videoUrl, videoEmbed),
+    "videoFile": videoFile.asset->url,
     "categoryId": category->_id,
     "categoryName": category->name,
     "categoryOrder": category->order
@@ -134,7 +144,9 @@ export async function getGalleryVideos() {
 
 export async function getVentures() {
   return client.fetch(`*[_type == "venture"] | order(order asc){
-    "id": _id, name, kicker, tagline, description, "slug": slug.current, logo, websiteUrl, youtubeUrl
+    "id": _id, name, kicker, shortText, tagline, description, "slug": slug.current,
+    logo, websiteUrl, youtubeUrl,
+    "backgroundImage": backgroundImage{ ..., "alt": alt, "aspect": asset->metadata.dimensions.aspectRatio }
   }`);
 }
 

@@ -49,6 +49,11 @@ export default function Opening({ location, headline, subText }: { location: str
       <p className="op-loc">{location}</p>
       <LiquidText as="h1" className="op-head" text={headline} entranceDelay={HEAD_ENTRANCE} />
       <p className="op-sub">{subText}</p>
+      {/* Scroll cue — also a link down to the first section. Fades in last. */}
+      <a href="#work" className="op-scroll" aria-label="Scroll down">
+        <span className="op-scroll-arrow" aria-hidden>&darr;</span>
+        <span>Scroll</span>
+      </a>
     </header>
   );
 }

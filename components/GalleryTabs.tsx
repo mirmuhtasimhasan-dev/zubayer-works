@@ -51,7 +51,8 @@ const ALBUM_IMG = { widths: [400, 600, 800], sizes: "(max-width:600px) 48vw, (ma
 
 export default function GalleryTabs({ videos, albums, behanceUrl }: { videos: any[]; albums: any[]; behanceUrl?: string }) {
   const [tab, setTab] = useState<"video" | "photos">("video");
-  const [lb, setLb] = useState<string | null>(null); // embed url of the playing video
+  // The playing video: an embed URL, or an uploaded file (featured work items).
+  const [lb, setLb] = useState<{ video?: string; videoFile?: string } | null>(null);
 
   useEffect(() => {
     if (!lb) return;
@@ -89,7 +90,7 @@ export default function GalleryTabs({ videos, albums, behanceUrl }: { videos: an
                       ? imgProxy(v.autoThumb)
                       : "";
                     return (
-                      <button key={v.id} className="eye-work" onClick={() => setLb(embedUrl(v.videoUrl))}>
+                      <button key={v.id} className="eye-work" onClick={() => setLb(v.videoFile ? { videoFile: v.videoFile } : { video: embedUrl(v.videoUrl) })}>
                         <div className="eye-work-media">
                           {src ? (
                             // Same ripple feel as the featured Eye tiles; holdBase +
@@ -149,14 +150,18 @@ export default function GalleryTabs({ videos, albums, behanceUrl }: { videos: an
       {lb && (
         <div className="lightbox" onClick={() => setLb(null)}>
           <button className="lb-close" aria-label="Close" onClick={() => setLb(null)}>&#10005;</button>
-          <div className="eye-videobox" onClick={(e) => e.stopPropagation()}>
-            <iframe
-              src={`${lb}${lb.includes("?") ? "&" : "?"}autoplay=1`}
-              allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-              allowFullScreen
-              title="Video"
-            />
-          </div>
+          {lb.videoFile ? (
+            <video className="eye-videobox" src={lb.videoFile} controls autoPlay playsInline onClick={(e) => e.stopPropagation()} />
+          ) : (
+            <div className="eye-videobox" onClick={(e) => e.stopPropagation()}>
+              <iframe
+                src={`${lb.video}${lb.video!.includes("?") ? "&" : "?"}autoplay=1`}
+                allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                allowFullScreen
+                title="Video"
+              />
+            </div>
+          )}
         </div>
       )}
     </section>

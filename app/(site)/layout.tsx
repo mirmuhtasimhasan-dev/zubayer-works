@@ -1,14 +1,27 @@
-import { Cinzel, Cormorant_Garamond, Manrope, Schibsted_Grotesk, Spectral, Source_Serif_4 } from "next/font/google";
+import { Cinzel, Cormorant_Garamond, Manrope, Montserrat, Schibsted_Grotesk, Spectral, Source_Serif_4 } from "next/font/google";
+import localFont from "next/font/local";
 import CursorDot from "@/components/CursorDot";
 import MusicProvider from "@/components/MusicProvider";
 import { SoundCorner, SoundPill } from "@/components/SoundControls";
 
-// Schibsted Grotesk is now the face across the whole site (headings + body) —
-// everything EXCEPT the opening/hero and the navbar. next/font ships a
+// The face across the whole site (headings + body) — everything EXCEPT the
+// opening/hero and the navbar. Generic --font-sans variable so the actual font
+// can be swapped here without touching every CSS rule. next/font ships a
 // size-adjusted fallback, so there is no layout shift when it loads.
+const sans = localFont({
+  src: [
+    { path: "../font/ElmsSans-VariableFont_wght.ttf", weight: "300 700", style: "normal" },
+    { path: "../font/ElmsSans-Italic-VariableFont_wght.ttf", weight: "300 700", style: "italic" },
+  ],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+// Kept only for the Still Photos / archive album titles, which the client wants
+// on the previous (Schibsted) face rather than the new Elms Sans default.
 const schibsted = Schibsted_Grotesk({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500"],
   variable: "--font-schibsted",
   display: "swap",
 });
@@ -18,6 +31,14 @@ const manrope = Manrope({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
   variable: "--font-manrope",
+  display: "swap",
+});
+
+// Montserrat — used ONLY inside the photo venture cards.
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-montserrat",
   display: "swap",
 });
 
@@ -54,10 +75,9 @@ const body = Spectral({
   variable: "--font-body",
   display: "swap",
 });
-
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`${schibsted.variable} ${manrope.variable} ${nav.variable} ${hero.variable} ${body.variable} ${quote.variable} site`}>
+    <div className={`${sans.variable} ${schibsted.variable} ${manrope.variable} ${montserrat.variable} ${nav.variable} ${hero.variable} ${body.variable} ${quote.variable} site`}>
       <MusicProvider>
         {children}
         <CursorDot />
