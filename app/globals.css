@@ -230,7 +230,7 @@ button{font-family:inherit;cursor:pointer;}
 @media (max-width:600px){.eye-tile-placeholder svg{width:28px;height:28px;}}
 
 .eye-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
-.eye-work{background:none;border:0;padding:0;text-align:left;cursor:pointer;}
+.eye-work{background:none;border:0;padding:0;text-align:left;cursor:pointer;color:var(--ink);-webkit-text-fill-color:var(--ink);}
 .eye-work-media{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--divider);}
 /* Only PLAIN thumbnails (direct img, e.g. gallery videos) get the saturate hover.
    MotionHover's nested img is left alone so it matches the GL (no colour shift). */
@@ -238,7 +238,9 @@ button{font-family:inherit;cursor:pointer;}
 .eye-work:hover .eye-work-media > img{transform:scale(1.05);filter:saturate(1);}
 .eye-work-media > div img{width:100%;height:100%;object-fit:cover;}
 .eye-work:hover .eye-work-play{transform:scale(1.08);}
-.eye-work-title{display:block;font-family:var(--font-sans),sans-serif;font-size:17px;font-weight:300;margin-top:12px;}
+/* color + -webkit-text-fill-color both set: iOS Safari otherwise paints text inside
+   a <button> with its system-blue fill, ignoring the inherited color. */
+.eye-work-title{display:block;font-family:var(--font-sans),sans-serif;font-size:17px;font-weight:300;margin-top:12px;color:var(--ink);-webkit-text-fill-color:var(--ink);}
 .eye-empty{color:var(--ash);font-size:15px;padding:18px 0;}
 
 /* Video modal */
@@ -458,8 +460,8 @@ button{font-family:inherit;cursor:pointer;}
   .gallery-album:hover .gallery-album-media img{filter:saturate(1);}
 }
 @media (prefers-reduced-motion:reduce){.gallery-album-media{transition:box-shadow .3s ease;}.gallery-album:hover .gallery-album-media{transform:none;}}
-.gallery-album-name{display:block;font-family:var(--font-schibsted),sans-serif;font-size:17px;font-weight:400;margin-top:12px;}
-.gallery-album-place{display:block;font-family:var(--font-schibsted),sans-serif;font-size:12px;letter-spacing:.05em;color:var(--ash);margin-top:3px;}
+.gallery-album-name{display:block;font-family:var(--font-schibsted),sans-serif;font-size:17px;font-weight:400;margin-top:12px;color:var(--ink);-webkit-text-fill-color:var(--ink);}
+.gallery-album-place{display:block;font-family:var(--font-schibsted),sans-serif;font-size:12px;letter-spacing:.05em;color:var(--ash);-webkit-text-fill-color:var(--ash);margin-top:3px;}
 @media (max-width:1000px){.gallery-albums{grid-template-columns:repeat(3,1fr);}}
 @media (max-width:700px){.gallery-albums{grid-template-columns:repeat(2,1fr);gap:14px;}}
 
