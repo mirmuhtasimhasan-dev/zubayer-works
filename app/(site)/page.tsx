@@ -15,7 +15,7 @@ export const revalidate = 30;
 const HERO = {
   location: "Dhaka, Bangladesh — Filmmaker & Brand Consultant",
   headline: "Some people choose a lane. I chose a problem.",
-  subText: "I make films, build brands, and start companies. Trained in architecture, shaped by media, sharpened in Japan.",
+  subText: "Working across film, design, and entrepreneurship in pursuit of meaningful solutions.",
 };
 
 // The About section now lives on its own /about page, managed in Sanity.

@@ -7,8 +7,8 @@ export default function Contact() {
       <section className="section" id="contact">
         <Reveal><p className="eyebrow">Contact</p></Reveal>
         <Reveal>
-          <p className="contact-text">If something here made you think, let us book a time to talk.</p>
-          <Link className="contact-email" href="/book">Book a session</Link>
+          <p className="contact-text">Ideas become meaningful when they&rsquo;re pursued with intent. If you have one worth pursuing, I&rsquo;d be interested to hear it.</p>
+          <Link className="contact-email" href="/book">Discuss your project</Link>
         </Reveal>
       </section>
       {/* Rule on top, copyright left, the build credit right. */}
