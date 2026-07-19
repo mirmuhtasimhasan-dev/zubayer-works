@@ -1,8 +1,6 @@
 "use client";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Reveal from "./Reveal";
-import LiquidHover from "./LiquidHover";
 import MotionHover from "./MotionHover";
 import { sanityImage } from "@/sanity/lib/image";
 
@@ -40,7 +38,10 @@ function YouTubeIcon() {
   );
 }
 
-const BG_IMG = { widths: [560, 800, 1100], sizes: "(max-width:1000px) 100vw, 33vw" };
+// 3:2 cropped at the source (keeping the bottom, where the logo sits) to match the
+// vertical card's banner box exactly — the WebGL ripple then samples the same frame
+// as the resting <img>, with no hover "jump".
+const BG_IMG = { widths: [420, 560, 800], sizes: "(max-width:820px) 100vw, 33vw", ratio: 1.5, crop: "bottom" as const };
 
 // The website + YouTube link pills — their own anchors, clickable above the
 // stretched card link. `variant` styles them for the plain card or the dark scrim.
@@ -76,15 +77,16 @@ function PhotoCard({ v }: { v: any }) {
   const router = useRouter();
   const href = `/ventures/${v.slug || v.id}`;
   const src = sanityImage(v.backgroundImage, BG_IMG).src || "";
+  // The one-liner may live in either "Short text" or "Tagline"; show whichever
+  // was filled. Guard the description against whitespace-only values ("\n").
+  const sub = v.shortText || v.tagline;
+  const desc = v.description?.trim();
   return (
     <div
       className="venture-card vc-photo"
       role="link"
       tabIndex={0}
       aria-label={v.name}
-      // Match the card to the photo's own aspect ratio so the WHOLE image shows
-      // (no crop). Falls back to a wide banner if the ratio is unknown.
-      style={{ aspectRatio: v.backgroundImage?.aspect || 16 / 9 }}
       onClick={() => router.push(href)}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push(href); } }}
     >
@@ -95,40 +97,66 @@ function PhotoCard({ v }: { v: any }) {
       <div className="vc-content">
         {v.kicker && <span className="vc-kicker">{v.kicker}</span>}
         <h3 className="vc-title">{v.name}</h3>
-        {v.shortText && <p className="vc-short">{v.shortText}</p>}
-        {v.description && <p className="vc-desc">{v.description}</p>}
+        {sub && <p className="vc-short">{sub}</p>}
+        {desc && <p className="vc-desc">{desc}</p>}
         <div className="vc-controls">
           <LinkPills v={v} variant="photo" />
-          <span className="vc-arrow" aria-hidden>&#8594;</span>
+          <span className="vc-learn" aria-hidden>Learn more <span className="vc-learn-arrow">&#8594;</span></span>
         </div>
       </div>
     </div>
   );
 }
 
-// EXISTING plain card (fallback for ventures with no background photo) — the same
-// LiquidHover ripple and layout as before.
+// LOGO card (ventures with no background photo). A solid card — black or white
+// per `cardTheme` — text on the LEFT, the venture LOGO on the RIGHT, in Poppins.
+// The logo RIPPLES on hover with the SAME MotionHover image effect as the Jadughor
+// photo card (delivered square so cover doesn't crop, holdBase + activateOnHover so
+// it only holds a WebGL context while hovered). Navigation is a click on the card
+// itself (like the photo card) so the ripple layer receives the hover.
 function PlainCard({ v }: { v: any }) {
+  const router = useRouter();
+  const light = v.cardTheme === "light";
+  const theme = light ? "vl-light" : "vl-dark";
+  const sub = v.shortText || v.tagline;
+  const desc = v.description?.trim();
+  const href = `/ventures/${v.slug || v.id}`;
+  // Deliver the logo at its NATURAL aspect (no crop) and size the box to that same
+  // aspect, so cover fills it exactly — nothing clips, and the resting frame matches
+  // the WebGL ripple (no hover jump).
+  const logoSrc = sanityImage(v.logo, { widths: [300, 400], sizes: "160px" }).src || "";
+  const logoAspect = v.logoAspect || 1;
   return (
-    <div className="venture-card">
-      <LiquidHover className="venture-card-liquid" contentClassName="venture-box">
-        <div className="venture-head">
-          {v.kicker && <span className="venture-card-kicker">{v.kicker}</span>}
-          <h3 className="venture-card-name">{v.name}</h3>
-        </div>
-        {v.tagline && <p className="venture-card-tag">{v.tagline}</p>}
-        {v.description && <p className="venture-card-desc">{v.description}</p>}
-        {(v.websiteUrl || v.youtubeUrl) && (
-          <div className="venture-links">
-            <LinkPills v={v} variant="plain" />
+    <div
+      className={`venture-card vl-card ${theme}`}
+      role="link"
+      tabIndex={0}
+      aria-label={v.name}
+      onClick={() => router.push(href)}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push(href); } }}
+    >
+      <div className="vl-box">
+        {v.logo?.asset && logoSrc && (
+          <div className="vl-logo" style={{ aspectRatio: logoAspect }}>
+            <MotionHover type="image" src={logoSrc} activateOnHover amplitude={0.05} base={0.55} ambient={0.35} style={{ position: "absolute", inset: 0 }} />
           </div>
         )}
-        <span className="venture-more">
-          <span className="vm-text">Learn more</span>
-          <span className="vm-arrow" aria-hidden>&#8594;</span>
-        </span>
-        <Link href={`/ventures/${v.slug || v.id}`} className="venture-stretch" aria-label={v.name} />
-      </LiquidHover>
+        <div className="vl-text">
+          {v.kicker && <span className="vl-kicker">{v.kicker}</span>}
+          <h3 className="vl-name">{v.name}</h3>
+          {sub && <p className="vl-short">{sub}</p>}
+          {desc && <p className="vl-desc">{desc}</p>}
+          {(v.websiteUrl || v.youtubeUrl) && (
+            <div className="venture-links vl-links">
+              <LinkPills v={v} variant="plain" />
+            </div>
+          )}
+          <span className="vl-more">
+            <span className="vm-text">Learn more</span>
+            <span className="vm-arrow" aria-hidden>&#8594;</span>
+          </span>
+        </div>
+      </div>
     </div>
   );
 }

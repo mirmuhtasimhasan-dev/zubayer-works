@@ -144,8 +144,8 @@ export async function getGalleryVideos() {
 
 export async function getVentures() {
   return client.fetch(`*[_type == "venture"] | order(order asc){
-    "id": _id, name, kicker, shortText, tagline, description, "slug": slug.current,
-    logo, websiteUrl, youtubeUrl,
+    "id": _id, name, kicker, shortText, tagline, description, cardTheme, "slug": slug.current,
+    logo, "logoAspect": logo.asset->metadata.dimensions.aspectRatio, websiteUrl, youtubeUrl,
     "backgroundImage": backgroundImage{ ..., "alt": alt, "aspect": asset->metadata.dimensions.aspectRatio }
   }`);
 }

@@ -36,6 +36,19 @@ export default defineType({
       fields: [{ name: "alt", title: "Alt text", type: "string" }],
     }),
     defineField({ name: "shortText", title: "Short text (one line under the title)", type: "string" }),
+    defineField({
+      name: "cardTheme",
+      title: "Logo-card background (only when there is no background photo)",
+      type: "string",
+      options: {
+        list: [
+          { title: "Dark (black card, logo on the right)", value: "dark" },
+          { title: "Light (white card, logo on the right)", value: "light" },
+        ],
+        layout: "radio",
+      },
+      initialValue: "dark",
+    }),
     defineField({ name: "tagline", title: "Tagline", type: "string" }),
     defineField({ name: "description", title: "Short description (card)", type: "text", rows: 3 }),
     // Small link icons under the card description. Use whichever fits: a website,

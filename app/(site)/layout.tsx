@@ -1,4 +1,4 @@
-import { Cinzel, Cormorant_Garamond, Manrope, Montserrat, Schibsted_Grotesk, Spectral, Source_Serif_4 } from "next/font/google";
+import { Cinzel, Cormorant_Garamond, Manrope, Montserrat, Poppins, Schibsted_Grotesk, Spectral, Source_Serif_4 } from "next/font/google";
 import localFont from "next/font/local";
 import CursorDot from "@/components/CursorDot";
 import MusicProvider from "@/components/MusicProvider";
@@ -42,6 +42,14 @@ const montserrat = Montserrat({
   display: "swap",
 });
 
+// Poppins — used ONLY inside the logo venture cards (Loadshedding, Motobuddy…).
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-poppins",
+  display: "swap",
+});
+
 // Source Serif 4 is kept ONLY for the navbar now (logo + links), pinned so it
 // does not change when the site default flips to Schibsted.
 const nav = Source_Serif_4({
@@ -77,7 +85,7 @@ const body = Spectral({
 });
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`${sans.variable} ${schibsted.variable} ${manrope.variable} ${montserrat.variable} ${nav.variable} ${hero.variable} ${body.variable} ${quote.variable} site`}>
+    <div className={`${sans.variable} ${schibsted.variable} ${manrope.variable} ${montserrat.variable} ${poppins.variable} ${nav.variable} ${hero.variable} ${body.variable} ${quote.variable} site`}>
       <MusicProvider>
         {children}
         <CursorDot />
