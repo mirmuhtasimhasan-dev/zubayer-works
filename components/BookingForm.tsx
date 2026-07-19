@@ -108,7 +108,7 @@ export default function BookingForm({ today, timeSlots, leadDays, blockedDates, 
       } else if (res.status === 400) {
         setError(data.error || "Please check the form and try again.");
       } else {
-        setError("Something went wrong, please try again.");
+        setError(data.error || "Something went wrong, please try again.");
       }
     } catch {
       setError("Something went wrong, please try again.");
