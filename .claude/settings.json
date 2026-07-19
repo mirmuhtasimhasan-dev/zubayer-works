@@ -8,7 +8,8 @@
       "Bash(NODE_PATH=\"c:/Users/samiul niloy/zubayer-works/node_modules\" node /tmp/a.js)",
       "Bash(git commit -q -m '@ *)",
       "Bash(git commit *)",
-      "Bash(NODE_PATH=\"c:/Users/samiul niloy/zubayer-works/node_modules\" node /tmp/al.js)"
+      "Bash(NODE_PATH=\"c:/Users/samiul niloy/zubayer-works/node_modules\" node /tmp/al.js)",
+      "Bash(NODE_PATH=\"c:/Users/samiul niloy/zubayer-works/node_modules\" node /tmp/wr.js)"
     ],
     "additionalDirectories": [
       "c:\\Users\\samiul niloy\\.claude\\projects\\c--Users-samiul-niloy-zubayer-works\\memory"
