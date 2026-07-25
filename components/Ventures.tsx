@@ -101,7 +101,7 @@ function PhotoCard({ v }: { v: any }) {
         {desc && <p className="vc-desc">{desc}</p>}
         <div className="vc-controls">
           <LinkPills v={v} variant="photo" />
-          <span className="vc-learn" aria-hidden>Learn more <span className="vc-learn-arrow">&#8594;</span></span>
+          <span className="vc-learn" aria-hidden><span className="vc-learn-label">Learn more</span> <span className="vc-learn-arrow">&#8594;</span></span>
         </div>
       </div>
     </div>

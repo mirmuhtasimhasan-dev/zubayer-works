@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 /* ─────────────── Tunable (the Engagements dropdown) ─────────────── */
@@ -83,7 +84,7 @@ function NavDropdown({ item }: { item: NavItem }) {
       onFocus={onFocus}
       onBlur={onBlur}
     >
-      <a
+      <Link
         ref={triggerRef}
         href={item.href}
         className="nde-trigger"
@@ -93,12 +94,12 @@ function NavDropdown({ item }: { item: NavItem }) {
       >
         {item.label}
         <span className="nde-caret" aria-hidden />
-      </a>
+      </Link>
       <div className="nde-panel">
         <ul className="nde-card" role="menu" aria-label={item.label}>
           {item.sub!.map((s, i) => (
             <li key={s.href} role="none">
-              <a
+              <Link
                 ref={i === 0 ? firstItemRef : undefined}
                 role="menuitem"
                 href={s.href}
@@ -107,7 +108,7 @@ function NavDropdown({ item }: { item: NavItem }) {
               >
                 <span>{s.label}</span>
                 <span className="nde-arrow" aria-hidden>&#8594;</span>
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
@@ -135,17 +136,17 @@ export default function Nav() {
   return (
     <>
       <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
-        <a href="/" className="nav-logo">
+        <Link href="/" className="nav-logo">
           <img src="/logo.png" alt="Zubayer Ahmed" className="nav-logo-img" />
           <img src="/signature.png" alt="" aria-hidden className="nav-sign" />
-        </a>
+        </Link>
 
         <div className="nav-links">
           {LINKS.map((item) =>
             item.sub ? (
               <NavDropdown key={item.href} item={item} />
             ) : (
-              <a key={item.href} href={item.href}>{item.label}</a>
+              <Link key={item.href} href={item.href}>{item.label}</Link>
             )
           )}
         </div>
@@ -157,10 +158,10 @@ export default function Nav() {
 
       <div className={`mobile-menu ${open ? "open" : ""}`}>
         <div className="mobile-menu-top">
-          <a href="/" className="nav-logo" onClick={close}>
+          <Link href="/" className="nav-logo" onClick={close}>
             <img src="/logo.png" alt="Zubayer Ahmed" className="nav-logo-img" />
             <img src="/signature.png" alt="" aria-hidden className="nav-sign" />
-          </a>
+          </Link>
           <button className="mobile-close" onClick={close} aria-label="Close menu">✕</button>
         </div>
         <div className="mobile-menu-links">
@@ -168,7 +169,7 @@ export default function Nav() {
             const delay = { transitionDelay: open ? `${i * 55 + 120}ms` : "0ms" };
             if (!item.sub) {
               return (
-                <a key={item.href} href={item.href} onClick={close} style={delay}>{item.label}</a>
+                <Link key={item.href} href={item.href} onClick={close} style={delay}>{item.label}</Link>
               );
             }
             // Touch: an accordion, not the hover panel. Tapping the chevron expands
@@ -177,7 +178,7 @@ export default function Nav() {
             return (
               <div key={item.href} className="mm-acc" style={delay}>
                 <div className="mm-acc-head">
-                  <a href={item.href} onClick={close}>{item.label}</a>
+                  <Link href={item.href} onClick={close}>{item.label}</Link>
                   <button
                     className="mm-acc-toggle"
                     aria-expanded={expanded}
@@ -189,7 +190,7 @@ export default function Nav() {
                 </div>
                 <div className={`mm-acc-panel ${expanded ? "open" : ""}`}>
                   {item.sub.map((s) => (
-                    <a key={s.href} href={s.href} onClick={close} className="mm-sub">{s.label}</a>
+                    <Link key={s.href} href={s.href} onClick={close} className="mm-sub">{s.label}</Link>
                   ))}
                 </div>
               </div>

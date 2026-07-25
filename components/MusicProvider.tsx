@@ -26,6 +26,10 @@ interface MusicState {
   /** The visitor has explicitly chosen — used to stop the pill nagging. */
   decided: boolean;
   toggle: () => void;
+  /** Temporarily silence the ambient while a video with sound plays (ref-counted).
+   *  The music's on/off intent is untouched — it resumes once every video ends. */
+  duck: () => void;
+  unduck: () => void;
 }
 
 const Ctx = createContext<MusicState>({
@@ -33,6 +37,8 @@ const Ctx = createContext<MusicState>({
   playing: false,
   decided: false,
   toggle: () => {},
+  duck: () => {},
+  unduck: () => {},
 });
 
 export const useMusic = () => useContext(Ctx);
@@ -105,36 +111,47 @@ export default function MusicProvider({ children }: { children: ReactNode }) {
     fadeRaf.current = requestAnimationFrame(step);
   }, []);
 
-  const start = useCallback(async () => {
-    const a = audioRef.current;
-    if (!a) return false;
-    try {
-      await a.play();
-    } catch {
-      return false; // blocked until a real gesture
-    }
-    fadeTo(TARGET_VOLUME);
-    setPlaying(true);
-    return true;
-  }, [fadeTo]);
+  // The audible state is derived: sound plays only when the visitor wants it ON
+  // (`playing`) AND nothing is ducking it (`duckCount` === 0, i.e. no video with
+  // sound). Refs mirror both so listeners/callbacks read the live value.
+  const playingRef = useRef(false);
+  useEffect(() => { playingRef.current = playing; }, [playing]);
+  const duckCount = useRef(0);
 
-  const stop = useCallback(() => {
+  // Reconcile the element to the derived state. Must be safe to call any number of
+  // times (toggle, duck, unduck, resume). `a.play()` inside a user gesture is fine.
+  const applyAudio = useCallback(() => {
     const a = audioRef.current;
     if (!a) return;
-    fadeTo(0, () => a.pause());
-    setPlaying(false);
+    const shouldSound = playingRef.current && duckCount.current === 0;
+    if (shouldSound) {
+      a.play().then(() => fadeTo(TARGET_VOLUME)).catch(() => {});
+    } else {
+      fadeTo(0, () => {
+        if (!(playingRef.current && duckCount.current === 0)) a.pause();
+      });
+    }
   }, [fadeTo]);
 
   const toggle = useCallback(() => {
     setDecided(true);
-    if (playing) {
-      stop();
-      try { localStorage.setItem(STORAGE_KEY, "off"); } catch {}
-    } else {
-      void start();
-      try { localStorage.setItem(STORAGE_KEY, "on"); } catch {}
-    }
-  }, [playing, start, stop]);
+    const next = !playingRef.current;
+    playingRef.current = next;
+    setPlaying(next);
+    try { localStorage.setItem(STORAGE_KEY, next ? "on" : "off"); } catch {}
+    applyAudio();
+  }, [applyAudio]);
+
+  // Duck / unduck (ref-counted): a video with sound raises the count; the ambient
+  // fades out for the duration and fades back once the count returns to zero.
+  const duck = useCallback(() => {
+    duckCount.current += 1;
+    if (duckCount.current === 1) applyAudio();
+  }, [applyAudio]);
+  const unduck = useCallback(() => {
+    duckCount.current = Math.max(0, duckCount.current - 1);
+    if (duckCount.current === 0) applyAudio();
+  }, [applyAudio]);
 
   // Returning visitor who had it on: autoplay is blocked, so wait for their first
   // gesture of the visit and pick up where they left off. One shot, then gone.
@@ -144,7 +161,11 @@ export default function MusicProvider({ children }: { children: ReactNode }) {
     try { stored = localStorage.getItem(STORAGE_KEY); } catch {}
     if (stored !== "on") return;
 
-    const resume = () => { void start(); };
+    const resume = () => {
+      playingRef.current = true;
+      setPlaying(true);
+      applyAudio();
+    };
     const opts = { once: true, passive: true } as const;
     window.addEventListener("pointerdown", resume, opts);
     window.addEventListener("keydown", resume, opts);
@@ -152,7 +173,7 @@ export default function MusicProvider({ children }: { children: ReactNode }) {
       window.removeEventListener("pointerdown", resume);
       window.removeEventListener("keydown", resume);
     };
-  }, [available, playing, start]);
+  }, [available, playing, applyAudio]);
 
-  return <Ctx.Provider value={{ available, playing, decided, toggle }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ available, playing, decided, toggle, duck, unduck }}>{children}</Ctx.Provider>;
 }

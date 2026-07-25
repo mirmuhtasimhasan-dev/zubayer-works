@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { imgProxy } from "@/lib/imgProxy";
 import MotionHover from "./MotionHover";
+import { useMusic } from "./MusicProvider";
 import { sanityImage } from "@/sanity/lib/image";
 
 function embedUrl(url?: string) {
@@ -41,14 +42,17 @@ const LIGHTBOX_IMG = { widths: [1024, 1600, 2000, 2600], sizes: "92vw" };
 
 export default function CategoryWorks({ works, group }: { works: any[]; group?: string }) {
   const [lightbox, setLightbox] = useState<{ img?: any; video?: string; videoFile?: string } | null>(null);
+  const { duck, unduck } = useMusic();
 
   useEffect(() => {
     if (!lightbox) return;
+    const hasSound = !!(lightbox.video || lightbox.videoFile);
+    if (hasSound) duck();
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setLightbox(null); };
     window.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
-    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
-  }, [lightbox]);
+    return () => { if (hasSound) unduck(); window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, [lightbox, duck, unduck]);
 
   const openWork = (w: any, g?: string) => {
     if (w?.videoFile) setLightbox({ videoFile: w.videoFile });

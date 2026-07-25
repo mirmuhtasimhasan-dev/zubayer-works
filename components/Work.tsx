@@ -5,6 +5,7 @@ import Link from "next/link";
 import Reveal from "./Reveal";
 import { sanityImage } from "@/sanity/lib/image";
 import MotionHover from "./MotionHover";
+import { useMusic } from "./MusicProvider";
 
 // Normalize a YouTube/Vimeo URL to an embeddable one.
 function embedUrl(url?: string) {
@@ -31,14 +32,18 @@ const INTRO =
 
 export default function Work({ featured, categories, eyebrow = "The Eye" }: { featured: any[]; categories?: any[]; eyebrow?: string }) {
   const [lightbox, setLightbox] = useState<{ img?: any; video?: string; videoFile?: string } | null>(null);
+  const { duck, unduck } = useMusic();
 
   useEffect(() => {
     if (!lightbox) return;
+    // Only a video (embed or file) has sound — an image lightbox must not duck.
+    const hasSound = !!(lightbox.video || lightbox.videoFile);
+    if (hasSound) duck();
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setLightbox(null); };
     window.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
-    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
-  }, [lightbox]);
+    return () => { if (hasSound) unduck(); window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, [lightbox, duck, unduck]);
 
   const items = (featured || []).filter((f: any) => f && (f.cover || f.image || f.autoThumb));
   if (!items.length) return null;

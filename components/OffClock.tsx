@@ -6,7 +6,7 @@
  */
 
 /* ─────────────── Tunable ─────────────── */
-const ICON_COLOR = "#2b2517"; // warm dark ink (set via CSS var --oc-ink)
+const ICON_COLOR = "#6f6353"; // muted warm tone (set via CSS var --oc-ink)
 // Order + labels. Add/remove/reorder here; each key maps to an icon below.
 const INTERESTS: { key: string; label: string }[] = [
   { key: "basketball", label: "Basketball" },
@@ -114,12 +114,12 @@ function IconFor({ keyName }: { keyName: string }) {
 export default function OffClock() {
   return (
     <section className="offclock" style={{ ["--oc-ink" as string]: ICON_COLOR }}>
-      <p className="oc-kick">Off the clock</p>
+      {/* Icons only — the heading and visible labels are hidden; each icon keeps an
+          accessible name via aria-label. */}
       <ul className="oc-row">
         {INTERESTS.map((it) => (
-          <li className="oc-item" key={it.key}>
+          <li className="oc-item" key={it.key} role="img" aria-label={it.label}>
             <IconFor keyName={it.key} />
-            <span className="oc-label">{it.label}</span>
           </li>
         ))}
       </ul>

@@ -132,7 +132,7 @@ button{font-family:inherit;cursor:pointer;}
 /* Entrance is ALL CSS, off first paint — same delays the JS used (.6s / 1.45s),
    so desktop is unchanged, but the phone no longer waits for hydration (which
    made the kicker/subtitle stagger in seconds late, looking like a second play). */
-.op-loc{font-family:var(--font-body);font-size:13px;letter-spacing:.1em;color:var(--ash);margin-bottom:42px;animation:opFadeIn .7s ease .15s both;}
+.op-loc{font-family:var(--font-sans),sans-serif;font-size:13px;letter-spacing:.1em;color:var(--ash);margin-bottom:42px;animation:opFadeIn .7s ease .15s both;}
 @keyframes opFadeIn{from{opacity:0;}to{opacity:1;}}
 /* The DOM text is always visible (LiquidText keeps it as the reliable base); the
    entrance is a pure CSS blur-in on filter/transform, so it can never be blank. */
@@ -141,7 +141,7 @@ button{font-family:inherit;cursor:pointer;}
 /* Reduced motion: show the final hero instantly (still only once). */
 @media (prefers-reduced-motion:reduce){.op-head,.op-loc,.op-sub{animation:none;opacity:1;filter:none;transform:none;}}
 /* opacity is JS-driven (Opening reveals it after the headline finishes). */
-.op-sub{font-family:var(--font-body);width:100%;max-width:46ch;color:var(--ash);font-size:17px;margin-top:38px;animation:opFadeIn 1s ease 1.45s both;}
+.op-sub{font-family:var(--font-sans),sans-serif;width:100%;max-width:46ch;color:var(--ash);font-size:17px;margin-top:38px;animation:opFadeIn 1s ease 1.45s both;}
 /* Scroll cue at the foot of the hero. margin-top:auto pushes it to the very
    bottom of the flex column while the content above stays centred — no absolute
    positioning to fight, and it's centred horizontally by align-self. */
@@ -199,7 +199,7 @@ button{font-family:inherit;cursor:pointer;}
 .eye-watch-more:hover{color:var(--ink);gap:11px;}
 /* Gallery > Videography: one block per category, stacked down the page. */
 .eye-groups{display:flex;flex-direction:column;gap:64px;}
-.eye-group-title{font-family:var(--font-sans),sans-serif;font-weight:400;font-size:clamp(22px,2.4vw,28px);line-height:1.15;margin-bottom:22px;padding-bottom:14px;border-bottom:1px solid var(--divider);}
+.eye-group-title{font-family:var(--font-sans),sans-serif;font-weight:400;font-size:clamp(17px,1.8vw,21px);line-height:1.15;margin-bottom:22px;padding-bottom:14px;border-bottom:1px solid var(--divider);}
 @media (max-width:600px){.eye-groups{gap:44px;}.eye-group-title{margin-bottom:16px;font-size:16px;}.eye-cat-title{font-size:22px;}}
 
 /* Category page (/eye/<slug>) */
@@ -479,15 +479,14 @@ button{font-family:inherit;cursor:pointer;}
 .offclock{--oc-sans:var(--font-sans),sans-serif;}
 .oc-kick{font-family:var(--oc-sans);font-size:11px;font-weight:500;letter-spacing:.24em;text-transform:uppercase;color:var(--ash);margin:64px 0 20px;text-align:center;}
 /* Full width under the About columns: all seven on one centred line. */
-.oc-row{list-style:none;margin:0;padding:0;display:flex;flex-wrap:nowrap;justify-content:center;gap:clamp(20px,4vw,52px);}
+.oc-row{list-style:none;margin:100px 0 0;padding:0;display:flex;flex-wrap:nowrap;justify-content:center;gap:clamp(20px,4vw,52px);}
 .oc-item{display:flex;flex-direction:column;align-items:center;gap:11px;}
 .oc-icon{color:var(--oc-ink);width:28px;height:28px;display:block;flex:none;}
 .oc-label{font-family:var(--oc-sans);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ash);line-height:1;}
 @media (max-width:640px){
   /* Phone: too narrow for one line — let it wrap rather than overflow. */
-  .oc-row{flex-wrap:wrap;gap:22px 26px;}
+  .oc-row{flex-wrap:wrap;gap:22px 26px;margin-top:68px;}
   .oc-icon{width:24px;height:24px;}
-  .oc-kick{margin-top:44px;}
 }
 
 /* THE VENTURES */
@@ -565,10 +564,14 @@ button{font-family:inherit;cursor:pointer;}
 .vc-pill:hover .vc-pill-label,.vc-pill:focus-visible .vc-pill-label{text-decoration:underline;text-underline-offset:3px;}
 .vc-pill:focus-visible{outline:none;}
 .vc-pill svg{width:13px;height:13px;flex:none;}
-/* Learn more: the BOXED pill. */
-.vc-learn{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(26,24,20,.35);color:var(--ink);border-radius:999px;padding:7px 15px;font-family:var(--font-montserrat),sans-serif;font-size:9.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;}
+/* Learn more: plain text (no box); the label underlines on hover, the arrow slides. */
+.vc-learn{display:inline-flex;align-items:center;gap:7px;color:var(--ink);font-family:var(--font-montserrat),sans-serif;font-size:9.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;}
+.vc-learn-label{position:relative;}
 .vc-learn-arrow{display:inline-block;transition:transform .3s ease;}
-@media (hover:hover) and (pointer:fine){.vc-photo:hover .vc-learn-arrow{transform:translateX(4px);}}
+@media (hover:hover) and (pointer:fine){
+  .vc-photo:hover .vc-learn-arrow{transform:translateX(4px);}
+  .vc-photo:hover .vc-learn-label{text-decoration:underline;text-underline-offset:3px;}
+}
 @media (prefers-reduced-motion:reduce){.vc-learn-arrow{transition:none;}}
 
 /* ===== VENTURE LOGO CARD — vertical: solid card (black/white per theme), the
@@ -592,25 +595,26 @@ button{font-family:inherit;cursor:pointer;}
 .vl-short{font-family:var(--font-poppins),sans-serif;font-weight:400;font-size:12.5px;margin:0 0 9px;}
 .vl-desc{font-family:var(--font-poppins),sans-serif;font-weight:400;font-size:12px;line-height:1.55;margin:0 0 18px;}
 .vl-links{margin:0 0 18px 0;}
-/* Anchor the CTA to the bottom so it lines up across cards of unequal text. */
-.vl-more{margin-top:auto;display:inline-flex;align-items:center;gap:9px;border:1px solid;border-radius:999px;padding:8px 16px;font-family:var(--font-poppins),sans-serif;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:500;transition:background .35s ease,border-color .35s ease;}
+/* Plain text CTA (no box), anchored to the bottom so it lines up across cards of
+   unequal text; the label underlines on hover, the arrow slides. */
+.vl-more{margin-top:auto;display:inline-flex;align-items:center;gap:8px;font-family:var(--font-poppins),sans-serif;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:500;}
+.vl-more .vm-text{position:relative;}
 .vl-more .vm-arrow{transition:transform .3s ease;}
 .vl-card:hover .vl-more .vm-arrow{transform:translateX(4px);}
+.vl-card:hover .vl-more .vm-text{text-decoration:underline;text-underline-offset:3px;}
 /* Dark theme */
 .vl-dark .vl-kicker{color:#d8b878;}
 .vl-dark .vl-name{color:#fff;}
 .vl-dark .vl-short{color:rgba(255,255,255,.82);}
 .vl-dark .vl-desc{color:rgba(255,255,255,.6);}
-.vl-dark .vl-more{color:#fff;border-color:rgba(255,255,255,.5);}
-.vl-dark .vl-card:hover .vl-more{background:rgba(255,255,255,.12);border-color:#fff;}
+.vl-dark .vl-more{color:#fff;}
 .vl-dark .venture-ext{color:#fff;}
 /* Light theme */
 .vl-light .vl-kicker{color:#a07d3a;}
 .vl-light .vl-name{color:var(--ink);}
 .vl-light .vl-short{color:#5a5044;}
 .vl-light .vl-desc{color:var(--ash);}
-.vl-light .vl-more{color:var(--ink);border-color:rgba(26,24,20,.35);}
-.vl-light .vl-card:hover .vl-more{background:rgba(26,24,20,.06);border-color:var(--ink);}
+.vl-light .vl-more{color:var(--ink);}
 .vl-light .venture-ext{color:var(--ink);}
 
 /* Venture detail page */
@@ -618,6 +622,10 @@ button{font-family:inherit;cursor:pointer;}
 .venture-detail-head{margin-bottom:8px;text-align:center;}
 .venture-detail-logo{display:flex;align-items:center;justify-content:center;margin:34px auto 28px;}
 .venture-detail-logo img{max-width:220px;max-height:170px;width:auto;height:auto;object-fit:contain;mix-blend-mode:multiply;}
+/* Dark-theme logo: a black tile is baked in with light marks, so frame it on a
+   matching dark panel and drop the multiply so the marks stay bright. */
+.venture-detail-logo.is-dark{background:#010101;border-radius:16px;padding:26px 34px;}
+.venture-detail-logo.is-dark img{mix-blend-mode:normal;max-height:150px;}
 .venture-detail-title{font-family:var(--font-sans),sans-serif;font-weight:400;font-size:clamp(30px,5vw,48px);line-height:1.05;}
 .venture-detail-tag{color:var(--ash);font-size:15px;margin:8px 0 8px;}
 /* Body: text + images + videos, in any order */

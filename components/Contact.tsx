@@ -8,7 +8,7 @@ export default function Contact() {
         <Reveal><p className="eyebrow">Contact</p></Reveal>
         <Reveal>
           <p className="contact-text">Ideas become meaningful when they&rsquo;re pursued with intent. If you have one worth pursuing, I&rsquo;d be interested to hear it.</p>
-          <Link className="contact-email" href="/book">Discuss your project</Link>
+          <Link className="contact-email" href="/book">Book a session</Link>
         </Reveal>
       </section>
       {/* Rule on top, copyright left, the build credit right. */}

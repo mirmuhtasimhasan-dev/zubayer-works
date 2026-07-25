@@ -66,7 +66,9 @@ export default async function VenturePage({ params }: { params: Promise<{ slug: 
         {/* The logo is the page's opening statement: large, centred, alone. */}
         <header className="venture-detail-head">
           {v.logo && (
-            <span className="venture-detail-logo">
+            // Dark-theme logos (a black tile baked in, light marks) need a dark panel
+            // and no multiply — otherwise the box stays black and the light marks vanish.
+            <span className={`venture-detail-logo${v.cardTheme === "dark" ? " is-dark" : ""}`}>
               <img {...sanityImage(v.logo, { widths: [320, 480, 640], sizes: "200px" })} alt={v.name} />
             </span>
           )}

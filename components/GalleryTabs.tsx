@@ -4,6 +4,7 @@ import { imgProxy } from "@/lib/imgProxy";
 import Link from "next/link";
 import MotionHover from "./MotionHover";
 import BehanceLink from "./BehanceLink";
+import { useMusic } from "./MusicProvider";
 import { sanityImage } from "@/sanity/lib/image";
 
 // Normalize a YouTube/Vimeo URL to an embeddable one.
@@ -53,14 +54,16 @@ export default function GalleryTabs({ videos, albums, behanceUrl }: { videos: an
   const [tab, setTab] = useState<"video" | "photos">("video");
   // The playing video: an embed URL, or an uploaded file (featured work items).
   const [lb, setLb] = useState<{ video?: string; videoFile?: string } | null>(null);
+  const { duck, unduck } = useMusic();
 
   useEffect(() => {
     if (!lb) return;
+    duck(); // silence the ambient while this video (with sound) plays
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setLb(null); };
     window.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
-    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
-  }, [lb]);
+    return () => { unduck(); window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, [lb, duck, unduck]);
 
   return (
     <section className="section section-page" id="gallery">

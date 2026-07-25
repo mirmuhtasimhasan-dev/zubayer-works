@@ -154,7 +154,7 @@ export async function getVentures() {
 export async function getVenture(slug: string) {
   return client.fetch(
     `*[_type == "venture" && (slug.current == $slug || _id == $slug)][0]{
-      "id": _id, name, tagline, description, "slug": slug.current, logo, body, inquiryEmail
+      "id": _id, name, tagline, description, cardTheme, "slug": slug.current, logo, body, inquiryEmail
     }`,
     { slug }
   );

@@ -99,67 +99,43 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "Could not save the booking. Please try again." }, { status: 500 });
   }
 
-  // Notify the owner via Resend. The booking is already saved above, so any email
-  // problem is logged LOUDLY (never swallowed). TEMP debug logs (marked below) can
-  // be removed once this is confirmed working in production.
+  // Notify the owner via Resend. The booking is already saved above, so an email
+  // problem is logged LOUDLY (never swallowed) but must NOT fail the submission —
+  // otherwise a saved booking would look failed and the visitor might submit again.
   const resendKey = process.env.RESEND_API_KEY;
   const from = process.env.BOOKING_FROM_EMAIL;
   const owner = process.env.OWNER_EMAIL;
-  // TEMP debug
-  console.log("[booking] handler reached email step", {
-    hasResendKey: !!resendKey,
-    from,
-    owner,
-  });
 
   if (!resendKey || !from || !owner) {
-    // Fail loudly rather than silently returning — this is exactly the case that
-    // produced "no runtime error AND no Resend log".
-    console.error("[booking] missing email env vars", {
+    console.error("[booking] notification skipped — missing email env vars", {
       hasResendKey: !!resendKey,
       hasFrom: !!from,
       hasOwner: !!owner,
     });
-    return NextResponse.json(
-      { ok: false, error: "Booking saved, but the notification email is misconfigured on the server." },
-      { status: 500 }
-    );
-  }
-
-  try {
-    const resend = new Resend(resendKey);
-    console.log("[booking] calling resend..."); // TEMP debug
-    const result = await resend.emails.send({
-      from,
-      to: owner,
-      replyTo: email,
-      subject: `New booking — ${name} · ${sessionType} · ${date}`,
-      text: [
-        `Name: ${name}`,
-        `Email: ${email}`,
-        whatsapp ? `WhatsApp: ${whatsapp}` : null,
-        `Session: ${sessionType}`,
-        `Date: ${date}`,
-        timeSlot ? `Time: ${timeSlot}` : null,
-        note ? `Note: ${note}` : null,
-      ]
-        .filter(Boolean)
-        .join("\n"),
-    });
-    console.log("[booking] resend result", result); // TEMP debug
-    if (result.error) {
-      console.error("[booking] resend error", result.error);
-      return NextResponse.json(
-        { ok: false, error: "Booking saved, but the confirmation email failed to send." },
-        { status: 500 }
-      );
+  } else {
+    try {
+      const resend = new Resend(resendKey);
+      const { error } = await resend.emails.send({
+        from,
+        to: owner,
+        replyTo: email,
+        subject: `New booking — ${name} · ${sessionType} · ${date}`,
+        text: [
+          `Name: ${name}`,
+          `Email: ${email}`,
+          whatsapp ? `WhatsApp: ${whatsapp}` : null,
+          `Session: ${sessionType}`,
+          `Date: ${date}`,
+          timeSlot ? `Time: ${timeSlot}` : null,
+          note ? `Note: ${note}` : null,
+        ]
+          .filter(Boolean)
+          .join("\n"),
+      });
+      if (error) console.error("[booking] resend returned an error (booking still saved):", error);
+    } catch (err) {
+      console.error("[booking] resend threw (booking still saved):", err);
     }
-  } catch (err) {
-    console.error("[booking] resend threw", err);
-    return NextResponse.json(
-      { ok: false, error: "Booking saved, but the confirmation email failed to send." },
-      { status: 500 }
-    );
   }
 
   return NextResponse.json({ ok: true });
