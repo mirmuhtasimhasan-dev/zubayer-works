@@ -372,7 +372,7 @@ button{font-family:inherit;cursor:pointer;}
 .bhl{
   --behance-fill:var(--divider); /* hover fill = the ventures-card tone (#E8E3D9) */
   --behance-rest:#8C7B6B;        /* rest: outline + logo colour (warm ash) */
-  --behance-open-text:var(--ink);/* text + logo once filled (dark on the card tone) */
+  --behance-open-text:#6d6154;   /* text + logo once filled (warm muted, not black) */
   --bhl-speed:.9s;               /* ← how long the pill takes to open/close */
   --bhl-fade:.45s;               /* ← how long the colour/label fade takes */
   display:inline-flex;align-items:center;flex:none;height:42px;max-width:42px;
@@ -854,6 +854,20 @@ button{font-family:inherit;cursor:pointer;}
 .contact-text{font-family:var(--font-sans),sans-serif;font-size:clamp(18px,2.3vw,26px);line-height:1.4;max-width:30ch;margin-bottom:34px;color:#6d6154;}
 .contact-email{font-size:20px;border-bottom:1px solid var(--ink);padding-bottom:3px;transition:color .3s,border-color .3s;}
 .contact-email:hover{color:var(--ash);border-color:var(--ash);}
+/* Text on the left, the three circular reach-out links on the right. */
+.contact-inner{display:flex;justify-content:space-between;align-items:center;gap:48px;flex-wrap:wrap;}
+.contact-main{flex:1 1 auto;min-width:0;}
+.contact-socials{flex:none;display:flex;flex-direction:column;gap:16px;}
+.contact-social{width:52px;height:52px;border-radius:50%;border:1px solid var(--divider);display:inline-flex;align-items:center;justify-content:center;color:#6d6154;transition:color .3s ease,background .3s ease,border-color .3s ease,transform .3s ease;}
+.contact-social svg{width:21px;height:21px;display:block;}
+@media (hover:hover) and (pointer:fine){
+  .contact-social:hover{background:#e3dfd5;color:#6d6154;border-color:#e3dfd5;transform:translateY(-2px);}
+}
+@media (max-width:640px){
+  .contact-inner{align-items:flex-start;}
+  .contact-socials{flex-direction:row;margin-top:6px;}
+  .contact-social{width:46px;height:46px;}
+}
 .footer{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:40px var(--side);border-top:1px solid var(--divider);font-size:12px;color:var(--faint);}
 .back-to-top-wrap{display:flex;justify-content:center;padding:34px 0 32px;}
 .back-to-top{display:inline-flex;color:var(--ash);transition:color .35s;}
